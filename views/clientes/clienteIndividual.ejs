@@ -1,0 +1,112 @@
+
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+<div class="container">
+   <a href="/clientes/ver-clientes" class="p-3 btn btn-info">Volver atras</a>
+   <a href="/clientes/<%= clienteIndividual._id %>/editar-cliente" class="p-3 btn btn-primary">Editar CLIENTE</a>
+
+   <div class="card px-3">
+      <div class="card-tittle">
+         <div class=" align-items-baseline ">
+            Local: 
+   
+             <p class="lead">
+             <%= clienteIndividual.nombreLocal %> 
+              
+             </p>
+         </div>
+         <p class="text-muted">
+             Ref: <%= clienteIndividual.dueño  %> 
+         </p>
+     </div>
+   
+     <div class="card-body">
+         Dirección: <%= clienteIndividual.direccion %> 
+         <br>
+         Telefono 1: <%=clienteIndividual.telefono1  %> 
+         <br>
+         Telefono 2: <%=clienteIndividual.telefono2   %> 
+         <br>
+         Telefono 3: <%=clienteIndividual.telefono3   %> 
+      <br>
+      Correo: <%= clienteIndividual.correo %> 
+        <div class="">
+         <p class="p-2 lead">
+          Comentario: <%= clienteIndividual.comentario %> 
+
+         </p>
+        </div>
+        
+     
+     </div>
+   
+   </div>
+
+
+   <div class="conta">
+      <table class="pedidosRealizados">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Productos</th>
+              
+              <th scope="col">Cantidad de productos</th>
+              
+              <th scope="col">Monto</th>
+              
+              
+              
+              
+              
+      
+      
+            </tr>
+          </thead>
+          <tbody>
+            <% for (let pedidosR of clienteIndividual.pedidosRealizados){ %>
+              <tr>
+      
+                  <td>
+                      <%= pedidosR.createdAt.localeString() %> 
+                  </td>
+                <td>
+                  <a href="/pedidos/<%= pedidosR._id %>">PRODUCTOS</a>
+                </td>
+             
+              
+                
+         
+      
+                <td>
+                  <%= producto.cantidadDeProductos %>
+                </td>
+          
+               
+                <td>
+                  <%= producto.importeTotal%>
+                </td>
+      
+           
+                
+              
+      
+      
+      
+      
+              </tr>
+              <%} %>
+      
+      
+      
+          </tbody>
+        </table>
+      <table></table>
+     </div>
+</div>
+
+
+
+
+<%- include('../partials/footer.ejs'); %>
+

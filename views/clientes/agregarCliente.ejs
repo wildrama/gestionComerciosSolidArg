@@ -1,0 +1,68 @@
+
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+
+<div class="container">
+  <% if ( usuario == 'REPARTIDOR') { %>
+    <a href="/clientes/clientes-index" class="p-3 btn btn-info">volver atras</a>
+
+  <% } %>
+
+
+  <% if (usuario == 'ADMINISTRADOR') { %>
+    <a href="/administrador/" class="p-3 btn btn-info">Menu Administrador</a>
+
+  <% } %>
+
+    <div class="h2">Agregar un cliente </div>
+
+    <form action="/clientes/agregar-cliente" method="POST">
+
+
+        <div class="h4">Datos del negocio</div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control"  name="nombreLocal" placeholder="Nombre del negocio" aria-label="Nombre del negocio" >
+          </div>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" name="direccion" placeholder="Dirección del local" aria-label="Dirección del local" >
+          </div>
+         
+          <div class="h4">Datos de la persona</div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="dueño" placeholder="Nombre de la persona" aria-label="Nombre de la persona" >
+          </div>
+
+          
+          <label for="basic-url" class="form-label">Telefonos para contactar</label>
+          <div class="input-group mb-3">
+            <input type="tel" class="form-control" placeholder="Numero de telefono 1" name="telefono1" id="basic-url" ">
+          </div>
+          <div class="input-group mb-3">
+            <input type="tel" class="form-control" placeholder="Numero de telefono 2" name="telefono2" id="basic-url" ">
+          </div>
+          <div class="input-group mb-3">
+            <input type="tel" class="form-control" placeholder="Numero de telefono 3" name="telefono3" id="basic-url" ">
+          </div>
+    
+                    
+          <div class="input-group mb-3">
+            <input type="email" class="form-control" name="correo" placeholder="Correo electronico" aria-label="Correo electronico" ">
+            <span class="input-group-text" id="basic-addon2"></span>
+          </div>
+          
+          <div class="input-group">
+            <span class="input-group-text">Comentarios</span>
+            <textarea class="form-control" name="comentario" aria-label="Comentarios"></textarea>
+          </div>
+          
+          <div class="d-flex justify-content-center mt-3">
+            <input type="submit" value="Agregar cliente" class="btn btn-outline-primary text-center px-5">
+
+          </div>
+    </form>
+</div>
+
+
+<%- include('../partials/footer.ejs'); %>
+

@@ -1,0 +1,136 @@
+/* ==================== NAVBAR ==================== */
+
+.navbar-admin {
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.brand-icon {
+    font-size: 1.25rem;
+}
+
+.brand-text {
+    display: inline;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+
+    @media (max-width: 768px) {
+        display: block;
+    }
+}
+
+.navbar-menu {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-white);
+        flex-direction: column;
+        gap: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s;
+        box-shadow: var(--shadow-md);
+
+        &.active {
+            max-height: 600px;
+        }
+    }
+}
+
+.nav-item {
+    display: flex;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    &.nav-link-logout {
+        color: var(--danger-color);
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        padding: 0.5rem 0.625rem;
+
+        span:not(.nav-icon) {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border-color);
+
+        span:not(.nav-icon) {
+            display: inline;
+            margin-left: 0.5rem;
+        }
+    }
+}
+
+.nav-icon {
+    font-size: 1rem;
+
+    @media (max-width: 768px) {
+        font-size: 1.25rem;
+    }
+}

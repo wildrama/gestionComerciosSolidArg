@@ -1,0 +1,184 @@
+.body {
+	background-color: #ffffff;
+	color: #000;
+}
+
+.header {
+	background-color: #1B4EA3;
+	justify-content: space-around;
+}
+
+.header button {
+	margin: 1rem 0;
+	color: white;
+}
+.header a {
+	margin: 1rem 0;
+	color: white;
+}
+.inp {
+	height: 100%;
+	margin: 0 auto;
+	min-height: 60px;
+}
+
+.bottom-cont {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	background-color: #fff;
+	width: 100%;
+	border-top: solid 1px #777;
+}
+
+
+.bottom {
+		justify-content: space-around;
+		height: 3rem;
+		margin: 2rem 0;
+		background-color: #fff;
+}
+
+.bo-flex {
+
+}
+
+.h {
+	background: #CE6B00;
+	border: 2px solid #FB982E;
+	box-sizing: border-box;
+	border-radius: 10px;
+	width: 239px;
+	height: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 1rem 0;
+}
+
+.cerrar {
+	display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 14px 32px;
+width: 44px;
+height: 44px;
+text-decoration: none;
+	margin: 1rem 0;
+background: #FFC700;
+border-radius: 13px;
+font-size: 1.4rem;
+}
+
+
+.fl1 {
+	gap: .5rem;
+}
+
+.fl {
+	gap: .8rem;
+	align-items: center;
+}
+
+.shortI {
+	width: 60px;
+	height: 30px;
+}
+
+.medI {
+	width: 100px;
+}
+
+.btnPurple {
+	color: white;
+	background: #4324AA;
+border: 2.81792px solid #4324AA;
+border-radius: 12.211px;
+}
+
+.formo {
+	padding: 0 2rem;
+	margin: auto;
+	padding-bottom: 8rem;
+}
+
+.formo p {
+	font-size: .6rem;
+}
+
+.formo label {
+	font-size: .6rem;
+}
+
+.formo .col-2 {
+	font-size: .7rem;
+	padding: 0;
+}
+
+.contPrec input {
+	box-sizing: border-box;
+
+}
+
+.contPrec p {
+	font-size: .7rem;
+	margin-bottom: 0;
+}
+
+
+.contPrec label {
+	font-size: .7rem;
+}
+
+
+
+.formo input {
+	width: 100%;
+	box-sizing: border-box;
+	
+}
+
+#id {
+	display: none;
+}
+
+.contPrec {
+	max-width: 450px;
+}
+
+.padside {
+	padding-left: 2rem;
+	padding-right: 2rem;
+}
+
+.padside input {
+border-radius: 4px;
+border: solid 1px #999;
+}
+
+.pMActual {
+	border: 1px solid #aaa;
+	width: 100%;
+	height: 30px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+}
+.pMActual p {
+	margin: 0;
+}
+
+.pMRes {
+	border: 1px solid #aaa;
+	width: 300px;
+	height: 40px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+
+}
+
+.pMRes p {
+	margin: 0;
+}

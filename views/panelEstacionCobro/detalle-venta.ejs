@@ -1,0 +1,106 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="breadcrumb-link"><%= estacionDeCobro.ubicacionDeEstacion %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Venta <%= venta.codigoVenta || String(venta._id).slice(-6) %></span>
+        </nav>
+
+        <div class="form-header">
+            <h1 class="form-title">Detalle de venta</h1>
+            <p class="form-subtitle">Estación <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong> · Venta <strong>#<%= venta.codigoVenta || String(venta._id).slice(-6) %></strong></p>
+        </div>
+
+        <% if (venta.observacionDatos) { %>
+            <div class="alert alert-warning mb-4" role="alert">
+                <strong>Venta histórica con datos parciales:</strong> <%= venta.observacionDatos %>
+            </div>
+        <% } %>
+
+        <div class="sale-detail-toolbar">
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">Volver a la estación</a>
+            <div class="sale-detail-actions">
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>/ticket" class="btn-secondary-modern" target="_blank" rel="noopener">Imprimir ticket</a>
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>/imprimir" class="btn-primary-modern" target="_blank" rel="noopener">Imprimir remito A4</a>
+            </div>
+        </div>
+
+        <div class="sales-section sale-ticket-summary">
+            <div class="sale-ticket-summary__header">
+                <div>
+                    <h2 class="section-title">Resumen del ticket</h2>
+                    <p class="sale-ticket-summary__subtitle">Representación de la venta registrada en caja.</p>
+                </div>
+                <div class="sale-ticket-summary__total">
+                    <span>Total</span>
+                    <strong>$<%= Number(venta.totalVenta || 0).toFixed(2) %></strong>
+                </div>
+            </div>
+
+            <div class="sale-ticket-grid">
+                <div class="sale-ticket-row"><span>Código</span><strong><%= venta.codigoVenta %></strong></div>
+                <div class="sale-ticket-row"><span>Fecha</span><strong><%= venta.fechaTexto %> <%= venta.horaTexto %></strong></div>
+                <div class="sale-ticket-row"><span>Cajero</span><strong><%= venta.nombreDelUsuario || '-' %></strong></div>
+                <div class="sale-ticket-row"><span>Tipo de pago</span><strong><%= venta.paymentLabel || venta.tipoDePago || '-' %></strong></div>
+                <div class="sale-ticket-row"><span>Importe cobrado</span><strong><%= venta.dineroIngresado !== null ? `$${Number(venta.dineroIngresado).toFixed(2)}` : '-' %></strong></div>
+                <div class="sale-ticket-row"><span>Vuelto / salida</span><strong><%= venta.dineroDeSalida !== null ? `$${Number(venta.dineroDeSalida).toFixed(2)}` : '-' %></strong></div>
+                <div class="sale-ticket-row"><span>Productos</span><strong><%= venta.cantidadDeProductosTotales || 0 %></strong></div>
+                <div class="sale-ticket-row"><span>Ticket</span><strong><%= venta.ticketLabel || '-' %></strong></div>
+            </div>
+
+            <div class="sale-summary-actions">
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>/ticket" class="btn-secondary-modern" target="_blank" rel="noopener">Imprimir ticket</a>
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>/imprimir" class="btn-primary-modern" target="_blank" rel="noopener">Imprimir remito A4</a>
+            </div>
+        </div>
+
+        <div class="sales-section">
+            <h2 class="section-title">Productos incluidos</h2>
+
+            <% if (venta.detalleProductos && venta.detalleProductos.length > 0) { %>
+                <div class="sales-table-wrapper">
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th style="text-align:center;">Cantidad</th>
+                                <th style="text-align:right;">Precio unitario</th>
+                                <th style="text-align:right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% venta.detalleProductos.forEach((producto) => { %>
+                                <tr>
+                                    <td><strong><%= producto.nombre %></strong></td>
+                                    <td style="text-align:center;"><span class="quantity-badge"><%= producto.cantidad %></span></td>
+                                    <td style="text-align:right;">$<%= Number(producto.precioUnitario || 0).toFixed(2) %></td>
+                                    <td style="text-align:right;"><span class="amount-badge income">$<%= Number(producto.total || 0).toFixed(2) %></span></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" style="text-align:right;">Total</th>
+                                <th style="text-align:right;">$<%= Number(venta.subtotalProductos || venta.totalVenta || 0).toFixed(2) %></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="empty-state-sales">
+                    <div class="empty-icon">—</div>
+                    <p>No hay detalle de productos disponible para esta venta.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

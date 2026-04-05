@@ -1,0 +1,172 @@
+body {
+  font-family: "Raleway", sans-serif;
+}
+
+.body-inicio {
+  background-color: #8a8a8a;
+}
+
+.body-inicio {
+  background-color: #D2D6ED;
+}
+
+nav {
+  font-family: "Raleway", sans-serif;
+}
+
+.subnav {
+  background-color: #04710b;
+}
+
+.subnav input {
+  border: 2px solid rgba(0, 0, 0, 0);
+  border-radius: 23px;
+  background-color: #04710b;
+  color: white;
+}
+
+.subnav .buscar {
+  background-color: #04710b;
+  color: white;
+}
+
+.subnav .buscar button {
+  border-color: rgba(255, 255, 255, 0);
+  border-radius: 23px;
+}
+
+.subnav .buscar button:hover {
+  background-color: #a38c1b;
+}
+
+.subnav a {
+  border: 2px solid #FB982E;
+  border-radius: 13px;
+  text-decoration: none;
+  color: white;
+  font-size: 1em;
+}
+
+.accionesrapidas {
+  font-family: "Raleway", sans-serif;
+}
+
+.accionesrapidas a {
+  text-decoration: none;
+  color: black;
+  font-size: 22px;
+}
+
+.productosAcciones {
+  list-style: none;
+}
+
+.editButton {
+  width: 32px;
+}
+
+.cargarproductosform .campo-requerido {
+  padding-left: 12px;
+  border-left: 2px solid green;
+}
+
+.caja-on {
+  width: 14px;
+  height: 14px;
+  background-color: #018501;
+  border-radius: 100%;
+}
+
+.contenedor-estaciones-inicio a {
+  text-decoration: none;
+  color: #2e2e95;
+}
+
+.container-split {
+  /* Split the screen in half */
+  /* Control the left side */
+  /* Control the right side */
+  /* If you want the content centered horizontally and vertically */
+}
+
+.container-split a {
+  text-decoration: none;
+  font-size: 3em;
+  -webkit-transition: all .4s ease;
+  transition: all .4s ease;
+  border: 2px solid #52529f;
+}
+
+.container-split a:hover {
+  font-size: 4.5em;
+}
+
+.container-split .split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.container-split .left {
+  left: 0;
+  background-color: #1B4EA3;
+}
+
+.container-split .left a {
+  color: #ddded1;
+}
+
+.container-split .left a:hover {
+  border-color: #B4B4BB;
+}
+
+.container-split .right {
+  right: 0;
+  background-color: #B4B4BB;
+}
+
+.container-split .right a {
+  color: #0b0a0a;
+}
+
+.container-split .right a:hover {
+  border-color: #1ba32f;
+}
+
+.container-split .centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+@media print {
+  head {
+    display: none;
+  }
+  body {
+    width: 58mm;
+    height: 100%;
+    margin-left: 2px;
+    margin-right: 2px;
+    position: absolute;
+    color: #000;
+    background-color: #fff;
+  }
+  .escososaTicket {
+    font-size: 12px;
+  }
+  .tittleTicket {
+    font-size: 10px;
+  }
+  .textTicket {
+    font-size: 8px;
+  }
+}
+/*# sourceMappingURL=style.css.map */

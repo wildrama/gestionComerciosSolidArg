@@ -1,0 +1,140 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Nueva Estación</span>
+        </nav>
+
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">🏪 Nueva Estación de Cobro</h1>
+            <p class="form-subtitle">Crea una nueva caja para tu negocio</p>
+        </div>
+
+        <!-- Info Card -->
+        <div class="setup-info-card">
+            <div class="info-icon">📋</div>
+            <div class="info-content">
+                <p class="info-title">Después de crear la estación</p>
+                <p class="info-description">Deberás asignar un usuario a esta estación de cobro para que pueda acceder y realizar operaciones.</p>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form action="/administrador/estacionesdecobro/nuevaestacion" method="POST" class="modern-form">
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                <!-- Información de Estación -->
+                <div class="form-section">
+                    <h3 class="section-title-form">📍 Ubicación y Datos</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="ubicacionDeEstacion" class="form-label-modern">Ubicación/Nombre de la Estación *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🏪</span>
+                            <input type="text" 
+                                   id="ubicacionDeEstacion" 
+                                   name="ubicacionDeEstacion" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="Ej: Caja 1, Mostrador, Entrada"
+                                   required>
+                        </div>
+                        <small class="form-help">Nombre identificador único para esta estación</small>
+                    </div>
+                </div>
+
+                <!-- Dinero Inicial -->
+                <div class="form-section">
+                    <h3 class="section-title-form">💰 Dinero Inicial</h3>
+                    
+                    <div class="form-info-box">
+                        <span class="info-box-icon">💡</span>
+                        <p class="info-box-text">
+                            Este será el monto de efectivo con el que abrirá la estación. 
+                            Puedes modificarlo después si es necesario.
+                        </p>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="dineroEnEstacion" class="form-label-modern">Dinero Inicial *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">💵</span>
+                            <input type="number" 
+                                   id="dineroEnEstacion" 
+                                   name="dineroEnEstacion" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   required>
+                        </div>
+                        <small class="form-help">Ingresa solo números. Ej: 1000.00</small>
+                    </div>
+
+                    <!-- Amount Preview -->
+                    <div class="amount-preview">
+                        <div class="preview-item">
+                            <span class="preview-label">Dinero Inicial:</span>
+                            <span class="preview-value" id="previewAmount">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions" style="gap: 1rem; margin-top: 2rem;">
+                <a href="/administrador/estacionesdecobro" class="btn-secondary-modern" style="flex: 1; text-align: center; text-decoration: none;">
+                    ← Cancelar
+                </a>
+                <button type="submit" class="btn-primary-modern" style="flex: 1;">
+                    <span class="btn-icon">✓</span>
+                    Crear Estación de Cobro
+                </button>
+            </div>
+        </form>
+
+        <!-- Next Steps -->
+        <div class="setup-next-steps">
+            <h3 class="steps-title">📋 Próximos Pasos</h3>
+            <ol class="steps-list">
+                <li>
+                    <span class="step-number">1</span>
+                    <span class="step-text">Crear la estación de cobro ✓</span>
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    <span class="step-text">Los usuarios pueden iniciar sesión directamente</span>
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    <span class="step-text">Realizar ingresos/egresos según sea necesario</span>
+                </li>
+                <li>
+                    <span class="step-number">4</span>
+                    <span class="step-text">Cerrar caja al final del día</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+// Actualizar preview del monto en tiempo real
+const inputMonto = document.getElementById('dineroEnEstacion');
+const previewAmount = document.getElementById('previewAmount');
+
+function actualizarPreview() {
+    const monto = parseFloat(inputMonto.value) || 0;
+    previewAmount.textContent = '$' + monto.toFixed(2);
+}
+
+inputMonto.addEventListener('input', actualizarPreview);
+inputMonto.addEventListener('change', actualizarPreview);
+</script>
+
+<%- include('../partials/footer.ejs'); %>

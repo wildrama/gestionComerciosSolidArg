@@ -1,0 +1,69 @@
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+
+<div class="container">
+
+    <a href="/clientes/clientes-index" class="p-3 btn btn-info">Volver atras</a>
+
+    <h3>Clientes actuales </h3>
+    <p>A continuación de muestran todos los clientes cargados en el sistema</p>
+    <div class="row justify-content-around">
+    
+
+            <% for( let cliente of todosLosClientes) { %>
+            
+                <div class="col-12 col-md-6 d-flex justify-content-center">
+
+            <div class="card px-3 mb-3">
+               
+
+                
+
+                <div class="card-tittle">
+                    <div class=" align-items-baseline ">
+                       Local: 
+
+                        <p class="lead">
+                        <%= cliente.nombreLocal %> 
+
+                        </p>
+                    </div>
+                    <p class="text-muted">
+                        Referencia: <%= cliente.dueño  %> 
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    Dirección: <%= cliente.direccion %> 
+                    <br>
+                    Telefono 1: <%=cliente.telefono1  %> 
+                    <br>
+                    Telefono 2: <%=cliente.telefono2   %> 
+                    <br>
+                    Telefono 3: <%=cliente.telefono3   %> 
+                    <br>
+                    <br>
+                    Correo: <%= cliente.correo %> 
+                      <div class="">
+                       <p class="py-2 ">
+                        Comentario: <%= cliente.comentario %> 
+              
+                       </p>
+                      </div>
+                   
+                   <a href="/clientes/<%= cliente._id %>" class="text-center btn btn-info my-2">Ver pedidos para este cliente</a>
+                   <!-- <form  class="text-end"  action="/clientes/<%= cliente._id %>?_method=DELETE" method="post">
+                    <button class="btn btn-outline-warning">Borrar</button>
+                </form>    -->
+                </div>
+            </div>
+        </div>
+
+            <% } %>
+      
+    
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

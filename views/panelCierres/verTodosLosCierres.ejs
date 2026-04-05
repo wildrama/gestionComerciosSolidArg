@@ -1,0 +1,106 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Cierres de Caja</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">📊 Cierres de Caja</h1>
+            <p class="form-subtitle">Historial de todos los cierres realizados en las estaciones</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="cierres-stats">
+            <div class="cierres-stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <p class="stat-label">Total de Cierres</p>
+                    <h3 class="stat-value"><%= cierresDeCaja.length %></h3>
+                </div>
+            </div>
+            <% if (cierresDeCaja.length > 0) { %>
+            <div class="cierres-stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <p class="stat-label">Último Cierre</p>
+                    <h3 class="stat-value"><%= new Date(cierresDeCaja[0].createdAt).toLocaleDateString('es-ES') %></h3>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Cierres Grid -->
+        <div class="cierres-grid">
+            <% if (cierresDeCaja && cierresDeCaja.length > 0) { %>
+                <% cierresDeCaja.forEach((cierreDeCajaRealizado, index) => { %>
+                <a href="/administrador/cierres-caja/<%= cierreDeCajaRealizado._id %>" class="cierre-card-link">
+                    <div class="cierre-card">
+                        <div class="cierre-card-header">
+                            <div class="cierre-card-number">#<%= cierresDeCaja.length - index %></div>
+                            <div class="cierre-card-date">
+                                <%= new Date(cierreDeCajaRealizado.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                            </div>
+                        </div>
+
+                        <div class="cierre-card-content">
+                            <div class="cierre-card-icon">🏪</div>
+                            <h3 class="cierre-card-title">
+                                <%= cierreDeCajaRealizado.estacionDeCobro.ubicacionDeEstacion %>
+                            </h3>
+                            <p class="cierre-card-time">
+                                <%= new Date(cierreDeCajaRealizado.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
+                            </p>
+                        </div>
+
+                        <div class="cierre-card-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Dinero en Caja:</span>
+                                <span class="stat-value">$<%= cierreDeCajaRealizado.dineroEnCaja.toFixed(2) %></span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Ventas:</span>
+                                <span class="stat-value">
+                                    $<%= Number((cierreDeCajaRealizado.ventasEnEfectivo?.montoTotal || 0) + (cierreDeCajaRealizado.ventasEnOtro?.montoTotal || 0)).toFixed(2) %>
+                                </span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Transacciones:</span>
+                                <span class="stat-value">
+                                    <%= (cierreDeCajaRealizado.ventasEnEfectivo?.cantidad || 0) + (cierreDeCajaRealizado.ventasEnOtro?.cantidad || 0) %>
+                                </span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Período:</span>
+                                <span class="stat-value"><%= cierreDeCajaRealizado.periodo || 'DIARIO' %></span>
+                            </div>
+                        </div>
+
+                        <div class="cierre-card-footer">
+                            <span class="view-link">Ver detalles →</span>
+                        </div>
+                    </div>
+                </a>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state-cierres">
+                    <div class="empty-icon">📊</div>
+                    <h3>No hay cierres registrados</h3>
+                    <p>Los cierres de caja aparecerán aquí</p>
+                    <a href="/administrador" class="btn-primary-modern">
+                        <span class="btn-icon">🏠</span>
+                        Ir al Dashboard
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

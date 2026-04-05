@@ -1,0 +1,164 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/stock" class="breadcrumb-link">Stock</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Buscar Productos</span>
+        </nav>
+
+        <!-- Search Header -->
+        <div class="form-header">
+            <h1 class="form-title">🔍 Buscar Productos</h1>
+            <p class="form-subtitle">Encuentra productos por nombre, marca o código de barra</p>
+        </div>
+
+        <!-- Search Container -->
+        <div class="search-container">
+            <form id="searchForm" class="search-form-modern">
+                <!-- Search Input -->
+                <div class="search-input-wrapper">
+                    <div class="search-box-large">
+                        <span class="search-icon-large">🔍</span>
+                        <input type="text" 
+                               id="searchInput" 
+                               class="search-input-large" 
+                               placeholder="Busca por nombre, marca o código..."
+                               autocomplete="off">
+                    </div>
+
+                    <!-- Search Type Toggle -->
+                    <div class="search-type-wrapper">
+                        <label class="toggle-switch-label">
+                            <span class="toggle-label-text">Buscar por:</span>
+                            <div class="toggle-switch-container">
+                                <input type="checkbox" id="searchByBarcode" class="toggle-input">
+                                <span class="toggle-track"></span>
+                                <span class="toggle-thumb"></span>
+                                <span class="toggle-label toggle-label-off">Texto</span>
+                                <span class="toggle-label toggle-label-on">Código</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Filters Row -->
+                <div class="search-filters-row">
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label for="sortFilter" class="filter-label">Ordenar por:</label>
+                        <select id="sortFilter" class="filter-select-modern">
+                            <option value="relevancia">⭐ Relevancia</option>
+                            <option value="nombre">🔤 Nombre A-Z</option>
+                            <option value="precio">💰 Menor precio</option>
+                            <option value="stock">📦 Mayor stock</option>
+                        </select>
+                    </div>
+
+                    <button type="reset" id="clearSearchBtn" class="btn-clear-search" style="align-self: flex-end;">
+                        🔄 Limpiar
+                    </button>
+                </div>
+
+                <!-- Alert Message -->
+                <div id="alertMessage" class="search-alert" style="display: none;">
+                    <span class="alert-icon">ℹ️</span>
+                    <span id="alertText">Ingresa un término de búsqueda válido</span>
+                </div>
+            </form>
+
+            <!-- Search Stats -->
+            <div id="searchStats" class="search-stats" style="display: none;">
+                <span class="stat-badge">
+                    📊 <strong id="resultCount">0</strong> productos encontrados
+                </span>
+            </div>
+        </div>
+
+        <!-- Search Results Grid -->
+        <div class="search-results-wrapper">
+            <div id="searchResults" class="search-results-grid"></div>
+
+            <!-- Empty State -->
+            <div id="noResults" class="empty-state-search" style="display: none;">
+                <div class="empty-icon-large">🔍</div>
+                <h3>No se encontraron productos</h3>
+                <p>Intenta con otros términos de búsqueda o utiliza diferentes palabras clave</p>
+            </div>
+
+            <!-- Initial State -->
+            <div id="initialState" class="empty-state-search">
+                <div class="empty-icon-large">📝</div>
+                <h3>Comienza tu búsqueda</h3>
+                <p>Escribe el nombre, marca o código del producto que buscas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Card Template -->
+<template id="productCardTemplate">
+    <div class="search-result-card">
+        <div class="result-card-header">
+            <div class="result-card-icon">📦</div>
+            <div class="result-card-title-group">
+                <h3 class="result-card-title"></h3>
+                <p class="result-card-brand"></p>
+            </div>
+        </div>
+        
+        <div class="result-card-body">
+            <div class="result-detail-row">
+                <span class="result-detail-label">Código:</span>
+                <span class="result-detail-value code"></span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Marca:</span>
+                <span class="result-detail-value brand"></span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Stock:</span>
+                <span class="result-detail-value stock"></span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Precio:</span>
+                <span class="result-detail-value price"></span>
+            </div>
+        </div>
+
+        <div class="result-card-footer">
+            <a href="" class="btn-result-edit">✏️ Ver Detalle</a>
+            <a href="" class="btn-result-stock">📦 Actualizar Stock</a>
+        </div>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/productSearch.js"></script>
+<script>
+// Inicializar búsqueda de productos
+document.addEventListener('DOMContentLoaded', function() {
+    const search = new ProductSearch({
+        searchInput: document.getElementById('searchInput'),
+        searchByBarcode: document.getElementById('searchByBarcode'),
+        sortFilter: document.getElementById('sortFilter'),
+        searchResults: document.getElementById('searchResults'),
+        noResults: document.getElementById('noResults'),
+        initialState: document.getElementById('initialState'),
+        alertMessage: document.getElementById('alertMessage'),
+        searchStats: document.getElementById('searchStats'),
+        resultCount: document.getElementById('resultCount'),
+        template: document.getElementById('productCardTemplate'),
+        clearSearchBtn: document.getElementById('clearSearchBtn'),
+        apiEndpoint: '/api/search/smart',
+        useSmartSearch: true
+    });
+    
+    search.init();
+});
+</script>
+
+<%- include('../partials/footer.ejs'); %>

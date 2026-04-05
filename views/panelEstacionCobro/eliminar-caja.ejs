@@ -1,0 +1,154 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="breadcrumb-link"><%= estacionDeCobro.ubicacionDeEstacion %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Eliminar Estación</span>
+        </nav>
+
+        <!-- Warning Header -->
+        <div class="delete-warning-header">
+            <div class="warning-icon-large">⚠️</div>
+            <h1 class="delete-title">Eliminar Estación de Cobro</h1>
+            <p class="delete-subtitle">Esta acción no se puede deshacer</p>
+        </div>
+
+        <!-- Station Info -->
+        <div class="delete-station-card">
+            <div class="station-info">
+                <span class="station-icon">🏪</span>
+                <div class="station-details">
+                    <p class="station-label">Estación a Eliminar:</p>
+                    <h2 class="station-name"><%= estacionDeCobro.ubicacionDeEstacion %></h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="danger-alert">
+            <span class="alert-icon">🔴</span>
+            <div class="alert-content">
+                <h3 class="alert-title">Importante</h3>
+                <p class="alert-text">
+                    Si eliminas esta estación de cobro, se borrarán todos los datos accesibles asociados a ella.
+                    <strong>Sin embargo, las ventas realizadas seguirán siendo parte del historial del sistema</strong>
+                    y podrán consultarse en los reportes.
+                </p>
+            </div>
+        </div>
+
+        <!-- Impact Info -->
+        <div class="impact-grid">
+            <div class="impact-card">
+                <span class="impact-icon">✓</span>
+                <p class="impact-label">Se Conservará</p>
+                <p class="impact-text">Historial de ventas</p>
+            </div>
+            <div class="impact-card">
+                <span class="impact-icon">✓</span>
+                <p class="impact-label">Se Conservará</p>
+                <p class="impact-text">Reportes y auditoría</p>
+            </div>
+            <div class="impact-card error">
+                <span class="impact-icon">✕</span>
+                <p class="impact-label">Se Eliminará</p>
+                <p class="impact-text">Datos de operación</p>
+            </div>
+            <div class="impact-card error">
+                <span class="impact-icon">✕</span>
+                <p class="impact-label">Se Eliminará</p>
+                <p class="impact-text">Saldo actual</p>
+            </div>
+        </div>
+
+        <!-- Station Stats -->
+        <div class="station-stats-section">
+            <h3 class="section-title">📊 Información de la Estación</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Dinero en Caja</span>
+                    <span class="stat-value">$<%= estacionDeCobro.dineroEnEstacion.toFixed(2) %></span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Ventas Realizadas</span>
+                    <span class="stat-value">
+                        <%= estacionDeCobro.comprasRealizadasEnEfectivo + estacionDeCobro.comprasRealizadasEnOtro %>
+                    </span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Total Recaudado</span>
+                    <span class="stat-value">
+                        $<%= (parseFloat(estacionDeCobro.dineroDeVentasEnEfectivo) + parseFloat(estacionDeCobro.dineroDeVentasEnOtro)).toFixed(2) %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Section -->
+        <div class="delete-confirmation-box">
+            <h3 class="confirmation-title">¿Deseas continuar?</h3>
+            <p class="confirmation-text">
+                Esta acción eliminará la estación "<strong><%= estacionDeCobro.ubicacionDeEstacion %></strong>" del sistema.
+            </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions delete-actions">
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">
+                ← Cancelar y Volver
+            </a>
+            <button type="button" class="btn-delete-large" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                <span class="btn-icon">🗑️</span>
+                Eliminar Estación
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-header-danger">
+                <h5 class="modal-title">
+                    <span style="font-size: 1.5rem; margin-right: 0.5rem;">⚠️</span>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-warning-text">
+                    ¿Estás completamente seguro de que deseas eliminar la estación de cobro 
+                    <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong>?
+                </p>
+                <p class="modal-info-text">
+                    Esta acción es <strong>irreversible</strong> y eliminará todos los datos operacionales, 
+                    aunque el historial de ventas se mantendrá en el sistema.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary-modern" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <form action="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>?_method=DELETE" 
+                      method="POST" 
+                      style="display: inline;">
+                    <button type="submit" class="btn-delete-final">
+                        <span class="btn-icon">🗑️</span>
+                        Sí, Eliminar Definitivamente
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

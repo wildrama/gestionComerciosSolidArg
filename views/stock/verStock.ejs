@@ -1,0 +1,274 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">📊 Gestión de Stock</h1>
+                <p class="page-subtitle">Total de productos: <%= cantidadTotalDeProductos %></p>
+            </div>
+            <div class="page-actions">
+                <a href="/administrador/productos/nuevo" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Nuevo Producto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Mini -->
+    <div class="stock-stats-mini">
+        <div class="stock-stat-card">
+            <div class="stock-stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">📦</div>
+            <div class="stock-stat-content">
+                <h3><%= cantidadTotalDeProductos %></h3>
+                <p>Total Productos</p>
+            </div>
+        </div>
+        <div class="stock-stat-card">
+            <div class="stock-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+            <div class="stock-stat-content">
+                <h3><%= productos.reduce((sum, p) => sum + (p.cantidad || 0), 0) %></h3>
+                <p>Stock Total</p>
+            </div>
+        </div>
+        <div class="stock-stat-card">
+            <div class="stock-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚠️</div>
+            <div class="stock-stat-content">
+                <h3><%= productos.filter(p => p.cantidad < 10).length %></h3>
+                <p>Stock Bajo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="stock-filters-card">
+        <div class="filters-row-stock">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" 
+                       id="searchStock" 
+                       placeholder="Buscar por nombre, marca o categoría..." 
+                       class="search-input"
+                       onkeyup="filtrarStock()">
+            </div>
+            <div class="filter-group-stock">
+                <select id="filterCategoria" class="filter-select" onchange="filtrarStock()">
+                    <option value="">Todas las categorías</option>
+                    <% const categorias = [...new Set(productos.map(p => p.categoriaInterna).filter(Boolean))]; %>
+                    <% categorias.forEach(cat => { %>
+                        <option value="<%= cat %>"><%= cat %></option>
+                    <% }); %>
+                </select>
+                <select id="filterStock" class="filter-select" onchange="filtrarStock()">
+                    <option value="">Todo el stock</option>
+                    <option value="bajo">Stock bajo (&lt;10)</option>
+                    <option value="medio">Stock medio (10-50)</option>
+                    <option value="alto">Stock alto (&gt;50)</option>
+                </select>
+                <button onclick="limpiarFiltros()" class="btn-filter-clear">🔄 Limpiar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista Desktop: Tabla -->
+    <div class="stock-table-desktop">
+        <div class="stock-table-wrapper">
+            <table class="stock-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Marca</th>
+                        <th style="text-align: center;">Stock</th>
+                        <th>Precio Minorista</th>
+                        <th>Precio Mayorista</th>
+                        <th>Categoría</th>
+                        <th>Presentación</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody">
+                    <% productos.forEach(producto => { %>
+                    <tr class="stock-row" 
+                        data-nombre="<%= producto.nombre.toLowerCase() %>"
+                        data-marca="<%= (producto.marca || '').toLowerCase() %>"
+                        data-categoria="<%= (producto.categoriaInterna || '').toLowerCase() %>"
+                        data-stock="<%= producto.cantidad || 0 %>">
+                        <td>
+                            <div class="stock-product-cell">
+                                <div class="stock-product-placeholder">📦</div>
+                                <div class="stock-product-info">
+                                    <h4><%= producto.nombre %></h4>
+                                    <% if (producto.peso) { %>
+                                        <p><%= producto.peso %></p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </td>
+                        <td><%= producto.marca || '-' %></td>
+                        <td style="text-align: center;">
+                            <span class="stock-number <%= producto.cantidad < 10 ? 'low' : (producto.cantidad < 50 ? 'ok' : 'high') %>">
+                                <%= producto.cantidad || 0 %>
+                            </span>
+                        </td>
+                        <td><strong style="color: #6366f1;">$<%= producto.precioMinorista ? producto.precioMinorista.toFixed(2) : '0.00' %></strong></td>
+                        <td><strong style="color: #10b981;">$<%= producto.precioMayorista ? producto.precioMayorista.toFixed(2) : '0.00' %></strong></td>
+                        <td><%= producto.categoriaInterna || '-' %></td>
+                        <td><%= producto.presentacion || '-' %></td>
+                        <td style="text-align: center;">
+                            <div class="stock-actions">
+                                <a href="/administrador/productos/<%= producto._id %>/upstock" 
+                                   class="btn-stock-action" 
+                                   title="Actualizar stock">
+                                    📦
+                                </a>
+                                <a href="/administrador/productos/<%= producto._id %>" 
+                                   class="btn-stock-action" 
+                                   title="Ver detalles">
+                                    👁️
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Vista Mobile: Cards -->
+    <div class="stock-cards-mobile" id="stockCardsMobile">
+        <% productos.forEach(producto => { %>
+        <div class="stock-card-mobile" 
+             data-nombre="<%= producto.nombre.toLowerCase() %>"
+             data-marca="<%= (producto.marca || '').toLowerCase() %>"
+             data-categoria="<%= (producto.categoriaInterna || '').toLowerCase() %>"
+             data-stock="<%= producto.cantidad || 0 %>">
+            <div class="stock-card-header-mobile">
+                <div class="stock-card-icon">📦</div>
+                <div>
+                    <h3 class="stock-card-title"><%= producto.nombre %></h3>
+                    <p class="stock-card-subtitle"><%= producto.marca || 'Sin marca' %></p>
+                </div>
+            </div>
+            <div class="stock-card-body-mobile">
+                <div class="stock-card-row">
+                    <span class="label">Stock:</span>
+                    <span class="value stock-value <%= producto.cantidad < 10 ? 'low' : 'ok' %>">
+                        <%= producto.cantidad || 0 %> unidades
+                    </span>
+                </div>
+                <div class="stock-card-row">
+                    <span class="label">Precio Minorista:</span>
+                    <span class="value price">$<%= producto.precioMinorista ? producto.precioMinorista.toFixed(2) : '0.00' %></span>
+                </div>
+                <div class="stock-card-row">
+                    <span class="label">Precio Mayorista:</span>
+                    <span class="value price">$<%= producto.precioMayorista ? producto.precioMayorista.toFixed(2) : '0.00' %></span>
+                </div>
+                <% if (producto.categoriaInterna) { %>
+                <div class="stock-card-row">
+                    <span class="label">Categoría:</span>
+                    <span class="value"><%= producto.categoriaInterna %></span>
+                </div>
+                <% } %>
+            </div>
+            <div class="stock-card-footer-mobile">
+                <a href="/administrador/productos/<%= producto._id %>/upstock" class="btn-mobile-action primary">
+                    📦 Actualizar Stock
+                </a>
+                <a href="/administrador/productos/<%= producto._id %>" class="btn-mobile-action secondary">
+                    👁️ Ver Detalles
+                </a>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+
+    <!-- No Results -->
+    <div id="noResults" class="empty-state" style="display: none;">
+        <div class="empty-icon">🔍</div>
+        <h3>No se encontraron productos</h3>
+        <p>Intenta con otros términos de búsqueda</p>
+        <button onclick="limpiarFiltros()" class="btn-primary-modern">Limpiar Filtros</button>
+    </div>
+</div>
+
+<script>
+function filtrarStock() {
+    const searchValue = document.getElementById('searchStock').value.toLowerCase();
+    const categoriaValue = document.getElementById('filterCategoria').value.toLowerCase();
+    const stockValue = document.getElementById('filterStock').value;
+    
+    // Filtrar tabla desktop
+    const rows = document.querySelectorAll('.stock-row');
+    let visibleCountDesktop = 0;
+    
+    rows.forEach(row => {
+        const nombre = row.dataset.nombre;
+        const marca = row.dataset.marca;
+        const categoria = row.dataset.categoria;
+        const stock = parseInt(row.dataset.stock);
+        
+        const matchSearch = nombre.includes(searchValue) || marca.includes(searchValue) || categoria.includes(searchValue);
+        const matchCategoria = categoriaValue === '' || categoria === categoriaValue;
+        
+        let matchStock = true;
+        if (stockValue === 'bajo') matchStock = stock < 10;
+        else if (stockValue === 'medio') matchStock = stock >= 10 && stock <= 50;
+        else if (stockValue === 'alto') matchStock = stock > 50;
+        
+        if (matchSearch && matchCategoria && matchStock) {
+            row.style.display = '';
+            visibleCountDesktop++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Filtrar cards mobile
+    const cards = document.querySelectorAll('.stock-card-mobile');
+    let visibleCountMobile = 0;
+    
+    cards.forEach(card => {
+        const nombre = card.dataset.nombre;
+        const marca = card.dataset.marca;
+        const categoria = card.dataset.categoria;
+        const stock = parseInt(card.dataset.stock);
+        
+        const matchSearch = nombre.includes(searchValue) || marca.includes(searchValue) || categoria.includes(searchValue);
+        const matchCategoria = categoriaValue === '' || categoria === categoriaValue;
+        
+        let matchStock = true;
+        if (stockValue === 'bajo') matchStock = stock < 10;
+        else if (stockValue === 'medio') matchStock = stock >= 10 && stock <= 50;
+        else if (stockValue === 'alto') matchStock = stock > 50;
+        
+        if (matchSearch && matchCategoria && matchStock) {
+            card.style.display = '';
+            visibleCountMobile++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Mostrar mensaje de no resultados
+    const noResults = document.getElementById('noResults');
+    if (visibleCountDesktop === 0 && visibleCountMobile === 0) {
+        noResults.style.display = 'flex';
+    } else {
+        noResults.style.display = 'none';
+    }
+}
+
+function limpiarFiltros() {
+    document.getElementById('searchStock').value = '';
+    document.getElementById('filterCategoria').value = '';
+    document.getElementById('filterStock').value = '';
+    filtrarStock();
+}
+</script>
+
+<%- include('../partials/footer.ejs'); %>
+

@@ -1,0 +1,1 @@
+jsBarcode("#codigoBarra", "dd")

@@ -1,0 +1,113 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/userpanel" class="breadcrumb-link">Usuarios</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Nuevo Usuario</span>
+        </nav>
+
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">➕ Agregar Nuevo Usuario</h1>
+            <p class="form-subtitle">Completa los datos para registrar un usuario en el sistema</p>
+        </div>
+
+        <!-- Form -->
+        <form action="/administrador/userpanel/nuevousuario" method="POST" class="modern-form">
+            <div class="form-grid">
+                <div class="form-section">
+                    <h3 class="section-title-form">👤 Información del Usuario</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="funcion" class="form-label-modern">Función en el Sistema *</label>
+                        <select name="funcion" id="funcion" class="form-control-modern" required>
+                            <option value="">Selecciona una función</option>
+                            <option value="CAJA">CAJA</option>
+                            <option value="REPARTIDOR">REPARTIDOR</option>
+                        </select>
+                        <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: block;">
+                            Define el rol del usuario en el sistema
+                        </small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="username" class="form-label-modern">Nombre de Usuario *</label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-control-modern" 
+                               placeholder="Ej: juan.perez"
+                               pattern="[a-z0-9.]+"
+                               title="Solo letras minúsculas, números y puntos"
+                               required>
+                        <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: block;">
+                            Solo letras minúsculas, números y puntos (sin espacios)
+                        </small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="password" class="form-label-modern">Contraseña *</label>
+                        <div class="password-wrapper">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   class="form-control-modern" 
+                                   placeholder="Ingresa una contraseña segura"
+                                   minlength="4"
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordField()">
+                                <span id="eye-icon-register">👁️</span>
+                            </button>
+                        </div>
+                        <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: block;">
+                            Mínimo 4 caracteres
+                        </small>
+                    </div>
+
+                    <div class="alert-info" style="margin-top: 1.5rem;">
+                        <span class="alert-icon">💡</span>
+                        <span>El usuario podrá acceder al sistema con estas credenciales una vez creado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/administrador/userpanel" class="btn-secondary-modern">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-primary-modern">
+                    <span class="btn-icon">💾</span>
+                    Crear Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePasswordField() {
+    const passwordField = document.getElementById('password');
+    const eyeIcon = document.getElementById('eye-icon-register');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.textContent = '🙈';
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.textContent = '👁️';
+    }
+}
+
+// Validación de username en tiempo real
+document.getElementById('username').addEventListener('input', function(e) {
+    this.value = this.value.toLowerCase().replace(/[^a-z0-9.]/g, '');
+});
+</script>
+
+<%- include('../partials/footer.ejs'); %>

@@ -1,0 +1,62 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+    <div class="container">
+        <h2 class="text-center">
+            Crear oferta
+        </h2>
+
+
+        <form action="/administrador/ofertas" method="post">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <select class="form-select" name="cantidadDeProductosParaOferta" id="cantidadDeProductosParaOferta" aria-label="Cantidad de productos para la oferta" >
+                    <option value="1">x1</option>
+                    <option value="2">x2</option>
+                    <option value="3">x3</option>
+                    <option value="4">x4</option>
+
+                    <option value="5">x5</option>
+
+                    <option value="6">x6</option>
+
+                  </select>     
+                         </div>
+              <div class="form-group col-md-6">
+                <label for="inputdate">Fecha de vigencia para oferta</label>
+                <input type="date" name="fechaDeVigencia" class="form-control" id="inputdate" placeholder="Fecha de vigencia para la oferta">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputPrecio">Precio de la oferta</label>
+              <input type="number" name="precioOferta" class="form-control" id="inputPrecio" placeholder="Introducir del precio de la oferta">
+            </div>
+            
+        
+            <button type="submit" class="btn btn-primary">Crear Oferta</button>
+          </form>
+    </div>
+
+
+
+
+<div style='text-align: center;'>
+    <!-- insert your custom barcode setting your data in the GET parameter "data" -->
+    <img alt='Barcode Generator TEC-IT'
+         src='https://barcode.tec-it.com/barcode.ashx?data=uyygyuiygiugyy6&code=&translate-esc=true'/>
+  </div>
+  <div style='padding-top:8px; text-align:center; font-size:15px; font-family: Source Sans Pro, Arial, sans-serif;'>
+    <!-- back-linking to www.tec-it.com is required -->
+    <a href='https://www.tec-it.com' title='Barcode Software by TEC-IT' target='_blank'>
+      TEC-IT Barcode Generator<br/>
+      <!-- logos are optional -->
+      <img alt='TEC-IT Barcode Software' border='0' src='http://www.tec-it.com/pics/banner/web/TEC-IT_Logo_75x75.gif'>
+    </a>
+  </div>
+  
+
+</div>
+  
+</div>
+  
+<%- include('../partials/footer.ejs'); %>
+

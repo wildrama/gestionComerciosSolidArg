@@ -1,0 +1,89 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/userpanel" class="breadcrumb-link">Usuarios</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current"><%= usuarioIndividual.username %></span>
+        </nav>
+
+        <!-- User Detail Card -->
+        <div class="user-detail-container">
+            <div class="user-detail-header">
+                <div class="user-detail-avatar">
+                    <span class="avatar-text-large"><%= usuarioIndividual.username.charAt(0).toUpperCase() %></span>
+                </div>
+                <div class="user-detail-info">
+                    <h1 class="user-detail-name"><%= usuarioIndividual.username %></h1>
+                    <p class="user-detail-role"><%= usuarioIndividual.funcion %></p>
+                    <p class="user-detail-date">
+                        <span style="color: #6b7280;">📅 Creado:</span> 
+                        <%= usuarioIndividual.createdAt.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    </p>
+                </div>
+            </div>
+
+            <div class="user-detail-body">
+                <h3 class="section-title-form">📋 Información del Usuario</h3>
+                
+                <div class="detail-grid">
+                    <div class="detail-box">
+                        <span class="detail-box-icon">👤</span>
+                        <div>
+                            <p class="detail-box-label">Usuario</p>
+                            <p class="detail-box-value"><%= usuarioIndividual.username %></p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box">
+                        <span class="detail-box-icon">🏷️</span>
+                        <div>
+                            <p class="detail-box-label">Función</p>
+                            <p class="detail-box-value"><%= usuarioIndividual.funcion %></p>
+                        </div>
+                    </div>
+
+                    <% if (usuarioIndividual.email) { %>
+                    <div class="detail-box">
+                        <span class="detail-box-icon">📧</span>
+                        <div>
+                            <p class="detail-box-label">Email</p>
+                            <p class="detail-box-value"><%= usuarioIndividual.email %></p>
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <div class="detail-box">
+                        <span class="detail-box-icon">📅</span>
+                        <div>
+                            <p class="detail-box-label">Fecha de Registro</p>
+                            <p class="detail-box-value">
+                                <%= usuarioIndividual.createdAt.toLocaleDateString('es-ES') %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-detail-actions">
+                <a href="/administrador/userpanel" class="btn-secondary-modern">
+                    ← Volver
+                </a>
+                <form action="/administrador/userpanel/<%= usuarioIndividual._id %>?_method=DELETE" 
+                      method="POST" 
+                      style="display: inline;"
+                      onsubmit="return confirm('¿Estás seguro de eliminar al usuario <%= usuarioIndividual.username %>?\n\nEsta acción eliminará permanentemente el usuario del sistema.')">
+                    <button type="submit" class="btn-delete-full">
+                        🗑️ Eliminar Usuario
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

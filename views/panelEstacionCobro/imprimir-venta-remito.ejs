@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remito Venta <%= venta.codigoVenta %></title>
+    <style>
+        @page {
+            size: A4;
+            margin: 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1f2937;
+            background: #f3f4f6;
+        }
+
+        .page {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 14mm;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .brand h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .brand p,
+        .meta p,
+        .note,
+        .footer-note {
+            margin: 4px 0;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .doc-box {
+            border: 1px solid #111827;
+            padding: 10px 12px;
+            min-width: 220px;
+        }
+
+        .doc-box h2 {
+            margin: 0 0 6px;
+            font-size: 18px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .info-card {
+            border: 1px solid #d1d5db;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #d1d5db;
+            padding: 9px 10px;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f3f4f6;
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .totals {
+            margin-top: 18px;
+            margin-left: auto;
+            width: 320px;
+        }
+
+        .totals td,
+        .totals th {
+            font-size: 14px;
+        }
+
+        .totals .grand-total {
+            background: #e5f3ff;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .note {
+            margin-top: 18px;
+            padding: 10px 12px;
+            border-left: 4px solid #2563eb;
+            background: #eff6ff;
+        }
+
+        .footer {
+            margin-top: 26px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .signature-box {
+            border-top: 1px solid #9ca3af;
+            padding-top: 8px;
+            min-height: 54px;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            .page {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="brand">
+                <h1>ISIDORITO</h1>
+                <p><strong>Remito interno de venta</strong></p>
+                <p>Estación: <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong></p>
+                <p>Cajero: <strong><%= venta.nombreDelUsuario || '-' %></strong></p>
+            </div>
+
+            <div class="doc-box meta">
+                <h2>REMITO</h2>
+                <p><strong>N°:</strong> <%= venta.codigoVenta %></p>
+                <p><strong>Fecha:</strong> <%= venta.fechaTexto %> <%= venta.horaTexto %></p>
+                <p><strong>Emitido por:</strong> <%= printedBy || '-' %></p>
+                <p><strong>Cliente:</strong> Consumidor final</p>
+            </div>
+        </header>
+
+        <section class="info-grid">
+            <div class="info-card">
+                <span class="label">Monto total</span>
+                <span class="value">$<%= Number(venta.totalVenta || 0).toFixed(2) %></span>
+            </div>
+            <div class="info-card">
+                <span class="label">Tipo de pago</span>
+                <span class="value"><%= venta.paymentLabel || '-' %></span>
+            </div>
+            <div class="info-card">
+                <span class="label">Importe cobrado</span>
+                <span class="value"><%= venta.dineroIngresado !== null ? `$${Number(venta.dineroIngresado).toFixed(2)}` : '-' %></span>
+            </div>
+            <div class="info-card">
+                <span class="label">Vuelto / salida</span>
+                <span class="value"><%= venta.dineroDeSalida !== null ? `$${Number(venta.dineroDeSalida).toFixed(2)}` : '-' %></span>
+            </div>
+            <div class="info-card">
+                <span class="label">Productos</span>
+                <span class="value"><%= Number(venta.cantidadDeProductosTotales || 0) %></span>
+            </div>
+            <div class="info-card">
+                <span class="label">Ticket</span>
+                <span class="value"><%= venta.ticketLabel || '-' %></span>
+            </div>
+        </section>
+
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-right">Precio unitario</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (venta.detalleProductos && venta.detalleProductos.length) { %>
+                        <% venta.detalleProductos.forEach((producto) => { %>
+                            <tr>
+                                <td><strong><%= producto.nombre %></strong></td>
+                                <td class="text-center"><%= producto.cantidad %></td>
+                                <td class="text-right">$<%= Number(producto.precioUnitario || 0).toFixed(2) %></td>
+                                <td class="text-right">$<%= Number(producto.total || 0).toFixed(2) %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center">No hay detalle de productos disponible para esta venta.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </section>
+
+        <table class="totals">
+            <tbody>
+                <tr>
+                    <th>Total productos</th>
+                    <td class="text-right">$<%= Number(venta.subtotalProductos || venta.totalVenta || 0).toFixed(2) %></td>
+                </tr>
+                <tr class="grand-total">
+                    <th>Total venta</th>
+                    <td class="text-right">$<%= Number(venta.totalVenta || 0).toFixed(2) %></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <% if (venta.observacionDatos) { %>
+            <div class="note">
+                <strong>Observación:</strong> <%= venta.observacionDatos %>
+            </div>
+        <% } %>
+
+        <div class="footer">
+            <div class="signature-box">
+                Firma de quien entrega
+            </div>
+            <div class="signature-box">
+                Firma de quien recibe
+            </div>
+        </div>
+
+        <p class="footer-note">Documento interno de control. No válido como factura ni documento fiscal.</p>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => window.print(), 180);
+        });
+
+        window.onafterprint = () => window.close();
+        window.onfocus = () => {
+            setTimeout(() => window.close(), 250);
+        };
+    </script>
+</body>
+</html>

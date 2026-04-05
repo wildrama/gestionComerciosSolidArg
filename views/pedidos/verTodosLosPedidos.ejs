@@ -1,0 +1,169 @@
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+    <div class="container">
+        <a href="/pedidos/pedidos-repartidor">Atras</a>
+
+        <h2>Pedidos realizados</h2>
+
+        <p>Explora los pedidos realizados a los clientes a travez del repartidor : <%= repartidor.username %> </p>
+   
+        <div class="accion d-flex">
+            <div class="imprimirAlgunos">
+
+            </div>
+
+            <div class="marcarComo">
+
+            </div>
+            <div class="archivar">
+
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+
+                <th scope="col">Local</th>
+                <th scope="col">Productos</th>
+    
+                <th scope="col">Cantidad</th>
+    
+                <th scope="col">Precio total</th>
+    
+                <th scope="col">
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tableParaProductosP">
+              
+              <% for( let pedidoIndividual of pedidos) { %>
+                <tr>
+                  <div>
+                </div>
+                <td>
+                  <%= pedidoIndividual.cliente.updatedAt.toLocaleString() %> 
+                </td>
+                  <td>
+                    <%= pedidoIndividual.cliente.nombreLocal %> 
+                  </td>
+                  <td>
+                      <a href="/pedidos/<%= pedidoIndividual._id %>/ver-pedido">INFO COMPLETA</a>
+                  </td>
+                  <td>
+                    <%= pedidoIndividual.cantidadDeProductos %> 
+                  </td>
+                  <td>
+                    <%= pedidoIndividual.importeTotal %> 
+                  </td>
+                  <td>
+               <a class="btn btn-info" href="/pedidos/<%= pedidoIndividual._id %>/ver-pedido">Ver pedido</a>
+
+                </td>
+                </tr>
+              <% } %>
+              
+            </tbody>
+          </table>
+    
+
+    </div>
+    <!-- <script>
+           function generatePDF(){
+            
+
+
+            var pdfObject = jsPDFInvoiceTemplate.default(props); 
+            console.log(pdfObject + 'creado')
+            
+       }
+
+   var props = {
+        outputType: jsPDFInvoiceTemplate.OutputType.Save,
+        returnJsPDFDocObject: true,
+        fileName: "remito",
+        orientationLandscape: false,
+        compress: true,
+      
+        
+        business: {
+            name: "Isidorito",
+            address: "San Pedro, Buenos",
+            phone: "(3329) 069 11 11 111",
+            email: "contacto@isidorito.com",
+            
+            website: "www.ididorito.com.ar/nosotros",
+        },
+        contact: {
+            label: "Remito dirigito a:",
+            name: `Despensa Arenales`,
+            address:`Pellegrini 2303`,
+            phone: `3329684732`,
+            email: `darenales@gmail.com`,
+            
+        },
+        invoice: {
+            label: "Pedido #",
+            num: 19,
+            invDate: `20/11/2022`,
+            invGenDate: `28/10/2022`,
+            headerBorder: false,
+            tableBodyBorder: false,
+            header: [
+              {
+                title: "#", 
+                style: { 
+                  width: 10 
+                } 
+              }, 
+              { 
+                title: "Productos descripción",
+                style: {
+                  width: 70
+                } 
+              }, 
+              { 
+                title: "Cantidad ",
+                style: {
+                  width:20
+                } 
+              }, 
+              { title: "Por Unidad",
+            style:{width:30}},
+              // { title: "Cantidad"},
+              { title: "Por tot",
+            style:{
+              width:30
+            }},
+              { title: "Total",
+              style:{
+                width:30
+              }}
+            ],
+            table: Array.from(Array(2), (productoIm, index)=>([
+                index + 1,
+                `Galletitas coronitas Frambuesa - Caja x 24U`,
+                `3`,
+                `255`,
+                `95`,
+                `255`,
+            ])),
+     
+            invDescLabel: "Cliente:",
+            invDesc: "Despensa Arenales",
+        },
+        footer: {
+            text: "Este remito generado digitalmente es valido para el pedido realizado",
+        },
+        pageEnable: true,
+        pageLabel: "Page ",
+     };
+    </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+    <script type="module" src="/imprimirPedido.js" ></script>
+    <script src="https://unpkg.com/jspdf-invoice-template@1.4.0/dist/index.js"></script>
+
+    <%- include('../partials/footer.ejs'); %>

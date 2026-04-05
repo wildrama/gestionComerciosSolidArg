@@ -1,0 +1,208 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/productos" class="breadcrumb-link">Productos</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Editar Precios</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">💰 Editar Precios del Producto</h1>
+            <p class="form-subtitle">Ajusta los precios de "<%= producto.nombre %>"</p>
+        </div>
+
+        <!-- Product Info Card -->
+        <div class="product-price-info">
+                <div class="product-info-header">
+                <div class="product-info-icon">📦</div>
+                <div>
+                    <h3 class="product-info-name"><%= producto.nombre %></h3>
+                    <p class="product-info-meta"><%= producto.marca %> | Código: <%= producto.codigo %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prices Edit Container -->
+        <div class="prices-edit-grid">
+            <!-- Precio Minorista -->
+            <div class="price-edit-card">
+                <div class="price-edit-header">
+                    <span class="price-edit-icon">🛒</span>
+                    <h3 class="price-edit-title">Precio Minorista</h3>
+                </div>
+
+                <form id="subMin" class="price-edit-form">
+                    <div class="price-current-display">
+                        <p class="price-label">Precio Actual:</p>
+                        <div class="price-value">
+                            <span class="currency">$</span>
+                            <span id="precioMinorista"><%= producto.precioMinorista %></span>
+                        </div>
+                    </div>
+
+                    <div class="price-edit-inputs">
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento %</label>
+                            <input type="number" 
+                                   id="aumPorMin" 
+                                   class="price-edit-input"
+                                   placeholder="0"
+                                   step="0.01"
+                                   min="0">
+                        </div>
+                        
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento Manual</label>
+                            <input type="number" 
+                                   id="aumManMin" 
+                                   class="price-edit-input"
+                                   placeholder="0.00"
+                                   step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="price-result-display">
+                        <p class="result-label">Nuevo Precio:</p>
+                        <div class="result-value">
+                            <span class="currency">$</span>
+                            <span id="minRes">-</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-price-accept" onclick="aceptarPrecioMin()">
+                        ✓ Aceptar Cambio
+                    </button>
+                </form>
+            </div>
+
+            <!-- Precio Mayorista -->
+            <div class="price-edit-card">
+                <div class="price-edit-header">
+                    <span class="price-edit-icon">🏪</span>
+                    <h3 class="price-edit-title">Precio Mayorista</h3>
+                </div>
+
+                <form id="subMay" class="price-edit-form">
+                    <div class="price-current-display">
+                        <p class="price-label">Precio Actual:</p>
+                        <div class="price-value">
+                            <span class="currency">$</span>
+                            <span id="precioMayorista"><%= producto.precioMayorista %></span>
+                        </div>
+                    </div>
+
+                    <div class="price-edit-inputs">
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento %</label>
+                            <input type="number" 
+                                   id="aumPorMay" 
+                                   class="price-edit-input"
+                                   placeholder="0"
+                                   step="0.01"
+                                   min="0">
+                        </div>
+                        
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento Manual</label>
+                            <input type="number" 
+                                   id="aumManMay" 
+                                   class="price-edit-input"
+                                   placeholder="0.00"
+                                   step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="price-result-display">
+                        <p class="result-label">Nuevo Precio:</p>
+                        <div class="result-value">
+                            <span class="currency">$</span>
+                            <span id="manRes">-</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-price-accept" onclick="aceptarPrecioMay()">
+                        ✓ Aceptar Cambio
+                    </button>
+                </form>
+            </div>
+
+            <!-- Precio Costo -->
+            <div class="price-edit-card">
+                <div class="price-edit-header">
+                    <span class="price-edit-icon">💸</span>
+                    <h3 class="price-edit-title">Precio Costo</h3>
+                </div>
+
+                <form id="subCos" class="price-edit-form">
+                    <div class="price-current-display">
+                        <p class="price-label">Precio Actual:</p>
+                        <div class="price-value">
+                            <span class="currency">$</span>
+                            <span id="precioCosto"><%= producto.precioCosto %></span>
+                        </div>
+                    </div>
+
+                    <div class="price-edit-inputs">
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento %</label>
+                            <input type="number" 
+                                   id="aumPorCos" 
+                                   class="price-edit-input"
+                                   placeholder="0"
+                                   step="0.01"
+                                   min="0">
+                        </div>
+                        
+                        <div class="input-group-compact">
+                            <label class="compact-label">Aumento Manual</label>
+                            <input type="number" 
+                                   id="aumManCos" 
+                                   class="price-edit-input"
+                                   placeholder="0.00"
+                                   step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="price-result-display">
+                        <p class="result-label">Nuevo Precio:</p>
+                        <div class="result-value">
+                            <span class="currency">$</span>
+                            <span id="cosRes">-</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-price-accept" onclick="aceptarPrecioCos()">
+                        ✓ Aceptar Cambio
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <a href="/administrador/productos/<%= producto.id %>/upstock" class="btn-secondary-modern">
+                ← Volver
+            </a>
+            <a href="/administrador/productos" class="btn-primary-modern">
+                <span class="btn-icon">✓</span>
+                Ir a Productos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden input para el ID del producto -->
+<input type="hidden" id="idPrec" value="<%= producto._id %>">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="../../../editPrice.js"></script>
+
+<%- include('../partials/footer.ejs'); %>
+
+

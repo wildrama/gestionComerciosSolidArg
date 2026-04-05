@@ -1,0 +1,271 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current"><%= estacionDeCobro.ubicacionDeEstacion %></span>
+        </nav>
+
+        <!-- Header -->
+        <div class="estacion-detail-header">
+            <div class="header-left">
+                <h1 class="estacion-detail-title">🏪 <%= estacionDeCobro.ubicacionDeEstacion %></h1>
+                <p class="estacion-detail-subtitle">Panel de Gestión de Caja</p>
+            </div>
+            <div class="header-right">
+                <div class="current-time">
+                    <p class="time-label">⏱️ Hora Actual</p>
+                    <p class="time-value" id="actualTime">--:--:--</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="estacion-info-cards">
+            <div class="info-card-box">
+                <div class="info-card-icon">💵</div>
+                <div class="info-card-content">
+                    <p class="info-card-label">Dinero de Inicio</p>
+                    <p class="info-card-value">$<%= parseFloat(estacionDeCobro.dineroDeInicio || 0).toFixed(2) %></p>
+                </div>
+            </div>
+
+            <div class="info-card-box">
+                <div class="info-card-icon">💰</div>
+                <div class="info-card-content">
+                    <p class="info-card-label">Dinero en Caja</p>
+                    <p class="info-card-value">$<%= parseFloat(estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %></p>
+                </div>
+            </div>
+
+            <div class="info-card-box">
+                <div class="info-card-icon">💸</div>
+                <div class="info-card-content">
+                    <p class="info-card-label">Ventas Efectivo</p>
+                    <p class="info-card-value"><%= estacionDeCobro.comprasRealizadasEnEfectivo || 0 %></p>
+                </div>
+            </div>
+
+            <div class="info-card-box">
+                <div class="info-card-icon">💳</div>
+                <div class="info-card-content">
+                    <p class="info-card-label">Ventas Tarjeta/Otro</p>
+                    <p class="info-card-value"><%= estacionDeCobro.comprasRealizadasEnOtro || 0 %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Grid -->
+        <div class="estacion-actions-section">
+            <h2 class="section-title">📋 Acciones de Gestión</h2>
+            
+            <div class="estacion-actions-grid">
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ingreso-efectivo-inicio" class="estacion-action-btn">
+                    <span class="action-icon">💵</span>
+                    <span class="action-text">Ingreso de Efectivo Inicial</span>
+                </a>
+
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ingreso-efectivo" class="estacion-action-btn">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Ingresos de Efectivo</span>
+                </a>
+
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/egreso-efectivo" class="estacion-action-btn">
+                    <span class="action-icon">➖</span>
+                    <span class="action-text">Egresos de Efectivo</span>
+                </a>
+
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id%>/historial-usuario" class="estacion-action-btn">
+                    <span class="action-icon">📜</span>
+                    <span class="action-text">Historial de Usuarios</span>
+                </a>
+
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja" class="estacion-action-btn">
+                    <span class="action-icon">🔒</span>
+                    <span class="action-text">Cierre de Caja</span>
+                </a>
+
+                <button type="button" class="estacion-action-btn btn-reset" data-bs-toggle="modal" data-bs-target="#resetModal">
+                    <span class="action-icon">🔄</span>
+                    <span class="action-text">Resetear Día</span>
+                </button>
+
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/eliminar-caja" class="estacion-action-btn btn-danger">
+                    <span class="action-icon">🗑️</span>
+                    <span class="action-text">Eliminar Estación</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sales Table -->
+        <div class="sales-section">
+            <h2 class="section-title">📊 Ventas Realizadas</h2>
+            
+            <% if (estacionDeCobro.ventasRealizadasEnLaEstacion && estacionDeCobro.ventasRealizadasEnLaEstacion.length > 0) { %>
+            <div class="sales-table-wrapper">
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Ingreso</th>
+                            <th style="text-align: center;">Salida</th>
+                            <th style="text-align: center;">Productos</th>
+                            <th style="text-align: center;">Monto Venta</th>
+                            <th style="text-align: center;">Ticket</th>
+                            <th>Tipo de Pago</th>
+                            <th>Fecha</th>
+                            <th style="text-align: center;">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% estacionDeCobro.ventasRealizadasEnLaEstacion.forEach(venta => { %>
+                        <tr>
+                            <td style="text-align: center;">
+                                <% if (venta.dineroIngresado !== null) { %>
+                                    <span class="amount-badge income">$<%= Number(venta.dineroIngresado || 0).toFixed(2) %></span>
+                                <% } else { %>
+                                    <span class="text-muted">-</span>
+                                <% } %>
+                            </td>
+                            <td style="text-align: center;">
+                                <% if (venta.dineroDeSalida !== null) { %>
+                                    <span class="amount-badge output">$<%= Number(venta.dineroDeSalida || 0).toFixed(2) %></span>
+                                <% } else { %>
+                                    <span class="text-muted">-</span>
+                                <% } %>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="quantity-badge"><%= Number(venta.cantidadDeProductosTotales || 0) %></span>
+                                <% if (venta.observacionDatos) { %>
+                                    <div class="small text-warning mt-2"><%= venta.observacionDatos %></div>
+                                <% } %>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="amount-badge income">$<%= Number(venta.totalVenta || 0).toFixed(2) %></span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="ticket-badge <%= venta.ticketClass || 'no' %>">
+                                    <%= venta.ticketEntregado === 'SI' ? '✓' : venta.ticketEntregado === 'NO' ? '✕' : '•' %>
+                                </span>
+                                <div class="small text-muted mt-1"><%= venta.ticketLabel || '-' %></div>
+                            </td>
+                            <td>
+                                <span class="payment-type <%= venta.paymentClass || 'other' %>">
+                                    <%= venta.paymentLabel || venta.tipoDePago || 'Sin definir' %>
+                                </span>
+                            </td>
+                            <td>
+                                <%= venta.fechaTexto || '-' %>
+                                <div class="small text-muted"><%= venta.horaTexto || '' %></div>
+                            </td>
+                            <td style="text-align: center;">
+                                <div class="sale-actions-stack">
+                                    <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>" class="btn btn-sm btn-outline-primary">
+                                        Ver venta
+                                    </a>
+                                    <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ventas/<%= venta._id %>/imprimir" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener">
+                                        Imprimir remito
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="empty-state-sales">
+                <div class="empty-icon">📭</div>
+                <p>No hay ventas registradas en esta estación</p>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Back Button -->
+        <div class="form-actions">
+            <a href="/administrador/estacionesdecobro" class="btn-secondary-modern">
+                ← Volver a Estaciones
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Modal - MEJORADO -->
+<div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-reset-content">
+            <div class="modal-header modal-header-reset">
+                <h5 class="modal-title">
+                    <span class="modal-icon">🔄</span>
+                    Restablecer Día de Caja
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body modal-body-reset">
+                <div class="reset-warning">
+                    <span class="warning-icon-large">⚠️</span>
+                    <div class="warning-content">
+                        <h4>Ten cuidado</h4>
+                        <p>Después de restablecer el día, <strong>todos los valores se volverán a 0</strong>.</p>
+                        <p>Deberás ingresar manualmente el dinero disponible para el nuevo día.</p>
+                    </div>
+                </div>
+
+                <form action="/administrador/estacionesdecobro/<%= estacionDeCobro._id%>/reset" method="POST" class="reset-form">
+                    <div class="form-group-reset">
+                        <label for="dineroDeInicio" class="form-label-reset">
+                            💵 Dinero de Inicio del Nuevo Día (Opcional)
+                        </label>
+                        <div class="input-group-reset">
+                            <span class="input-prefix">$</span>
+                            <input type="number" 
+                                   id="dineroDeInicio" 
+                                   name="dineroDeInicio" 
+                                   class="input-reset" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0">
+                        </div>
+                        <small class="input-help">Si dejas vacío, el día comenzará sin dinero inicial</small>
+                    </div>
+
+                    <div class="reset-info-box">
+                        <span class="info-icon">ℹ️</span>
+                        <p class="info-text">El historial de ventas y cierres anteriores se mantendrá en el sistema</p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-modal-confirm">
+                            <span class="btn-icon">✓</span>
+                            Restablecer Día
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/ux.js?v=20260402-1"></script>
+<script>
+// Actualizar hora en tiempo real
+function updateTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('actualTime').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+setInterval(updateTime, 1000);
+updateTime();
+</script>
+
+<%- include('../partials/footer.ejs'); %>

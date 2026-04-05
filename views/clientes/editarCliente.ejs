@@ -1,0 +1,85 @@
+
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+<div class="container">
+   <a href="/clientes/<%= clienteIndividual._id %>" class="p-3 btn btn-info">Volver atras</a>
+
+   <div class="card px-3">
+
+    Edición de información del cliente
+      <div class="card-tittle">
+         <div class=" align-items-baseline ">
+           <label for="nombreLocalHTML">Local:</label> 
+   
+             <p class="lead">
+                <input type="text" class="form-control" id="nombreLocalHTML" value="<%= clienteIndividual.nombreLocal %>">
+              
+              
+             </p>
+         </div>
+         <p class="text-muted">
+            <label for="dueñoHTML"> Ref::</label> 
+
+           
+            <input type="text" class="form-control" id="dueñoHTML" value="<%= clienteIndividual.dueño  %>">
+
+           
+         </p>
+     </div>
+   
+     <div class="card-body">
+         
+         <label for="direccionHTML">Dirección:</label> 
+
+           
+         <input type="text" class=" mb-3 form-control" id="direccionHTML" value="<%= clienteIndividual.direccion  %>">
+
+   
+         
+         <label for="telefono1">Telefono1:</label> 
+
+           
+         <input type="number" class=" mb-3 form-control" id="telefono1" value="<%= clienteIndividual.telefono1  %>">
+
+    
+         <label for="telefono2">Telefono2:</label> 
+
+           
+         <input type="number" class=" mb-3 form-control" id="telefono2" value="<%= clienteIndividual.telefono2  %>">
+
+         <label for="telefono3">Telefono3:</label> 
+
+           
+         <input type="number" class=" mb-3 form-control" id="telefono3" value="<%= clienteIndividual.telefono3  %>">
+
+         <label for="correoHTML">Correo:</label> 
+
+           
+         <input type="email" class=" mb-3 form-control" id="correoHTML" value="<%= clienteIndividual.correo  %>">
+
+        <div class="">
+
+         <p class="p-2 lead">
+            <textarea name="comentario" id="comentarioHTML" cols="30" rows="10">
+                <%= clienteIndividual.comentario %>
+            </textarea>
+     
+
+         </p>
+        </div>
+        
+                    <button class="btn btn-primary px-4">Confirmar EDICIÓN</button>
+     </div>
+   
+   </div>
+
+
+  
+</div>
+
+
+
+
+<%- include('../partials/footer.ejs'); %>
+

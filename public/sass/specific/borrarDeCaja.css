@@ -1,0 +1,104 @@
+.parrafo {
+	color: #000;
+}
+
+.bloqueador {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ventana {
+	width: 710px;
+	height: 384px;
+	background-color: #ffffff;
+	position: relative;
+}
+
+.salir {
+	position: absolute;
+	right: 30px;
+	top: 10px;
+	margin-bottom: 0;
+	font-size: 27px;
+	font-weight: bold;
+}
+
+.ventana h1 {
+	font-size: 20px;
+	font-weight: bold;
+	position: absolute;
+	top: 65px;
+	left: 82px;
+	color: #000;
+
+}
+
+.ventana input {
+	top: 116px;
+	left: 73px;
+	position: absolute;
+	width: 406px;
+	height: 43px;
+	box-shadow: 4px 2px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 13px;
+	border-style: none;
+}
+
+.ventana .buscar {
+
+position: absolute;
+width: 59px;
+height: 52px;
+left: 504px;
+top: 111px;
+border-style: none;
+background: #EE8E36;
+border-radius: 13px;
+
+}
+
+.ventana .parrafo {
+	position: absolute;
+	top: 172px;
+	left: 81px;
+}
+
+.ventana ul {
+	position: absolute;
+	top: 200px;
+	left: 81px;
+	color: #000;
+}
+
+.btnCancel {
+	position: absolute;
+	font-family: 'Roboto', sans-serif;
+	font-weight: bold;
+	border: solid 1px #000000;
+	border-radius: 22px;
+	width: 186px;
+	height: 36px;
+	z-index: 9999;
+	left: 70px;
+	top: 247px;
+	background-color: #ffffff;
+}
+
+.btnSubmitDel {
+	position: absolute;
+	width: 258px;
+	height: 40px;
+	left: 349px;
+	top: 247px;
+	background: #4D8938;
+	border: 1px solid #4D8938;
+	box-sizing: border-box;
+	border-radius: 23px;
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.x {
+	color: #000;
+}

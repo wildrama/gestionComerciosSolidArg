@@ -1,0 +1,32 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6 ">
+            <a href="/administrador/ofertas" class="btn btn-outline-success px-md-2 my-2">Ir a OFERTAS</a>
+            <div class="ofertaCard">
+                <div class="card px-lg-4">
+                    <div class="card-title">
+                         Producto:   <%= ofertaIndividualParaVer.productoEnOferta.nombre %>
+                    </div>
+                    <h6 class="card-subtitle mb-2 ">Oferta de <%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %> por <%= ofertaIndividualParaVer.precioOferta %>  </h6>
+                    <div class="card-body ">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Precio de la oferta: <%= ofertaIndividualParaVer.precioOferta %></li>
+                            <li class="list-group-item">cantidad de productos para completar la oferta: <%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %></li>
+                            <li class="list-group-item">Vigente hasta: <%= ofertaIndividualParaVer.fechaDeVigencia %></li>
+                            <li class="list-group-item">Aplica en: 
+                                
+                               
+                              </li>
+                          </ul>
+                                           </div>
+                        <form class="d-inline px-2" action="/administrador/ofertas/oferta-individual/<%= ofertaIndividualParaVer._id%>?_method=DELETE" method="post">
+                            <button class="btn btn-warning text-end px-2">Eliminar</button>
+                        </form>
+                    </div>
+         
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer.ejs'); %>

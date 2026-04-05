@@ -1,0 +1,361 @@
+/* ==================== ESTACIONES DE COBRO ==================== */
+
+.estaciones-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.estacion-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+
+    &:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+        transform: translateY(-4px);
+
+        .estacion-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--primary-light));
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+}
+
+.estacion-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.estacion-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.estacion-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &.estado-activo {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    &.estado-inactivo {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--text-secondary);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+
+    &.estado-mantenimiento {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+}
+
+.estacion-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    background: var(--bg-light);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.05);
+    }
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.estacion-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.estacion-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    margin-bottom: 0.75rem;
+}
+
+.estacion-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+
+    > button,
+    > a {
+        flex: 1;
+    }
+}
+
+/* Estaciones List View */
+.estaciones-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.estacion-list-item {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+    transition: all 0.2s;
+
+    &:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.estacion-list-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-md);
+
+    @media (max-width: 768px) {
+        width: 100%;
+        font-size: 1.5rem;
+    }
+}
+
+.estacion-list-info {
+    @media (max-width: 768px) {
+        text-align: center;
+    }
+}
+
+.estacion-list-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        justify-content: space-between;
+
+        > button,
+        > a {
+            flex: 1;
+        }
+    }
+}
+
+/* Estacion Modal / Edit Form */
+.estacion-form-group {
+    margin-bottom: 1.25rem;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.estacion-form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.estacion-form-input,
+.estacion-form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: var(--bg-white);
+    transition: all 0.2s;
+
+    &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    &:disabled {
+        background: var(--bg-light);
+        color: var(--text-tertiary);
+        cursor: not-allowed;
+    }
+}
+
+.estacion-form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Estación Stats Overview */
+.estacion-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.estacion-stat-box {
+    background: var(--bg-light);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--border-light);
+
+    &:hover {
+        border-color: var(--primary-color);
+    }
+}
+
+.estacion-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.estacion-stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Estación Timeline */
+.estacion-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-top: 1.5rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0.375rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+    }
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: -1.875rem;
+        top: 0.375rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        border: 3px solid var(--bg-white);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+}
+
+.timeline-content {
+    background: var(--bg-light);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary-color);
+}
+
+.timeline-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.25rem 0;
+}
+
+.timeline-description {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}

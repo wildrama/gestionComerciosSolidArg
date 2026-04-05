@@ -1,0 +1,161 @@
+/* ==================== BUTTONS ==================== */
+
+.btn-primary-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        text-decoration: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+.btn-secondary-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--bg-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+}
+
+.btn-icon {
+    font-size: 1.25rem;
+}
+
+/* ==================== BUTTON VARIANTS ==================== */
+
+.btn-edit,
+.btn-delete,
+.btn-result-edit,
+.btn-result-stock {
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-block;
+}
+
+.btn-edit,
+.btn-result-edit {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info-color);
+
+    &:hover {
+        background: var(--info-color);
+        color: white;
+        text-decoration: none;
+    }
+}
+
+.btn-delete,
+.btn-result-stock {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+
+    &:hover {
+        background: var(--success-color);
+        color: white;
+        text-decoration: none;
+    }
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+
+    &:hover {
+        background: var(--danger-color);
+        color: white;
+    }
+}
+
+/* ==================== BADGE STYLES ==================== */
+
+.badge-base {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.precio-badge {
+    @extend .badge-base;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.quantity-badge {
+    @extend .badge-base;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+
+    &.cerrado {
+        background: rgba(34, 197, 94, 0.15);
+        color: #15803d;
+    }
+
+    &.abierto {
+        background: rgba(245, 158, 11, 0.15);
+        color: #92400e;
+    }
+}

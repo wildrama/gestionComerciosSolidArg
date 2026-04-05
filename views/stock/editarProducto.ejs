@@ -1,0 +1,397 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/stock" class="breadcrumb-link">Stock</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Editar Producto</span>
+        </nav>
+
+        <!-- Form Header with Product Info -->
+        <div class="form-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div class="form-header-content">
+                <h1 class="form-title">✏️ Editar Producto</h1>
+                <p class="form-subtitle">Actualiza: <strong><%= producto.nombre %></strong></p>
+            </div>
+            <div style="background: #f0f4ff; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
+                <small style="color: #4b5563; display: block;">Código</small>
+                <strong style="color: #1f2937; font-size: 1.125rem;"><%= producto.codigo %></strong>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <form id="editProductForm" class="modern-form" method="POST" action="/administrador/productos/<%= producto._id %>?_method=PUT">
+            <!-- Información Básica -->
+            <div class="form-section">
+                <h3 class="section-title-form">📝 Información Básica</h3>
+                
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="nombre" class="form-label-modern">Nombre del Producto *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📦</span>
+                            <input type="text" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.nombre %>"
+                                   required
+                                   placeholder="Ej: Coca Cola 2.25L">
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="marca" class="form-label-modern">Marca *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🏷️</span>
+                            <input type="text" 
+                                   id="marca" 
+                                   name="marca" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.marca || '' %>"
+                                   required
+                                   placeholder="Ej: Coca Cola">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="codigo" class="form-label-modern">Código de Barras (Read-Only)</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔢</span>
+                            <input type="text" 
+                                   id="codigo" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.codigo %>"
+                                   readonly
+                                   style="background-color: #e5e7eb; cursor: not-allowed;">
+                        </div>
+                        <small class="form-help">✓ Este campo no puede modificarse</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="categoria" class="form-label-modern">Categoría</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📁</span>
+                            <input type="text" 
+                                   id="categoria" 
+                                   name="categoria" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.categoriaInterna || '' %>"
+                                   placeholder="Ej: Bebidas">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock e Información Adicional -->
+            <div class="form-section">
+                <h3 class="section-title-form">📦 Stock e Información</h3>
+                
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="cantidad" class="form-label-modern">Cantidad en Stock *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📊</span>
+                            <input type="number" 
+                                   id="cantidad" 
+                                   name="cantidad" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.cantidad || 0 %>"
+                                   required
+                                   min="0"
+                                   placeholder="0">
+                        </div>
+                        <small class="form-help">Unidades disponibles</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="peso" class="form-label-modern">Peso / Presentación</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">⚖️</span>
+                            <input type="text" 
+                                   id="peso" 
+                                   name="peso" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.peso || '' %>"
+                                   placeholder="Ej: 500g, 1kg, 2L">
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="fechaDeVencimiento" class="form-label-modern">Fecha de Vencimiento</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📅</span>
+                            <input type="date" 
+                                   id="fechaDeVencimiento" 
+                                   name="fechaDeVencimiento" 
+                                   class="form-control-modern with-icon"
+                                   <% if (producto.fechaDeVencimiento) { %>
+                                       value="<%= producto.fechaDeVencimiento.toISOString().split('T')[0] %>"
+                                   <% } %>>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="impuestoAplicado" class="form-label-modern">Impuesto (%)</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">%</span>
+                            <input type="number" 
+                                   id="impuestoAplicado" 
+                                   name="impuestoAplicado" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.impuestoAplicado || 0 %>"
+                                   min="0"
+                                   max="100"
+                                   step="0.01"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Precios -->
+            <div class="form-section">
+                <h3 class="section-title-form">💰 Precios</h3>
+                
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="precioCosto" class="form-label-modern">Precio Costo *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioCosto" 
+                                   name="precioCosto" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= (producto.precioCosto || 0).toFixed(2) %>"
+                                   required
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   onchange="validatePrices()">
+                        </div>
+                        <small class="form-help">Precio de compra</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="precioMinorista" class="form-label-modern">Precio Minorista *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioMinorista" 
+                                   name="precioMinorista" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= (producto.precioMinorista || 0).toFixed(2) %>"
+                                   required
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   onchange="validatePrices()">
+                        </div>
+                        <small class="form-help">Precio individual / Mostrador</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="precioMayorista" class="form-label-modern">Precio Mayorista *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioMayorista" 
+                                   name="precioMayorista" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= (producto.precioMayorista || 0).toFixed(2) %>"
+                                   required
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   onchange="validatePrices()">
+                        </div>
+                        <small class="form-help">Precio por volumen</small>
+                    </div>
+                </div>
+
+                <!-- Price Warning Alert -->
+                <div id="priceWarning" class="alert-warning" style="display: none; margin-top: 1rem;">
+                    <span style="font-size: 1.25rem; margin-right: 0.5rem;">⚠️</span>
+                    <span id="warningText">Verifica que los precios tengan lógica comercial</span>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions-section">
+                <div class="button-group">
+                    <a href="/administrador/stock" class="btn-secondary-modern">
+                        ← Cancelar
+                    </a>
+                    <button type="submit" class="btn-primary-modern">
+                        ✅ Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Debug Info -->
+        <div class="debug-info" style="margin-top: 2rem; padding: 1rem; background-color: #f9fafb; border: 1px dashed #d1d5db; border-radius: 0.5rem;">
+            <small style="color: #6b7280; font-size: 0.75rem;">
+                <strong>Última modificación:</strong> <%= new Date(producto.updatedAt || producto.createdAt).toLocaleString('es-ES') %>
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para validación -->
+<style>
+    .alert-warning {
+        padding: 0.875rem 1rem;
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        border-radius: 0.375rem;
+        color: #92400e;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-actions-section {
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary-modern, .btn-secondary-modern {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary-modern {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary-modern {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary-modern:hover {
+        background-color: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .button-group {
+            flex-direction: column;
+        }
+
+        .btn-primary-modern, .btn-secondary-modern {
+            width: 100%;
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+
+        .form-group-modern {
+            width: 100% !important;
+        }
+    }
+</style>
+
+<!-- Script para validación de precios -->
+<script>
+    function validatePrices() {
+        const costo = parseFloat(document.getElementById('precioCosto').value) || 0;
+        const minorista = parseFloat(document.getElementById('precioMinorista').value) || 0;
+        const mayorista = parseFloat(document.getElementById('precioMayorista').value) || 0;
+        const warning = document.getElementById('priceWarning');
+        const warningText = document.getElementById('warningText');
+
+        let hasWarning = false;
+        let warningMessages = [];
+
+        // Verificar que minorista > costo
+        if (minorista > 0 && minorista < costo) {
+            hasWarning = true;
+            warningMessages.push('Minorista < Costo');
+        }
+
+        // Verificar que mayorista < minorista (si existen ambos)
+        if (mayorista > 0 && minorista > 0 && mayorista > minorista) {
+            hasWarning = true;
+            warningMessages.push('Mayorista > Minorista');
+        }
+
+        if (hasWarning) {
+            warning.style.display = 'flex';
+            warningText.textContent = '⚠️ ' + warningMessages.join(' | ');
+        } else {
+            warning.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        validatePrices();
+
+        document.getElementById('editProductForm').addEventListener('submit', function(e) {
+            const costo = parseFloat(document.getElementById('precioCosto').value) || 0;
+            const minorista = parseFloat(document.getElementById('precioMinorista').value) || 0;
+            const mayorista = parseFloat(document.getElementById('precioMayorista').value) || 0;
+
+            if (minorista > 0 && minorista < costo) {
+                if (!confirm('⚠️ El precio minorista es menor que el costo. ¿Continuar de todas formas?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+
+            if (mayorista > 0 && minorista > 0 && mayorista > minorista) {
+                if (!confirm('⚠️ El precio mayorista es mayor que el minorista. ¿Continuar de todas formas?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    });
+</script>
+
+<%- include('../partials/footer.ejs'); %>
+

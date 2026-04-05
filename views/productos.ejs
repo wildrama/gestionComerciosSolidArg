@@ -1,0 +1,212 @@
+<%- include('./partials/headerAdm.ejs'); %>
+
+<%- include('./partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">📦 Gestión de Productos</h1>
+                <p class="page-subtitle">Administra tu inventario completo</p>
+            </div>
+            <div class="page-actions">
+                <a href="/administrador/productos/nuevo" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Nuevo Producto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-mini-grid">
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">📦</div>
+            <div>
+                <p class="stat-mini-label">Total Productos</p>
+                <h3 class="stat-mini-value"><%= productos.length %></h3>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+            <div>
+                <p class="stat-mini-label">Stock Total</p>
+                <h3 class="stat-mini-value"><%= productos.reduce((sum, p) => sum + p.stock, 0) %></h3>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚠️</div>
+            <div>
+                <p class="stat-mini-label">Stock Bajo</p>
+                <h3 class="stat-mini-value"><%= productos.filter(p => p.stock < 10).length %></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-card">
+        <div class="filters-row">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Buscar productos..." 
+                       class="search-input"
+                       onkeyup="filterProducts()">
+            </div>
+            <div class="filter-group">
+                <select id="categoryFilter" class="filter-select" onchange="filterProducts()">
+                    <option value="">Todas las categorías</option>
+                    <% 
+                    const uniqueCategories = [...new Set(productos.map(p => p.categoria))];
+                    uniqueCategories.forEach(cat => { 
+                    %>
+                        <option value="<%= cat %>"><%= cat %></option>
+                    <% }); %>
+                </select>
+                <select id="stockFilter" class="filter-select" onchange="filterProducts()">
+                    <option value="">Todo el stock</option>
+                    <option value="out">Sin stock</option>
+                    <option value="low">Stock bajo (&lt;10)</option>
+                    <option value="ok">Stock normal</option>
+                    <option value="high">Stock alto (&gt;50)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="productsGrid">
+        <% productos.forEach(producto => { %>
+        <div class="product-card-modern" 
+             data-nombre="<%= producto.nombre.toLowerCase() %>" 
+             data-categoria="<%= producto.categoria.toLowerCase() %>"
+             data-stock="<%= producto.stock %>">
+            
+            <div class="product-image-wrapper">
+                <% if (producto.imagen) { %>
+                    <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" class="product-image-modern">
+                <% } else { %>
+                    <div class="product-no-image">📦</div>
+                <% } %>
+                
+                <% if (producto.stock === 0) { %>
+                    <span class="stock-badge stock-out">Sin stock</span>
+                <% } else if (producto.stock < 10) { %>
+                    <span class="stock-badge stock-low">Stock bajo: <%= producto.stock %></span>
+                <% } else { %>
+                    <span class="stock-badge stock-ok">Stock: <%= producto.stock %></span>
+                <% } %>
+            </div>
+
+            <div class="product-content-modern">
+                <div class="product-category-tag"><%= producto.categoria %></div>
+                
+                <h3 class="product-name-modern"><%= producto.nombre %></h3>
+                
+                <div class="product-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Precio:</span>
+                        <span class="detail-value price">$<%= producto.precio.toFixed(2) %></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Stock disponible:</span>
+                        <span class="detail-value <%= producto.stock === 0 ? 'text-danger' : (producto.stock < 10 ? 'text-warning' : '') %>">
+                            <%= producto.stock %> unidades
+                        </span>
+                    </div>
+                </div>
+
+                <div class="product-actions">
+                    <a href="/administrador/productos/editar/<%= producto._id %>" class="btn-edit">
+                        ✏️ Editar
+                    </a>
+                    <form action="/administrador/productos/eliminar/<%= producto._id %>?_method=DELETE" 
+                          method="POST" 
+                          style="display: inline; flex: 1;"
+                          onsubmit="return confirm('¿Seguro que deseas eliminar <%= producto.nombre %>?\n\nEsta acción no se puede deshacer.')">
+                        <button type="submit" class="btn-delete">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+
+    <% if (productos.length === 0) { %>
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No hay productos registrados</h3>
+        <p>Comienza agregando tu primer producto al inventario</p>
+        <a href="/administrador/productos/nuevo" class="btn-primary-modern">
+            <span class="btn-icon">+</span>
+            Crear Primer Producto
+        </a>
+    </div>
+    <% } %>
+
+    <div id="noResults" class="empty-state" style="display: none;">
+        <div class="empty-icon">🔍</div>
+        <h3>No se encontraron productos</h3>
+        <p>Intenta con otros términos de búsqueda o filtros</p>
+        <button onclick="clearFilters()" class="btn-primary-modern">
+            Limpiar filtros
+        </button>
+    </div>
+</div>
+
+<script>
+function filterProducts() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    const categoryValue = document.getElementById('categoryFilter').value.toLowerCase();
+    const stockValue = document.getElementById('stockFilter').value;
+    const cards = document.querySelectorAll('.product-card-modern');
+    const noResults = document.getElementById('noResults');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        const nombre = card.dataset.nombre;
+        const categoria = card.dataset.categoria;
+        const stock = parseInt(card.dataset.stock);
+        
+        const matchesSearch = nombre.includes(searchValue) || categoria.includes(searchValue);
+        const matchesCategory = categoryValue === '' || categoria === categoryValue;
+        
+        let matchesStock = true;
+        if (stockValue === 'out') {
+            matchesStock = stock === 0;
+        } else if (stockValue === 'low') {
+            matchesStock = stock > 0 && stock < 10;
+        } else if (stockValue === 'ok') {
+            matchesStock = stock >= 10 && stock <= 50;
+        } else if (stockValue === 'high') {
+            matchesStock = stock > 50;
+        }
+        
+        if (matchesSearch && matchesCategory && matchesStock) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    if (visibleCount === 0 && cards.length > 0) {
+        noResults.style.display = 'flex';
+    } else {
+        noResults.style.display = 'none';
+    }
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('stockFilter').value = '';
+    filterProducts();
+}
+</script>
+
+<%- include('./partials/footer.ejs'); %>

@@ -1,0 +1,211 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/productos" class="breadcrumb-link">Productos</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/productos/<%= producto._id %>" class="breadcrumb-link"><%= producto.nombre %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Editar</span>
+        </nav>
+
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">✏️ Actualizar Stock</h1>
+            <p class="form-subtitle">Modifica los datos del producto "<%= producto.nombre %>"</p>
+        </div>
+
+        <!-- Form -->
+        <form action="/productos/<%= producto._id %>?_method=PUT" method="POST" class="modern-form">
+            <div class="form-grid">
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <h3 class="section-title-form">📝 Información Básica</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="nombre" class="form-label-modern">Nombre del Producto *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📦</span>
+                            <input type="text" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.nombre %>"
+                                   placeholder="Nombre del producto"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="marca" class="form-label-modern">Marca *</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🏷️</span>
+                                <input type="text" 
+                                       id="marca" 
+                                       name="marca" 
+                                       class="form-control-modern with-icon" 
+                                       value="<%= producto.marca %>"
+                                       placeholder="Marca del producto"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="cantidad" class="form-label-modern">Cantidad en Stock *</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">📊</span>
+                                <input type="number" 
+                                       id="cantidad" 
+                                       name="cantidad" 
+                                       class="form-control-modern with-icon" 
+                                       value="<%= producto.cantidad %>"
+                                       min="0"
+                                       placeholder="0"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Precios -->
+                <div class="form-section">
+                    <h3 class="section-title-form">💰 Precios</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="valor" class="form-label-modern">Precio *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="valor" 
+                                   name="valor" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.valor %>"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        <small class="form-help">Precio de venta del producto</small>
+                    </div>
+
+                    <% if (producto.precioMinorista) { %>
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="precioMinorista" class="form-label-modern">Precio Minorista</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">$</span>
+                                <input type="number" 
+                                       id="precioMinorista" 
+                                       name="precioMinorista" 
+                                       class="form-control-modern with-icon" 
+                                       value="<%= producto.precioMinorista %>"
+                                       step="0.01"
+                                       min="0"
+                                       placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="precioMayorista" class="form-label-modern">Precio Mayorista</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">$</span>
+                                <input type="number" 
+                                       id="precioMayorista" 
+                                       name="precioMayorista" 
+                                       class="form-control-modern with-icon" 
+                                       value="<%= producto.precioMayorista %>"
+                                       step="0.01"
+                                       min="0"
+                                       placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <% if (producto.precioCosto) { %>
+                    <div class="form-group-modern">
+                        <label for="precioCosto" class="form-label-modern">Precio Costo</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioCosto" 
+                                   name="precioCosto" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.precioCosto %>"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Información Adicional -->
+                <% if (producto.peso || producto.fechaVencimiento || producto.presentacion) { %>
+                <div class="form-section">
+                    <h3 class="section-title-form">📋 Información Adicional</h3>
+                    
+                    <% if (producto.peso) { %>
+                    <div class="form-group-modern">
+                        <label for="peso" class="form-label-modern">Peso</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">⚖️</span>
+                            <input type="text" 
+                                   id="peso" 
+                                   name="peso" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.peso %>"
+                                   placeholder="Peso">
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <% if (producto.fechaVencimiento) { %>
+                    <div class="form-group-modern">
+                        <label for="fechaVencimiento" class="form-label-modern">Fecha de Vencimiento</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📅</span>
+                            <input type="date" 
+                                   id="fechaVencimiento" 
+                                   name="fechaVencimiento" 
+                                   class="form-control-modern with-icon" 
+                                   value="<%= producto.fechaVencimiento ? producto.fechaVencimiento.toISOString().split('T')[0] : '' %>">
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <% if (producto.presentacion) { %>
+                    <div class="form-group-modern">
+                        <label for="presentacion" class="form-label-modern">Presentación</label>
+                        <input type="text" 
+                               id="presentacion" 
+                               name="presentacion" 
+                               class="form-control-modern" 
+                               value="<%= producto.presentacion %>"
+                               placeholder="Ej: Botella, Caja, Sache">
+                    </div>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/administrador/productos" class="btn-secondary-modern">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-primary-modern">
+                    <span class="btn-icon">💾</span>
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

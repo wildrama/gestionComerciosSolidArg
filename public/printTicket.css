@@ -1,0 +1,9 @@
+@media print {
+     body {
+     width: 56mm;
+     height:100%;
+     position:absolute;
+     color: #000;
+     background-color: #fff;
+    }
+ }

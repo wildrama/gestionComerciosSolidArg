@@ -1,0 +1,111 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Estaciones de Cobro</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">🏪 Estaciones de Cobro</h1>
+            <p class="form-subtitle">Gestiona y accede a todas las cajas disponibles en el sistema</p>
+        </div>
+
+        <!-- Info Section -->
+        <div class="estaciones-info-card">
+            <div class="info-icon-lg">📍</div>
+            <p class="info-text">
+                Las estaciones de cobro identifican las cajas distribuidas en el negocio. 
+                Accediendo a cada estación podrás visualizar información en tiempo real.
+            </p>
+        </div>
+
+        <!-- Action Button -->
+        <div class="estaciones-actions">
+            <a href="/administrador/estacionesdecobro/nuevaestacion" class="btn-primary-modern">
+                <span class="btn-icon">+</span>
+                Nueva Estación de Cobro
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="estaciones-stats">
+            <div class="stat-card">
+                <span class="stat-icon">🏪</span>
+                <div class="stat-content">
+                    <p class="stat-label">Total de Estaciones</p>
+                    <h3 class="stat-value"><%= estacionesDeCobro.length %></h3>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">✓</span>
+                <div class="stat-content">
+                    <p class="stat-label">Activas</p>
+                    <h3 class="stat-value"><%= estacionesDeCobro.filter(e => e.isActive === 'SI').length %></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estaciones Grid -->
+        <div class="estaciones-grid">
+            <% if (estacionesDeCobro && estacionesDeCobro.length > 0) { %>
+                <% estacionesDeCobro.forEach((estacion, index) => { %>
+                <div class="estacion-card">
+                    <div class="estacion-card-header">
+                        <div class="estacion-card-number">#<%= index + 1 %></div>
+                        <div class="estacion-status-badge <%= estacion.isActive === 'SI' ? 'active' : 'inactive' %>">
+                            <%= estacion.isActive === 'SI' ? 'Activa' : 'Inactiva' %>
+                        </div>
+                    </div>
+
+                    <div class="estacion-card-content">
+                        <div class="estacion-card-icon">🏪</div>
+                        <h3 class="estacion-card-title"><%= estacion.ubicacionDeEstacion %></h3>
+                        
+                        <% if (estacion.usuarioActual) { %>
+                        <div class="estacion-card-info">
+                            <span class="info-label">👤 Cajero:</span>
+                            <span class="info-value"><%= estacion.usuarioActual %></span>
+                        </div>
+                        <% } else { %>
+                        <div class="estacion-card-info">
+                            <span class="info-label">👤 Cajero:</span>
+                            <span class="info-value no-assignment">Sin asignar</span>
+                        </div>
+                        <% } %>
+
+                        <% if (estacion.numero) { %>
+                        <div class="estacion-card-info">
+                            <span class="info-label">🔢 Número:</span>
+                            <span class="info-value">#<%= estacion.numero %></span>
+                        </div>
+                        <% } %>
+                    </div>
+
+                    <div class="estacion-card-footer">
+                        <a href="/administrador/estacionesdecobro/<%= estacion._id %>" class="btn-estacion-action">
+                            Acceder →
+                        </a>
+                    </div>
+                </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state-estaciones">
+                    <div class="empty-icon">🏪</div>
+                    <h3>No hay estaciones de cobro</h3>
+                    <p>Crea la primera estación de cobro para comenzar</p>
+                    <a href="/administrador/estacionesdecobro/nuevaestacion" class="btn-primary-modern">
+                        <span class="btn-icon">+</span>
+                        Crear Estación
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

@@ -1,0 +1,777 @@
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav class="cierre-breadcrumb">
+        <a href="/administrador" class="breadcrumb-item">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/administrador/cierres-caja" class="breadcrumb-item">
+            <i class="fas fa-cash-register"></i> Cierres de Caja
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Detalle del Cierre</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="cierre-detalle-header">
+        <div class="header-left">
+            <h1 class="detalle-title">
+                <i class="fas fa-cash-register"></i>
+                Detalle del Cierre
+            </h1>
+            <p class="detalle-subtitle">
+                <i class="fas fa-map-marker-alt"></i>
+                <%= cierre.ubicacionDeEstacion %>
+            </p>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <a href="/administrador/cierres-caja/<%= cierre._id %>/imprimir" class="btn-volver" target="_blank">
+                <i class="fas fa-print"></i> Imprimir resumen
+            </a>
+            <a href="/administrador/cierres-caja" class="btn-volver">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Status & Basic Info -->
+    <div class="cierre-status-grid">
+        <div class="status-card">
+            <div class="status-badge <%= cierre.estado === 'CERRADO' ? 'cerrado' : 'abierto' %>">
+                <i class="fas fa-<%= cierre.estado === 'CERRADO' ? 'lock' : 'lock-open' %>"></i>
+                <%= cierre.estado %>
+            </div>
+            <p class="status-label">Estado</p>
+        </div>
+
+        <div class="status-card">
+            <div class="status-value">
+                <%= new Date(cierre.fechaDeCierre).toLocaleDateString('es-AR') %>
+            </div>
+            <p class="status-label">Fecha</p>
+        </div>
+
+        <div class="status-card">
+            <div class="status-value">
+                <%= cierre.nombreDelUsuario %>
+            </div>
+            <p class="status-label">Usuario</p>
+        </div>
+
+        <div class="status-card">
+            <div class="status-value status-periodo">
+                <%= cierre.periodo %>
+            </div>
+            <p class="status-label">Período</p>
+        </div>
+    </div>
+
+    <!-- Dinero Section -->
+    <div class="cierre-dinero-section">
+        <h2 class="section-title">
+            <i class="fas fa-coins"></i> Análisis de Dinero
+        </h2>
+
+        <div class="dinero-cards-grid">
+            <!-- Dinero Inicial -->
+            <div class="dinero-card">
+                <div class="dinero-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="dinero-card-content">
+                    <p class="dinero-card-label">Dinero Inicial</p>
+                    <p class="dinero-card-value">$<%= cierre.dineroDeInicio.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <!-- Dinero Esperado -->
+            <div class="dinero-card">
+                <div class="dinero-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="dinero-card-content">
+                    <p class="dinero-card-label">Dinero Esperado</p>
+                    <p class="dinero-card-value">$<%= cierre.dineroEsperado.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <!-- Dinero Real -->
+            <div class="dinero-card">
+                <div class="dinero-card-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="dinero-card-content">
+                    <p class="dinero-card-label">Dinero Real</p>
+                    <p class="dinero-card-value">$<%= cierre.dineroReal.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <!-- Diferencia -->
+            <div class="dinero-card">
+                <div class="dinero-card-icon <%= cierre.diferencia > 0 ? 'ganancia' : cierre.diferencia < 0 ? 'perdida' : 'igual' %>" 
+                     style="background: linear-gradient(135deg, <%= cierre.diferencia > 0 ? '#f093fb 0%, #f5576c 100%' : '#ff9a56 0%, #ff6a88 100%' %>);">
+                    <i class="fas fa-<%= cierre.diferencia > 0 ? 'arrow-up' : cierre.diferencia < 0 ? 'arrow-down' : 'minus' %>"></i>
+                </div>
+                <div class="dinero-card-content">
+                    <p class="dinero-card-label">Diferencia</p>
+                    <p class="dinero-card-value <%= cierre.diferencia > 0 ? 'positiva' : cierre.diferencia < 0 ? 'negativa' : 'neutra' %>">
+                        <%= cierre.diferencia > 0 ? '+' : '' %>$<%= cierre.diferencia.toFixed(2) %>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventas Section -->
+    <div class="cierre-ventas-section">
+        <h2 class="section-title">
+            <i class="fas fa-receipt"></i> Resumen de Ventas
+        </h2>
+
+        <div class="ventas-cards-grid">
+            <!-- Efectivo -->
+            <div class="ventas-card">
+                <div class="ventas-card-header">
+                    <i class="fas fa-money-bill"></i>
+                    <h3>En Efectivo</h3>
+                </div>
+                <div class="ventas-card-body">
+                    <div class="ventas-stat">
+                        <span class="stat-label">Cantidad:</span>
+                        <span class="stat-value"><%= cierre.ventasEnEfectivo.cantidad %> operaciones</span>
+                    </div>
+                    <div class="ventas-stat">
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value monto">$<%= cierre.ventasEnEfectivo.montoTotal.toFixed(2) %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Otro -->
+            <div class="ventas-card">
+                <div class="ventas-card-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>Otro Medio</h3>
+                </div>
+                <div class="ventas-card-body">
+                    <div class="ventas-stat">
+                        <span class="stat-label">Cantidad:</span>
+                        <span class="stat-value"><%= cierre.ventasEnOtro.cantidad %> operaciones</span>
+                    </div>
+                    <div class="ventas-stat">
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value monto">$<%= cierre.ventasEnOtro.montoTotal.toFixed(2) %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles de Ventas -->
+    <% if (cierre.detallesDeVentas && cierre.detallesDeVentas.length > 0) { %>
+        <div class="cierre-detalles-section">
+            <h2 class="section-title">
+                <i class="fas fa-list-check"></i> Detalle de Operaciones
+            </h2>
+
+            <div class="detalles-table-wrapper">
+                <table class="detalles-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo Pago</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% cierre.detallesDeVentas.forEach(detalle => { %>
+                            <tr>
+                                <td data-label="Fecha">
+                                    <%= new Date(detalle.fecha).toLocaleString('es-AR') %>
+                                </td>
+                                <td data-label="Tipo Pago">
+                                    <span class="badge-tipo-pago <%= detalle.tipoPago === 'EFECTIVO' ? 'efectivo' : 'otro' %>">
+                                        <%= detalle.tipoPago %>
+                                    </span>
+                                </td>
+                                <td data-label="Monto">
+                                    <strong>$<%= detalle.monto.toFixed(2) %></strong>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Notas -->
+    <% if (cierre.notasDelCierre) { %>
+        <div class="cierre-notas-section">
+            <h2 class="section-title">
+                <i class="fas fa-sticky-note"></i> Notas
+            </h2>
+            <div class="notas-card">
+                <p><%= cierre.notasDelCierre %></p>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<style>
+    /* ============================================
+       BREADCRUMB
+       ============================================ */
+    .cierre-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb-item {
+        color: var(--primary-color);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-item:hover {
+        color: #4f46e5;
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--border-color);
+    }
+
+    .breadcrumb-current {
+        color: var(--text-secondary);
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .cierre-detalle-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
+        border-radius: var(--radius-md);
+        color: white;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        flex: 1;
+    }
+
+    .detalle-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .detalle-subtitle {
+        margin: 0;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-volver {
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-volver:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ============================================
+       STATUS GRID
+       ============================================ */
+    .cierre-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .status-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .status-badge.cerrado {
+        background: rgba(34, 197, 94, 0.15);
+        color: #15803d;
+    }
+
+    .status-badge.abierto {
+        background: rgba(245, 158, 11, 0.15);
+        color: #92400e;
+    }
+
+    .status-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .status-value.status-periodo {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .status-label {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* ============================================
+       DINERO SECTION
+       ============================================ */
+    .cierre-dinero-section,
+    .cierre-ventas-section,
+    .cierre-detalles-section,
+    .cierre-notas-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-primary);
+    }
+
+    .dinero-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .dinero-card {
+        background: var(--background-light);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .dinero-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .dinero-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .dinero-card-content {
+        flex: 1;
+    }
+
+    .dinero-card-label {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .dinero-card-value {
+        margin: 0.5rem 0 0 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .dinero-card-value.positiva {
+        color: #10b981;
+    }
+
+    .dinero-card-value.negativa {
+        color: #ef4444;
+    }
+
+    .dinero-card-value.neutra {
+        color: var(--text-secondary);
+    }
+
+    /* ============================================
+       VENTAS SECTION
+       ============================================ */
+    .ventas-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .ventas-card {
+        background: var(--background-light);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .ventas-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .ventas-card-header i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .ventas-card-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-primary);
+    }
+
+    .ventas-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ventas-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .stat-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .stat-value.monto {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    /* ============================================
+       DETALLES TABLE
+       ============================================ */
+    .detalles-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .detalles-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .detalles-table thead th {
+        background: var(--background-light);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .detalles-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s ease;
+    }
+
+    .detalles-table tbody tr:hover {
+        background-color: rgba(99, 102, 241, 0.02);
+    }
+
+    .detalles-table tbody td {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .badge-tipo-pago {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-tipo-pago.efectivo {
+        background: rgba(34, 197, 94, 0.15);
+        color: #15803d;
+    }
+
+    .badge-tipo-pago.otro {
+        background: rgba(59, 130, 246, 0.15);
+        color: #1e40af;
+    }
+
+    /* ============================================
+       NOTAS
+       ============================================ */
+    .notas-card {
+        background: var(--background-light);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .notas-card p {
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+        .cierre-detalle-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .detalle-title {
+            font-size: 1.5rem;
+        }
+
+        .dinero-cards-grid,
+        .ventas-cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .detalles-table thead {
+            display: none;
+        }
+
+        .detalles-table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .detalles-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detalles-table td:last-child {
+            border-bottom: none;
+        }
+
+        .detalles-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 100px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cierre-dinero-section,
+        .cierre-ventas-section,
+        .cierre-detalles-section,
+        .cierre-notas-section {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            gap: 0.5rem;
+        }
+
+        .dinero-card {
+            padding: 1rem;
+            gap: 0.75rem;
+        }
+
+        .dinero-card-value {
+            font-size: 1.25rem;
+        }
+
+        .ventas-card {
+            padding: 1rem;
+        }
+
+        .detalle-title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+            </div>
+
+            <!-- Dinero de Inicio -->
+            <div class="cierre-detail-box">
+                <div class="detail-header">
+                    <span class="detail-icon">🔄</span>
+                    <h3 class="detail-title">Dinero Inicial</h3>
+                </div>
+                <div class="detail-body">
+                    <p class="detail-label">Ingresado al inicio</p>
+                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroDeInicio.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <!-- Ventas en Efectivo -->
+            <div class="cierre-detail-box">
+                <div class="detail-header">
+                    <span class="detail-icon">💸</span>
+                    <h3 class="detail-title">Ventas en Efectivo</h3>
+                </div>
+                <div class="detail-body">
+                    <p class="detail-label">Cantidad de ventas</p>
+                    <p class="detail-amount"><%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnEfectivo %></p>
+                    <p class="detail-label">Monto total</p>
+                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnEfectivo.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <!-- Ventas en Tarjeta/Transferencia -->
+            <div class="cierre-detail-box">
+                <div class="detail-header">
+                    <span class="detail-icon">💳</span>
+                    <h3 class="detail-title">Ventas Otros Medios</h3>
+                </div>
+                <div class="detail-body">
+                    <p class="detail-label">Cantidad de ventas</p>
+                    <p class="detail-amount"><%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnOtro %></p>
+                    <p class="detail-label">Monto total</p>
+                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnOtro.toFixed(2) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="cierre-summary-card">
+            <h3 class="summary-title">📊 Resumen del Cierre</h3>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-label">Total de Transacciones:</span>
+                    <span class="summary-value">
+                        <%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnEfectivo + cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnOtro %>
+                    </span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Total Recaudado:</span>
+                    <span class="summary-value total">
+                        $<%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnEfectivo) + parseFloat(cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnOtro)).toFixed(2) %>
+                    </span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Diferencia:</span>
+                    <span class="summary-value <%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroEnCaja) - parseFloat(cierreDeCajaRealizadoIndividual.dineroDeInicio)) >= 0 ? 'positive' : 'negative' %>">
+                        $<%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroEnCaja) - parseFloat(cierreDeCajaRealizadoIndividual.dineroDeInicio)).toFixed(2) %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comentarios -->
+        <% if (cierreDeCajaRealizadoIndividual.comentarioDeCierre) { %>
+        <div class="cierre-comments-card">
+            <h3 class="comments-title">💬 Comentarios del Cierre</h3>
+            <div class="comments-body">
+                <p class="comments-text"><%= cierreDeCajaRealizadoIndividual.comentarioDeCierre %></p>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <a href="/administrador/cierres-caja" class="btn-secondary-modern">
+                ← Volver a Cierres
+            </a>
+            <a href="/administrador" class="btn-primary-modern">
+                <span class="btn-icon">🏠</span>
+                Ir al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="/ux.js?v=20260402-1"></script>
+
+<%- include('../partials/footer.ejs'); %>

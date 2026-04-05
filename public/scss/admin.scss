@@ -1,0 +1,64 @@
+/* ==================== ADMIN.SCSS - MASTER FILE ==================== */
+/* 
+ * This is the main SCSS file that imports all modular partials.
+ * The structure is organized by functionality for easy maintenance.
+ * 
+ * Compilation: sass admin.scss ../styles/admin-compiled.css
+ * Watch mode: sass --watch . ../styles
+ */
+
+/* ===== Foundation & Utilities ===== */
+@import 'variables';      // CSS custom properties and design tokens
+@import 'global';         // Global resets and animations
+@import 'utilities';      // Utility classes and helpers
+
+/* ===== Layout & Structure ===== */
+@import 'layout';         // Layout components and page structure
+@import 'navbar';         // Navbar and navigation styles
+
+/* ===== Form Components ===== */
+@import 'forms';          // Form controls, inputs, and form sections
+@import 'search';         // Search bars and advanced filters
+
+/* ===== UI Components ===== */
+@import 'buttons';        // Button styles and badge components
+@import 'tables';         // Table styling and responsive tables
+@import 'cards';          // Card components and containers
+
+/* ===== Feature Modules ===== */
+@import 'estaciones';     // Estaciones de Cobro module styles
+@import 'ofertas';        // Ofertas/Promotions module styles
+@import 'cierres';        // Cierre de Cajas module styles
+
+/* ===== NOTE ===== */
+/* 
+ * Total Partials: 12
+ * Total Lines: ~3,200+ lines of organized SCSS
+ * 
+ * Advantages:
+ * - Modular: Each file handles a specific concern
+ * - Maintainable: Easy to find and update specific features
+ * - Scalable: New features can be added as new partials
+ * - DRY: Variables and mixins prevent code repetition
+ * - Responsive: Breakpoints organized at source
+ * - Performance: Can be optimized and minified on compile
+ * 
+ * File Structure:
+ * /public/scss/
+ *   ├── admin.scss (THIS FILE - master import)
+ *   ├── _variables.scss (29 lines)
+ *   ├── _global.scss (28 lines)
+ *   ├── _utilities.scss (410 lines)
+ *   ├── _layout.scss (77 lines)
+ *   ├── _navbar.scss (150 lines)
+ *   ├── _forms.scss (195 lines)
+ *   ├── _search.scss (220 lines)
+ *   ├── _buttons.scss (103 lines)
+ *   ├── _tables.scss (127 lines)
+ *   ├── _cards.scss (186 lines)
+ *   ├── _estaciones.scss (315 lines)
+ *   ├── _ofertas.scss (360 lines)
+ *   ├── _cierres.scss (520 lines)
+ *   └── [compiled output]
+ *       └── ../styles/admin-compiled.css
+ */

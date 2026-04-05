@@ -1,0 +1,30 @@
+.uFlex {
+	display: flex;
+	margin-bottom: 1rem;
+	column-gap: 1rem;
+	border-left: solid 2px #008000;
+	padding-left: 5px;
+}
+
+.uFlex label {
+	font-size: 10px;
+	
+}
+
+.uFlex p {
+	font-size: 10px;
+	width: 50px;
+	margin-bottom: 0;
+	color: grey;
+
+}
+
+.uFlex input {
+	height: 35px;
+	width: 100%;
+	border: 1px solid #bbbbbb;
+}
+
+.uFlex select {
+	width: 100%;
+}

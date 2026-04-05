@@ -1,0 +1,19 @@
+/*
+  Entry point de estilos unificados (NO CAJA).
+  Mantiene compatibilidad con estilos existentes mientras ordenamos por modulos.
+*/
+
+/* Base historica general */
+@import url('/sass/style.css');
+
+/* Base administrativa nueva */
+@import url('/styles/admin.css');
+
+/* Formularios/login compartidos (repartidor/admin/user forms) */
+@import url('/styles/login.css');
+
+/*
+  Importante:
+  - No incluir aqui estilos de CAJA (/sass/specific/cajacobro.css, etc).
+  - CAJA queda fuera de esta unificacion por decision funcional.
+*/

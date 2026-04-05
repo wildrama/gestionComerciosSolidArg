@@ -1,0 +1,103 @@
+<%- include('./partials/headerCaja.ejs'); %>
+
+
+    <div class="container">
+
+		<div class="filaA row mt-4">
+			<div class="col-md-8 columI">
+
+				<div class="row">
+				<form id="cajaCobroForm" class="headerDiv d-flex justify-content-around">
+
+					<input class="inputBuscar" id="textBuscar" type="text" placeholder="Buscar producto por código">
+					<input id="sbBuscar" type="submit" class="btnBuscar" value="Buscar">	</form>	
+
+
+					<button id="lVerd" class="btnAddMan">Agregar producto manualmente</button>
+
+				
+							<div class="filaB row">
+
+
+					<table class="table table-dark table-hover mt-4 mb-4">
+						<tr>
+							<th class="thNombre">Nombre</th>
+							<th>Precio unitario</th>
+							<th>Marcas</th>
+							<th>Cantidad</th>
+							<th><b>Subtotal</b></th>
+						</tr>
+
+						<tbody id="tablaCajaCobro">
+
+
+						</tbody>
+
+					
+	
+					</table>
+					<div class="boxPrecioContainer">
+					<div class="boxPrecio"><p id="total">Total: $</p></div>
+					</div>
+				</div> 
+				</div>
+					<div class="btnContainer mt-4">
+						<div id="imprimirTicketC" class="btnFunc">Imprimir Ticket-C</div>
+						<div id="cancelarCompra" class="btnFunc">Cancelar Compra</div>
+						<div id="cambiarPrecio" class="btnFunc">Cambiar Precio</div>
+						<div id="imprimirTicketA" class="btnFunc">Imprimir Ticket-A</div>
+						<div id="eliminarProductos" class="btnFunc">Eliminar Producto</div>
+						<div id="agregarProducto" class="btnFunc">Agregar prod. a la lista</div>
+					</div>				
+			</div>
+			<div class="col-md-4 columD">
+			<div class="row filaDSup">
+					<h4>Ofertas minoristas</h4>
+					<div class="row azul">
+						<div class="col-md-4 centrado"><div class="boxOferta">x4</div></div>
+						<div class="col-md-4 centrado"><div class="boxOferta">x5</div></div>
+						<div class="col-md-4 centrado"><div class="boxOferta">x6</div></div>
+						<div class="col-md-4 centrado"><div class="boxOferta">x1</div></div>
+						<div class="col-md-4 centrado"><div class="boxOferta">x2</div></div>
+						<div class="col-md-4 centrado"><div class="boxOferta">x3</div></div>
+
+					</div>
+				</div>
+			<div class="row filaMedio pt-4">
+				<div class="emptyBtn"></div>
+				<div class="emptyBtn"></div>
+				<div class="emptyBtn"></div></div>
+			<div class="row filaDInf">
+
+				<p class="subt">Dinero ingresado</p>
+				<div class="boxDinero">
+					<label>$</label><input id="dineroIngresado" type="number">
+				</div>
+
+				<p class="subt">Vuelto</p>
+
+				<div class="boxDinero">
+					<p id="vuelto">0.00</p>
+				</div>
+			</div>
+				<div class="row">
+					
+					<button id="finalizarCompra" class="finalizarCompra">Finalizar compra</button>
+
+				</div>
+			</div>
+
+				</div>
+
+
+	</div>     
+    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="../edit.js"></script>
+    <script type="module"src="../cajaCobro.js"></script>
+    <script src="../eliminarDeCaja.js"></script>
+    <script src="../agregarProducto.js"></script>
+
+
+
+    <%- include('./partials/footer.ejs'); %>

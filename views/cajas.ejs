@@ -1,0 +1,134 @@
+<%- include('./partials/headerAdm.ejs'); %>
+
+<%- include('./partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">💰 Gestión de Cajas</h1>
+                <p class="page-subtitle">Administra las cajas y puntos de venta</p>
+            </div>
+            <div class="page-actions">
+                <a href="/administrador/cajas/nueva" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Nueva Caja
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Mini -->
+    <div class="stats-mini-grid">
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">💰</div>
+            <div>
+                <p class="stat-mini-label">Total Cajas</p>
+                <h3 class="stat-mini-value"><%= cajas ? cajas.length : 0 %></h3>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+            <div>
+                <p class="stat-mini-label">Activas</p>
+                <h3 class="stat-mini-value"><%= cajas ? cajas.filter(c => c.activa).length : 0 %></h3>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">⏸️</div>
+            <div>
+                <p class="stat-mini-label">Inactivas</p>
+                <h3 class="stat-mini-value"><%= cajas ? cajas.filter(c => !c.activa).length : 0 %></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cajas Grid -->
+    <div class="cajas-grid">
+        <% if (cajas && cajas.length > 0) { %>
+            <% cajas.forEach(caja => { %>
+            <div class="caja-card-modern">
+                <div class="caja-card-header">
+                    <div class="caja-icon-wrapper">
+                        <span class="caja-icon">💰</span>
+                    </div>
+                    <div class="caja-status-badge <%= caja.activa ? 'status-active' : 'status-inactive' %>">
+                        <%= caja.activa ? '● Activa' : '○ Inactiva' %>
+                    </div>
+                </div>
+
+                <div class="caja-card-body">
+                    <h3 class="caja-name"><%= caja.nombre %></h3>
+                    
+                    <div class="caja-details">
+                        <% if (caja.numero) { %>
+                        <div class="caja-detail-row">
+                            <span class="detail-icon">🔢</span>
+                            <span class="detail-label">Número:</span>
+                            <span class="detail-value"><%= caja.numero %></span>
+                        </div>
+                        <% } %>
+                        
+                        <% if (caja.responsable) { %>
+                        <div class="caja-detail-row">
+                            <span class="detail-icon">👤</span>
+                            <span class="detail-label">Responsable:</span>
+                            <span class="detail-value"><%= caja.responsable %></span>
+                        </div>
+                        <% } %>
+                        
+                        <% if (caja.ubicacion) { %>
+                        <div class="caja-detail-row">
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-label">Ubicación:</span>
+                            <span class="detail-value"><%= caja.ubicacion %></span>
+                        </div>
+                        <% } %>
+
+                        <% if (caja.montoInicial !== undefined) { %>
+                        <div class="caja-detail-row highlight">
+                            <span class="detail-icon">💵</span>
+                            <span class="detail-label">Monto inicial:</span>
+                            <span class="detail-value price">$<%= caja.montoInicial.toFixed(2) %></span>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="caja-card-footer">
+                    <a href="/administrador/cajas/editar/<%= caja._id %>" class="btn-edit-full">
+                        ✏️ Editar
+                    </a>
+                    <% if (!caja.activa) { %>
+                    <form action="/administrador/cajas/eliminar/<%= caja._id %>?_method=DELETE" 
+                          method="POST" 
+                          style="flex: 1;"
+                          onsubmit="return confirm('¿Eliminar caja <%= caja.nombre %>?')">
+                        <button type="submit" class="btn-delete-full">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                    <% } else { %>
+                    <a href="/caja/<%= caja._id %>" class="btn-access">
+                        🚪 Acceder
+                    </a>
+                    <% } %>
+                </div>
+            </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state-full">
+                <div class="empty-icon">💰</div>
+                <h3>No hay cajas registradas</h3>
+                <p>Crea la primera caja para comenzar a operar</p>
+                <a href="/administrador/cajas/nueva" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Crear Primera Caja
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('./partials/footer.ejs'); %>

@@ -1,0 +1,110 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="container-fluid mt-5">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav mb-4">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/stock" class="breadcrumb-link">Stock</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Producto</span>
+        </nav>
+
+        <!-- Producto Card -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><%= producto.nombre %></h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Producto Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p><strong>Código:</strong> <%= producto.codigo %></p>
+                                <p><strong>Marca:</strong> <%= producto.marca || 'N/A' %></p>
+                                <p><strong>Categoría:</strong> <%= producto.categoria || 'N/A' %></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Stock Actual:</strong> <span class="badge bg-success"><%= producto.cantidad || 0 %> unidades</span></p>
+                                <p><strong>Precio:</strong> <span class="badge bg-info">$<%= (producto.precioMinorista || 0).toFixed(2) %></span></p>
+                                <p><strong>Estado:</strong> <span class="badge <%= producto.cantidad > 0 ? 'bg-success' : 'bg-danger' %>">
+                                    <%= producto.cantidad > 0 ? 'En Stock' : 'Sin Stock' %>
+                                </span></p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Acciones -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="/administrador/stock/actualizar?id=<%= producto._id %>" class="btn btn-warning w-100 mb-2">
+                                    ✎ Actualizar Stock
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/administrador/productos/<%= producto._id %>/edit" class="btn btn-info w-100 mb-2">
+                                    ✎ Editar Producto
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Back Button -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <a href="/administrador/stock" class="btn btn-secondary w-100">
+                                    ← Volver al Stock
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-dashboard {
+    padding: 2rem;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding: 1.5rem;
+}
+
+.breadcrumb-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-link {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: #666;
+    margin: 0 0.5rem;
+}
+
+.breadcrumb-current {
+    color: #666;
+    font-weight: 500;
+}
+</style>

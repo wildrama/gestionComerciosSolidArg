@@ -1,0 +1,18 @@
+{
+  "name": "isidorito",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de punto de venta",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "docker:clean": "docker-compose down -v",
+    "docker:shell": "docker exec -it isidorito-app sh"
+  },
+  "...existing dependencies...": ""
+}

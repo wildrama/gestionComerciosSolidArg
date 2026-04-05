@@ -1,0 +1,114 @@
+<%- include('./partials/headerAdm.ejs'); %>
+
+<%- include('./partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">👥 Gestión de Usuarios</h1>
+                <p class="page-subtitle">Administra los usuarios y permisos del sistema</p>
+            </div>
+            <div class="page-actions">
+                <a href="/administrador/usuarios/nuevo" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Nuevo Usuario
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Mini -->
+    <div class="stats-mini-grid">
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">👥</div>
+            <div>
+                <p class="stat-mini-label">Total Usuarios</p>
+                <h3 class="stat-mini-value"><%= usuarios ? usuarios.length : 0 %></h3>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+            <div>
+                <p class="stat-mini-label">Activos</p>
+                <h3 class="stat-mini-value"><%= usuarios ? usuarios.filter(u => u.activo !== false).length : 0 %></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Grid -->
+    <div class="users-grid-modern">
+        <% if (usuarios && usuarios.length > 0) { %>
+            <% usuarios.forEach(usuario => { %>
+            <div class="user-card-modern">
+                <div class="user-card-header">
+                    <div class="user-avatar-modern">
+                        <span class="avatar-text"><%= usuario.username.charAt(0).toUpperCase() %></span>
+                    </div>
+                    <div class="user-status-badge <%= usuario.activo !== false ? 'status-active' : 'status-inactive' %>">
+                        <%= usuario.activo !== false ? 'Activo' : 'Inactivo' %>
+                    </div>
+                </div>
+                
+                <div class="user-card-body">
+                    <h3 class="user-name-modern"><%= usuario.username %></h3>
+                    <div class="user-details-grid">
+                        <div class="user-detail-item">
+                            <span class="detail-icon">🏷️</span>
+                            <div>
+                                <p class="detail-label">Rol</p>
+                                <p class="detail-value"><%= usuario.rol || 'Usuario' %></p>
+                            </div>
+                        </div>
+                        <% if (usuario.email) { %>
+                        <div class="user-detail-item">
+                            <span class="detail-icon">📧</span>
+                            <div>
+                                <p class="detail-label">Email</p>
+                                <p class="detail-value"><%= usuario.email %></p>
+                            </div>
+                        </div>
+                        <% } %>
+                        <% if (usuario.createdAt) { %>
+                        <div class="user-detail-item">
+                            <span class="detail-icon">📅</span>
+                            <div>
+                                <p class="detail-label">Creado</p>
+                                <p class="detail-value"><%= new Date(usuario.createdAt).toLocaleDateString('es-ES') %></p>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="user-card-footer">
+                    <a href="/administrador/usuarios/editar/<%= usuario._id %>" class="btn-edit-full">
+                        ✏️ Editar
+                    </a>
+                    <form action="/administrador/usuarios/eliminar/<%= usuario._id %>?_method=DELETE" 
+                          method="POST" 
+                          style="flex: 1;"
+                          onsubmit="return confirm('¿Estás seguro de eliminar al usuario <%= usuario.username %>?\n\nEsta acción no se puede deshacer.')">
+                        <button type="submit" class="btn-delete-full">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state-full">
+                <div class="empty-icon">👥</div>
+                <h3>No hay usuarios registrados</h3>
+                <p>Crea el primer usuario del sistema</p>
+                <a href="/administrador/usuarios/nuevo" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Crear Primer Usuario
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('./partials/footer.ejs'); %>

@@ -1,0 +1,27 @@
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+<div class="container">
+
+  <% if ( usuario == 'REPARTIDOR') { %>
+    <a href="/pedidos/pedidos-repartidor" class="p-3 btn btn-info">Atras </a>
+   
+    
+  <% } %>
+
+
+  <% if (usuario == 'ADMINISTRADOR') { %>
+    <a href="/administrador/" class="p-3 btn btn-info">Menu Administrador</a>
+
+  <% } %>
+    <p class="h2 p-2">
+        Clientes
+    </p>
+    <div class="row ">
+        <div class="col-12 mb-3"> <a class="btn btn-outline-primary" href="/clientes/agregar-cliente"> Agregar Cliente NUEVO</a></div>
+        <div class="col-12 mb-3"> <a class="btn btn-outline-secondary" href="/clientes/ver-clientes">Ver clientes (TODOS)</a> </div>
+    </div>
+
+    
+</div>
+<%- include('../partials/footer.ejs'); %>

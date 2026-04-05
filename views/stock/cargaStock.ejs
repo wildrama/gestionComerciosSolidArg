@@ -1,0 +1,270 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/productos" class="breadcrumb-link">Productos</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Cargar Stock</span>
+        </nav>
+
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">➕ Agregar Producto al Stock</h1>
+            <p class="form-subtitle">Completa todos los campos requeridos para registrar el producto</p>
+        </div>
+
+        <!-- Form -->
+        <form id="formStock" action="/administrador/productos" method="POST" class="modern-form">
+            <div class="form-grid">
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <h3 class="section-title-form">📝 Información Básica</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="codigo" class="form-label-modern">
+                            Código de Barra *
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔢</span>
+                            <input type="text" 
+                                   id="codigo" 
+                                   name="codigo" 
+                                   class="form-control-modern with-icon codigoProducto" 
+                                   placeholder="Ingresa el código de barra"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                   tabindex="1"
+                                   required>
+                        </div>
+                        <div class="form-actions-inline">
+                            <small class="form-help">Solo números</small>
+                            <button type="button" id="switchCodigo" class="btn-generate-code" onclick="generarCodigo()">
+                                🔄 Generar código
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="nombre" class="form-label-modern">Nombre del Producto *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📦</span>
+                            <input type="text" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="Ej: Coca Cola 2.25L"
+                                   tabindex="2"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="marca" class="form-label-modern">Marca *</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🏷️</span>
+                                <input type="text" 
+                                       id="marca" 
+                                       name="marca" 
+                                       class="form-control-modern with-icon" 
+                                       placeholder="Ej: Coca Cola"
+                                       tabindex="4"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="cantidad" class="form-label-modern">Stock Inicial *</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">📊</span>
+                                <input type="number" 
+                                       id="cantidad" 
+                                       name="cantidad" 
+                                       class="form-control-modern with-icon" 
+                                       placeholder="0"
+                                       min="0"
+                                       tabindex="3"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="categoriaInterna" class="form-label-modern">Categoría de Gondola *</label>
+                        <select id="categoriaInterna" 
+                                name="categoriaInterna" 
+                                class="form-control-modern" 
+                                tabindex="10"
+                                required>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="varios">VARIOS</option>
+                            <option value="aceite/vinagre">Aceite/Vinagre/Embotellados</option>
+                            <option value="arroz">Arroz</option>
+                            <option value="articulos del hogar">Artículos de hogar</option>
+                            <option value="articulos de limpieza">Artículos de limpieza</option>
+                            <option value="azucar">Azúcar</option>
+                            <option value="bebidas con alcohol">Bebidas con Alcohol</option>
+                            <option value="bebidas sin alcohol">Bebidas sin Alcohol</option>
+                            <option value="enlatados">Enlatados</option>
+                            <option value="fideos">Fideos</option>
+                            <option value="fiambreria">Fiambrería</option>
+                            <option value="pañales">Pañales</option>
+                            <option value="galletitas">Galletitas</option>
+                            <option value="golosinas">Golosinas</option>
+                            <option value="higene corporal">Higiene corporal</option>
+                            <option value="higene femenina">Higiene femenina</option>
+                            <option value="panaderia">Panadería</option>
+                            <option value="no perecederos">No perecederos</option>
+                            <option value="te cafe">Té/Café</option>
+                            <option value="sal">Sal</option>
+                            <option value="verduleria">Verdulería</option>
+                            <option value="yerba">Yerba</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Precios -->
+                <div class="form-section">
+                    <h3 class="section-title-form">💰 Precios</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="precioMinorista" class="form-label-modern">Precio Minorista</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">$</span>
+                                <input type="number" 
+                                       id="precioMinorista" 
+                                       name="precioMinorista" 
+                                       class="form-control-modern with-icon" 
+                                       placeholder="0.00"
+                                       step="0.01"
+                                       min="0"
+                                       tabindex="5">
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="precioMayorista" class="form-label-modern">Precio Mayorista</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">$</span>
+                                <input type="number" 
+                                       id="precioMayorista" 
+                                       name="precioMayorista" 
+                                       class="form-control-modern with-icon" 
+                                       placeholder="0.00"
+                                       step="0.01"
+                                       min="0"
+                                       tabindex="6">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="precioCosto" class="form-label-modern">Precio Costo</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioCosto" 
+                                   name="precioCosto" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   tabindex="7">
+                        </div>
+                        <small class="form-help">Precio al que compras el producto</small>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="form-section">
+                    <h3 class="section-title-form">📋 Información Adicional</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="peso" class="form-label-modern">Peso (KG o Gramos)</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">⚖️</span>
+                                <input type="number" 
+                                       id="peso" 
+                                       name="peso" 
+                                       class="form-control-modern with-icon" 
+                                       placeholder="0"
+                                       step="0.01"
+                                       min="0"
+                                       tabindex="8">
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="fechaVenc" class="form-label-modern">Fecha de Vencimiento</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">📅</span>
+                                <input type="date" 
+                                       id="fechaVenc" 
+                                       name="fechaDeVencimiento" 
+                                       class="form-control-modern with-icon" 
+                                       tabindex="9">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="presentacion" class="form-label-modern">Presentación</label>
+                            <input type="text" 
+                                   id="presentacion" 
+                                   name="presentacion" 
+                                   class="form-control-modern" 
+                                   placeholder="Ej: Botella, Caja, Sache"
+                                   tabindex="11">
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="impuestoAplicado" class="form-label-modern">Impuesto Aplicado</label>
+                            <select id="impuestoAplicado" 
+                                    name="impuestoAplicado" 
+                                    class="form-control-modern" 
+                                    tabindex="12">
+                                <option value="0">0%</option>
+                                <option value="8">8%</option>
+                                <option value="21">21%</option>
+                                <option value="35">35%</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/administrador/productos" class="btn-secondary-modern">
+                    Cancelar
+                </a>
+                <button type="submit" id="btnCargaStock" class="btn-primary-modern">
+                    <span class="btn-icon">💾</span>
+                    Cargar Producto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="../../cargaStock.js"></script>    
+<script src="../../jsBarcode.min.js"></script>    
+<script src="../../ktCode.js"></script>
+
+<script>
+// Función para generar código de barra aleatorio
+function generarCodigo() {
+    const codigo = Math.floor(Math.random() * 9000000000000) + 1000000000000;
+    document.getElementById('codigo').value = codigo;
+}
+</script>
+
+<%- include('../partials/footer.ejs'); %>
+

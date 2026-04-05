@@ -1,0 +1,169 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/stock" class="breadcrumb-link">Stock</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current"><%= producto.nombre %></span>
+        </nav>
+
+        <!-- Product Detail Card -->
+        <div class="product-detail-container">
+            <div class="product-detail-header">
+                <div class="product-detail-icon">📦</div>
+                <div class="product-detail-info">
+                    <h1 class="product-detail-name"><%= producto.nombre %></h1>
+                    <p class="product-detail-brand"><%= producto.marca || 'Sin marca' %></p>
+                    <p class="product-detail-category">
+                        <span style="color: #6b7280;">📁</span> 
+                        <%= producto.categoriaInterna || 'Sin categoría' %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Barcode -->
+            <div class="product-barcode-section">
+                <div style="text-align: center;">
+                    <svg id="codigoBarra"></svg>
+                    <p class="barcode-label">Código: <%= producto.codigo %></p>
+                </div>
+            </div>
+
+            <div class="product-detail-body">
+                <h3 class="section-title-form">📋 Información del Producto</h3>
+                
+                <div class="detail-grid-large">
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">📊</span>
+                        <div>
+                            <p class="detail-box-label">Stock Disponible</p>
+                            <p class="detail-box-value stock-value">
+                                <%= producto.cantidad || 0 %> unidades
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">⚖️</span>
+                        <div>
+                            <p class="detail-box-label">Peso</p>
+                            <p class="detail-box-value"><%= producto.peso || 'N/A' %></p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">📅</span>
+                        <div>
+                            <p class="detail-box-label">Fecha de Vencimiento</p>
+                            <p class="detail-box-value">
+                                <% if (producto.fechaVencimiento) { %>
+                                    <%= new Date(producto.fechaVencimiento).toLocaleDateString('es-ES') %>
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">📦</span>
+                        <div>
+                            <p class="detail-box-label">Presentación</p>
+                            <p class="detail-box-value"><%= producto.presentacion || 'N/A' %></p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title-form" style="margin-top: 2rem;">💰 Información de Precios</h3>
+                
+                <div class="detail-grid-large">
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">🛒</span>
+                        <div>
+                            <p class="detail-box-label">Precio Minorista</p>
+                            <p class="detail-box-value price">
+                                $<%= producto.precioMinorista ? parseFloat(producto.precioMinorista).toFixed(2) : '0.00' %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">🏪</span>
+                        <div>
+                            <p class="detail-box-label">Precio Mayorista</p>
+                            <p class="detail-box-value price">
+                                $<%= producto.precioMayorista ? parseFloat(producto.precioMayorista).toFixed(2) : '0.00' %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">💸</span>
+                        <div>
+                            <p class="detail-box-label">Precio Costo</p>
+                            <p class="detail-box-value price">
+                                $<%= producto.precioCosto ? parseFloat(producto.precioCosto).toFixed(2) : '0.00' %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="detail-box-large">
+                        <span class="detail-box-icon">📊</span>
+                        <div>
+                            <p class="detail-box-label">Impuesto Aplicado</p>
+                            <p class="detail-box-value"><%= producto.impuestoAplicado || '0' %>%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="product-detail-actions">
+                <div class="actions-group">
+                    <a href="/administrador/buscar" class="btn-secondary-modern">
+                        ← Buscar Productos
+                    </a>
+                </div>
+                <div class="actions-group">
+                    <a href="/administrador/productos/<%= producto._id %>/edit" class="btn-edit-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        ✏️ Editar Producto
+                    </a>
+                    <a href="/administrador/productos/<%= producto._id %>/upstockprecio" class="btn-edit-full" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        💰 Editar Precios
+                    </a>
+                    <form action="/administrador/productos/<%= producto._id %>?_method=DELETE" 
+                          method="POST" 
+                          style="display: inline;"
+                          onsubmit="return confirm('¿Estás seguro de eliminar este producto?\\n\\nEsta acción eliminará permanentemente: <%= producto.nombre %>')">
+                        <button type="submit" class="btn-delete-full">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+<script>
+    if (document.getElementById('codigoBarra')) {
+        JsBarcode('#codigoBarra', '<%= producto.codigo %>', {
+            format: 'CODE128',
+            width: 2,
+            height: 100,
+            displayValue: true
+        });
+    }
+</script>
+
+<!-- Price Sync Script - Sincroniza precios actualizados desde editPrecio.js -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/priceSync.js"></script>
+
+<%- include('../partials/footer.ejs'); %>

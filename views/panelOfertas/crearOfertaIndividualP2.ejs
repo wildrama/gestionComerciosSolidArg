@@ -1,0 +1,162 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Crear Oferta Individual - Paso 2</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">🎁 Configurar Oferta Individual</h1>
+            <p class="form-subtitle">Paso 2: Define los parámetros de la oferta</p>
+        </div>
+
+        <!-- Product Info Card -->
+        <div class="offer-product-info">
+            <div class="info-header">
+                <span class="info-icon">📦</span>
+                <div>
+                    <h3 class="info-product-name"><%= productoParaOfertaIndividual.nombre %></h3>
+                    <p class="info-product-meta"><%= productoParaOfertaIndividual.marca %></p>
+                </div>
+            </div>
+            <div class="info-price">
+                <span class="price-label">Precio Actual:</span>
+                <span class="price-value">$<%= productoParaOfertaIndividual.precioMinorista.toFixed(2) %></span>
+            </div>
+        </div>
+
+        <!-- Offer Form -->
+        <form action="/administrador/ofertas/agregar-oferta-individual/nueva" method="POST" class="modern-form">
+            <div class="form-grid">
+                <!-- Detalles de la Oferta -->
+                <div class="form-section">
+                    <h3 class="section-title-form">💰 Detalles de la Oferta</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="cantidadDeUnidadesNecesarias" class="form-label-modern">
+                            Cantidad de Unidades Necesarias *
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📊</span>
+                            <input type="number" 
+                                   id="cantidadDeUnidadesNecesarias" 
+                                   name="cantidadDeUnidadesNecesarias" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="Ej: 3"
+                                   min="1"
+                                   required>
+                        </div>
+                        <small class="form-help">Cantidad mínima de unidades para aplicar la oferta</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="precioOferta" class="form-label-modern">Precio de la Oferta *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   id="precioOferta" 
+                                   name="precioOferta" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   required>
+                        </div>
+                        <small class="form-help">Precio especial de la oferta</small>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="fechaDeVigencia" class="form-label-modern">Fecha de Vigencia *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📅</span>
+                            <input type="date" 
+                                   id="fechaDeVigencia" 
+                                   name="fechaDeVigencia" 
+                                   class="form-control-modern with-icon"
+                                   required>
+                        </div>
+                        <small class="form-help">Hasta cuándo estará vigente esta oferta</small>
+                    </div>
+                </div>
+
+                <!-- Estaciones de Cobro -->
+                <div class="form-section">
+                    <h3 class="section-title-form">🏪 Aplicar en Estaciones</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="estacionDeCobroParaLaOferta" class="form-label-modern">
+                            Selecciona las Estaciones *
+                        </label>
+                        <div class="select-wrapper-multiple">
+                            <select id="estacionDeCobroParaLaOferta" 
+                                    name="estacionDeCobroParaLaOferta" 
+                                    class="form-control-modern form-select-multiple"
+                                    multiple
+                                    required>
+                                <% for(let estacionDeCobro of estacionesDeCobro) { %>
+                                    <option value="<%= estacionDeCobro._id %>">
+                                        🏪 <%= estacionDeCobro.ubicacionDeEstacion %>
+                                    </option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <small class="form-help">Mantén presionado Ctrl/Cmd para seleccionar múltiples estaciones</small>
+                    </div>
+
+                    <div class="estaciones-preview">
+                        <p class="preview-label">Estaciones Seleccionadas:</p>
+                        <div id="selectedStations" class="selected-stations-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Input -->
+            <input type="hidden" 
+                   name="productoEnOferta" 
+                   value="<%= productoParaOfertaIndividual._id %>">
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-secondary-modern">
+                    ← Volver al Paso 1
+                </a>
+                <button type="submit" class="btn-primary-modern">
+                    <span class="btn-icon">✓</span>
+                    Crear Oferta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+// Mostrar estaciones seleccionadas
+const selectElement = document.getElementById('estacionDeCobroParaLaOferta');
+const selectedStationsList = document.getElementById('selectedStations');
+
+function updateSelectedStations() {
+    const selected = Array.from(selectElement.selectedOptions).map(opt => opt.text);
+    
+    if (selected.length === 0) {
+        selectedStationsList.innerHTML = '<p class="no-selection">Selecciona al menos una estación</p>';
+        return;
+    }
+    
+    selectedStationsList.innerHTML = selected
+        .map(station => `<span class="station-badge">${station}</span>`)
+        .join('');
+}
+
+selectElement.addEventListener('change', updateSelectedStations);
+updateSelectedStations();
+</script>
+
+<%- include('../partials/footer.ejs'); %>

@@ -1,0 +1,118 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="breadcrumb-link"><%= estacionDeCobro.ubicacionDeEstacion %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Historial de Usuarios</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="form-header">
+            <h1 class="form-title">📜 Historial de Usuarios</h1>
+            <p class="form-subtitle">Registro de accesos a la estación <%= estacionDeCobro.ubicacionDeEstacion %></p>
+        </div>
+
+        <!-- Station Info -->
+        <div class="historial-info-card">
+            <div class="info-icon">🏪</div>
+            <div class="info-content">
+                <p class="info-label">Estación de Cobro:</p>
+                <h2 class="info-value"><%= estacionDeCobro.ubicacionDeEstacion %></h2>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="historial-stats">
+            <div class="stat-item">
+                <span class="stat-icon">👥</span>
+                <div class="stat-content">
+                    <p class="stat-label">Total de Accesos</p>
+                    <p class="stat-value"><%= estacionDeCobro.historialDeUsuarios.length %></p>
+                </div>
+            </div>
+            <% if (estacionDeCobro.historialDeUsuarios.length > 0) { %>
+            <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <div class="stat-content">
+                    <p class="stat-label">Último Acceso</p>
+                    <p class="stat-value">
+                        <%= new Date(estacionDeCobro.historialDeUsuarios[estacionDeCobro.historialDeUsuarios.length - 1].fechaDeLogeoEnEstación).toLocaleDateString('es-ES') %>
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Historial Table -->
+        <div class="historial-section">
+            <h2 class="section-title">📋 Registro de Accesos</h2>
+            
+            <% if (estacionDeCobro.historialDeUsuarios && estacionDeCobro.historialDeUsuarios.length > 0) { %>
+            <div class="historial-table-wrapper">
+                <table class="historial-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Número</th>
+                            <th>Usuario</th>
+                            <th>Fecha y Hora de Acceso</th>
+                            <th style="text-align: center;">Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% estacionDeCobro.historialDeUsuarios.forEach((user, index) => { %>
+                        <tr class="historial-row">
+                            <td style="text-align: center;">
+                                <span class="row-number">#<%= estacionDeCobro.historialDeUsuarios.length - index %></span>
+                            </td>
+                            <td>
+                                <div class="user-info">
+                                    <span class="user-avatar"><%= user.nombreUser.charAt(0).toUpperCase() %></span>
+                                    <span class="user-name"><%= user.nombreUser %></span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="date-time">
+                                    <%= new Date(user.fechaDeLogeoEnEstación).toLocaleString('es-ES', { 
+                                        year: 'numeric', 
+                                        month: '2-digit', 
+                                        day: '2-digit', 
+                                        hour: '2-digit', 
+                                        minute: '2-digit',
+                                        second: '2-digit'
+                                    }) %>
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="duration-badge">-</span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="empty-state-historial">
+                <div class="empty-icon">📭</div>
+                <h3>No hay registros de acceso</h3>
+                <p>Aún no hay usuarios que hayan accedido a esta estación</p>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Back Button -->
+        <div class="form-actions">
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">
+                ← Volver a Estación
+            </a>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

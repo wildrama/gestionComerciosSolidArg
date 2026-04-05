@@ -1,0 +1,94 @@
+<%- include('./partials/headerAdm.ejs'); %>
+
+<%- include('./partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <!-- Hero Section -->
+    <div class="dashboard-hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Panel de Administración</h1>
+                <p class="hero-subtitle">Bienvenido <%= currentUser ? currentUser.username : '' %> - Acceso completo al sistema</p>
+            </div>
+            <div class="hero-actions">
+                <a href="/administrador/productos/nuevo" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Nuevo Producto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="section-title">Acciones Rápidas</h2>
+        <div class="actions-grid">
+            <a href="/administrador/productos/nuevo" class="action-card">
+                <div class="action-icon">📦</div>
+                <h3>Cargar Producto</h3>
+                <p>Añade nuevos productos al catálogo del sistema</p>
+            </a>
+
+            <a href="/administrador/productos" class="action-card">
+                <div class="action-icon">💰</div>
+                <h3>Gestionar Productos</h3>
+                <p>Ver y modificar precios de productos</p>
+            </a>
+
+            <a href="/administrador/buscar" class="action-card">
+                <div class="action-icon">🔍</div>
+                <h3>Buscar Producto</h3>
+                <p>Busca productos en el inventario</p>
+            </a>
+
+            <a href="/administrador/estacionesdecobro" class="action-card">
+                <div class="action-icon">🏪</div>
+                <h3>Estaciones de Cobro</h3>
+                <p>Gestiona las estaciones activas</p>
+            </a>
+
+            <a href="/ingreso-caja" class="action-card">
+                <div class="action-icon">🧾</div>
+                <h3>Caja de Cobro</h3>
+                <p>Accede a la terminal de caja de escritorio</p>
+            </a>
+
+            <a href="/administrador/userpanel" class="action-card">
+                <div class="action-icon">👥</div>
+                <h3>Usuarios</h3>
+                <p>Administra usuarios del sistema</p>
+            </a>
+
+            <a href="/administrador/ofertas" class="action-card">
+                <div class="action-icon">🎁</div>
+                <h3>Ofertas</h3>
+                <p>Crea y gestiona ofertas especiales</p>
+            </a>
+
+            <a href="/administrador/cierres-caja" class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Cierres de Caja</h3>
+                <p>Revisa los cierres realizados</p>
+            </a>
+
+            <a href="/clientes" class="action-card">
+                <div class="action-icon">👤</div>
+                <h3>Clientes</h3>
+                <p>Administra la base de clientes</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- System Info -->
+    <div class="system-info">
+        <div class="info-card">
+            <div class="info-icon">✓</div>
+            <div class="info-content">
+                <p class="info-text">Sistema operativo correctamente</p>
+                <span class="info-time">Última actualización: Ahora</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer.ejs'); %>

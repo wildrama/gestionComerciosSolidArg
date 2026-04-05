@@ -1,0 +1,172 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Ofertas</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">🎁 Gestión de Ofertas</h1>
+            <p class="form-subtitle">Crea y administra ofertas de productos individuales y conjuntos</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="ofertas-actions" style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-oferta-action btn-individual" style="flex: 1; min-width: 250px; text-align: center;">
+                <span class="btn-icon">📦</span>
+                <span>Agregar Oferta Individual</span>
+            </a>
+            <a href="/administrador/ofertas/agregar-oferta-conjunto" class="btn-oferta-action btn-conjunto" style="flex: 1; min-width: 250px; text-align: center;">
+                <span class="btn-icon">🎯</span>
+                <span>Agregar Oferta Conjunto</span>
+            </a>
+        </div>
+
+        <!-- Ofertas Individuales -->
+        <div class="ofertas-section">
+            <h2 class="ofertas-section-title">📦 Ofertas Individuales</h2>
+            
+            <% if (ofertasIndividuales && ofertasIndividuales.length > 0) { %>
+            <div class="ofertas-table-wrapper">
+                <table class="ofertas-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th style="text-align: center;">Precio Oferta</th>
+                            <th style="text-align: center;">Cantidad Necesaria</th>
+                            <th style="text-align: center;">Vigencia</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% ofertasIndividuales.forEach(oferta => { %>
+                        <tr class="oferta-row">
+                            <td data-label="Producto:">
+                                <div class="oferta-product-cell">
+                                    <span class="product-icon">📦</span>
+                                    <a href="/administrador/ofertas/oferta-individual/<%= oferta._id %>" class="product-link">
+                                        <%= oferta.productoEnOferta.nombre %>
+                                    </a>
+                                </div>
+                            </td>
+                            <td data-label="Precio:" style="text-align: center;">
+                                <span class="price-badge">$<%= oferta.precioOferta.toFixed(2) %></span>
+                            </td>
+                            <td data-label="Cantidad:" style="text-align: center;">
+                                <span class="quantity-badge"><%= oferta.cantidadDeUnidadesNecesarias %> unid.</span>
+                            </td>
+                            <td data-label="Vigencia:" style="text-align: center;">
+                                <span class="date-badge">
+                                    <%= new Date(oferta.fechaDeVigencia).toLocaleDateString('es-ES') %>
+                                </span>
+                            </td>
+                            <td data-label="Acciones:" style="text-align: center;">
+                                <div class="oferta-actions">
+                                    <a href="/administrador/ofertas/oferta-individual/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles">
+                                        👁️
+                                    </a>
+                                    <form action="/administrador/ofertas/oferta-individual/<%= oferta._id %>?_method=DELETE" 
+                                          method="POST" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('¿Eliminar esta oferta?')">
+                                        <button type="submit" class="btn-oferta-delete" title="Eliminar">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="empty-state-ofertas">
+                <p>No hay ofertas individuales registradas</p>
+                <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Crear Primera Oferta
+                </a>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Ofertas Conjunto -->
+        <div class="ofertas-section">
+            <h2 class="ofertas-section-title">🎯 Ofertas Conjunto</h2>
+            
+            <% if (ofertasConjunto && ofertasConjunto.length > 0) { %>
+            <div class="ofertas-table-wrapper">
+                <table class="ofertas-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre de Oferta</th>
+                            <th style="text-align: center;">Precio Oferta</th>
+                            <th style="text-align: center;">Productos Incluidos</th>
+                            <th style="text-align: center;">Vigencia</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% ofertasConjunto.forEach(oferta => { %>
+                        <tr class="oferta-row">
+                            <td data-label="Nombre:">
+                                <div class="oferta-product-cell">
+                                    <span class="product-icon">🎯</span>
+                                    <a href="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>" class="product-link">
+                                        <%= oferta.nombreOferta %>
+                                    </a>
+                                </div>
+                            </td>
+                            <td data-label="Precio:" style="text-align: center;">
+                                <span class="price-badge">$<%= oferta.precioOferta.toFixed(2) %></span>
+                            </td>
+                            <td data-label="Productos:" style="text-align: center;">
+                                <span class="quantity-badge">
+                                    <%= oferta.productosEnOferta ? oferta.productosEnOferta.length : 0 %> productos
+                                </span>
+                            </td>
+                            <td data-label="Vigencia:" style="text-align: center;">
+                                <span class="date-badge">
+                                    <%= new Date(oferta.fechaDeVigencia).toLocaleDateString('es-ES') %>
+                                </span>
+                            </td>
+                            <td data-label="Acciones:" style="text-align: center;">
+                                <div class="oferta-actions">
+                                    <a href="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles">
+                                        👁️
+                                    </a>
+                                    <form action="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>?_method=DELETE" 
+                                          method="POST" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('¿Eliminar esta oferta?')">
+                                        <button type="submit" class="btn-oferta-delete" title="Eliminar">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="empty-state-ofertas">
+                <p>No hay ofertas conjunto registradas</p>
+                <a href="/administrador/ofertas/agregar-oferta-conjunto" class="btn-primary-modern">
+                    <span class="btn-icon">+</span>
+                    Crear Primera Oferta
+                </a>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

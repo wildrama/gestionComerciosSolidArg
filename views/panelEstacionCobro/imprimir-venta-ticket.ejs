@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket <%= venta.codigoVenta %></title>
+    <style>
+        @page {
+            size: 80mm auto;
+            margin: 4mm;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #ffffff;
+            color: #111;
+        }
+
+        .ticket {
+            width: 72mm;
+            margin: 0 auto;
+            padding: 4mm 3mm 6mm;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .business-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.4px;
+        }
+
+        .muted {
+            font-size: 11px;
+            color: #444;
+        }
+
+        .separator {
+            border-top: 1px dashed #222;
+            margin: 8px 0;
+        }
+
+        .meta-row,
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+
+        .items-table th,
+        .items-table td {
+            font-size: 11px;
+            padding: 4px 0;
+            vertical-align: top;
+        }
+
+        .items-table th {
+            text-align: left;
+            border-bottom: 1px dashed #222;
+        }
+
+        .items-table td:last-child,
+        .items-table th:last-child {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .footer-note {
+            margin-top: 8px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        @media print {
+            html, body {
+                width: 80mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="center">
+            <div class="business-name">ISIDORITO</div>
+            <div class="muted">Ticket interno de venta</div>
+            <div class="muted"><%= estacionDeCobro.ubicacionDeEstacion %></div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="meta-row"><span>Venta</span><span>#<%= venta.codigoVenta %></span></div>
+        <div class="meta-row"><span>Fecha</span><span><%= venta.fechaTexto %> <%= venta.horaTexto %></span></div>
+        <div class="meta-row"><span>Cajero</span><span><%= venta.nombreDelUsuario || '-' %></span></div>
+        <div class="meta-row"><span>Pago</span><span><%= venta.paymentLabel || '-' %></span></div>
+
+        <div class="separator"></div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Importe</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (venta.detalleProductos && venta.detalleProductos.length) { %>
+                    <% venta.detalleProductos.forEach((producto) => { %>
+                        <tr>
+                            <td>
+                                <div><%= producto.cantidad %> x <%= producto.nombre %></div>
+                                <div class="muted">$<%= Number(producto.precioUnitario || 0).toFixed(2) %> c/u</div>
+                            </td>
+                            <td>$<%= Number(producto.total || 0).toFixed(2) %></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="2" class="center">Sin detalle de productos</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <div class="separator"></div>
+
+        <div class="meta-row"><span>Importe cobrado</span><span><%= venta.dineroIngresado !== null ? `$${Number(venta.dineroIngresado).toFixed(2)}` : '-' %></span></div>
+        <div class="meta-row"><span>Vuelto</span><span><%= venta.dineroDeSalida !== null ? `$${Number(venta.dineroDeSalida).toFixed(2)}` : '-' %></span></div>
+        <div class="total-row"><span>Total</span><span>$<%= Number(venta.totalVenta || 0).toFixed(2) %></span></div>
+
+        <div class="separator"></div>
+        <div class="footer-note">TICKET NO VÁLIDO COMO DOCUMENTO FISCAL</div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => window.print(), 180);
+        });
+        window.onafterprint = () => window.close();
+        window.onfocus = () => setTimeout(() => window.close(), 250);
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="breadcrumb-link"><%= estacionDeCobro.ubicacionDeEstacion %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Ingreso de Efectivo</span>
+        </nav>
+
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">➕ Ingreso de Efectivo</h1>
+            <p class="form-subtitle">Agrega dinero a la caja durante su operación diaria</p>
+        </div>
+
+        <!-- Station Info Card -->
+        <div class="transaction-info-card">
+            <div class="transaction-icon">💰</div>
+            <div class="transaction-content">
+                <p class="transaction-label">Estación de Cobro:</p>
+                <h2 class="transaction-value"><%= estacionDeCobro.ubicacionDeEstacion %></h2>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form action="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/ingreso-efectivo" method="POST" class="modern-form">
+            <div class="form-grid">
+                <!-- Dinero -->
+                <div class="form-section">
+                    <h3 class="section-title-form">💵 Monto a Ingresar</h3>
+                    
+                    <div class="form-info-box">
+                        <span class="info-box-icon">📝</span>
+                        <p class="info-box-text">
+                            Registra el dinero que se está ingresando manualmente a la caja. 
+                            Esto es útil para reposiciones o retiros durante el día.
+                        </p>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="dineroDeIngreso" class="form-label-modern">Monto a Ingresar *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">💵</span>
+                            <input type="number" 
+                                   id="dineroDeIngreso" 
+                                   name="dineroDeIngreso" 
+                                   class="form-control-modern with-icon" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   required>
+                        </div>
+                        <small class="form-help">Ingresa solo números. Ej: 500.00</small>
+                    </div>
+
+                    <!-- Amount Preview -->
+                    <div class="amount-preview">
+                        <div class="preview-item">
+                            <span class="preview-label">Monto a Ingresar:</span>
+                            <span class="preview-value income" id="previewAmount">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comentario -->
+                <div class="form-section">
+                    <h3 class="section-title-form">📝 Detalles</h3>
+                    
+                    <div class="form-group-modern">
+                        <label for="comentarioDeIngreso" class="form-label-modern">Comentario (Opcional)</label>
+                        <textarea id="comentarioDeIngreso" 
+                                  name="comentarioDeIngreso" 
+                                  class="form-control-modern textarea-modern" 
+                                  placeholder="Ej: Reposición de efectivo, ingreso cliente, etc."
+                                  rows="4"></textarea>
+                        <small class="form-help">Añade una nota para identificar el motivo del ingreso</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">
+                    ← Cancelar
+                </a>
+                <button type="submit" class="btn-primary-modern">
+                    <span class="btn-icon">💾</span>
+                    Registrar Ingreso
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Actualizar preview del monto en tiempo real
+const inputMonto = document.getElementById('dineroDeIngreso');
+const previewAmount = document.getElementById('previewAmount');
+
+function actualizarPreview() {
+    const monto = parseFloat(inputMonto.value) || 0;
+    previewAmount.textContent = '$' + monto.toFixed(2);
+}
+
+inputMonto.addEventListener('input', actualizarPreview);
+inputMonto.addEventListener('change', actualizarPreview);
+</script>
+
+<%- include('../partials/footer.ejs'); %>

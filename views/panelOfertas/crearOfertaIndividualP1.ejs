@@ -1,0 +1,123 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Crear Oferta Individual</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">🎁 Nueva Oferta Individual</h1>
+            <p class="form-subtitle">Paso 1: Selecciona el producto para la oferta</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="offer-search-card">
+            <h3 class="offer-search-title">🔍 Buscar Producto</h3>
+            
+            <form id="searchBarFormCodigoIndividual" class="offer-search-form">
+                <div class="search-box-offer">
+                    <span class="search-icon-offer">📦</span>
+                    <input type="text" 
+                           name="codigoDeProducto" 
+                           id="codigoIndividualInput" 
+                           class="search-input-offer" 
+                           placeholder="Busca por código de barra del producto"
+                           autocomplete="off">
+                </div>
+                
+                <button type="submit" class="btn-search-offer">
+                    <span class="btn-icon">🔍</span>
+                    Buscar Producto
+                </button>
+            </form>
+        </div>
+
+        <!-- Product Result -->
+        <div class="offer-result-section">
+            <h3 class="offer-result-title">📋 Información del Producto</h3>
+            
+            <div id="productoIndividualContainer" class="product-result-card">
+                <div class="result-empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p>Busca un producto para ver sus detalles aquí</p>
+                </div>
+
+                <!-- Este contenedor se actualiza dinámicamente -->
+                <div id="productResultContent" style="display: none;">
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Nombre del Producto</span>
+                            <p id="nombreProdIndividual" class="result-value"></p>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Marca</span>
+                            <p id="marcaProdIndividual" class="result-value"></p>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Precio Actual</span>
+                            <p id="precioProdIndividual" class="result-value price"></p>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Stock Disponible</span>
+                            <p id="cantidadProdIndividual" class="result-value"></p>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Código de Barra</span>
+                            <p id="idContainer" class="result-value"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <a href="/administrador/ofertas" class="btn-secondary-modern">
+                ← Cancelar
+            </a>
+            <button id="btn2daPantalla" class="btn-primary-modern" disabled>
+                <span class="btn-icon">→</span>
+                Continuar al Paso 2
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/ofertasFunc.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+// Mostrar/ocultar resultado cuando se busca
+const container = document.getElementById('productoIndividualContainer');
+const resultContent = document.getElementById('productResultContent');
+const emptyState = container.querySelector('.result-empty-state');
+
+// Monitorear cambios en el resultado
+const observer = new MutationObserver(function() {
+    const hasContent = document.getElementById('nombreProdIndividual')?.textContent?.trim();
+    if (hasContent) {
+        emptyState.style.display = 'none';
+        resultContent.style.display = 'block';
+        document.getElementById('btn2daPantalla').disabled = false;
+    } else {
+        emptyState.style.display = 'flex';
+        resultContent.style.display = 'none';
+        document.getElementById('btn2daPantalla').disabled = true;
+    }
+});
+
+observer.observe(container, { childList: true, subtree: true, characterData: true });
+</script>
+
+<%- include('../partials/footer.ejs'); %>

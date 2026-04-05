@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Isidorito</title>
+    <link rel="stylesheet" href="/styles/app-unified.css">
+</head>
+<body class="admin-page">
+    <!-- Navbar Principal -->
+    <nav class="navbar-admin">
+        <div class="navbar-content">
+            <a href="/administrador" class="navbar-brand">
+                <span class="brand-icon">🏪</span>
+                <span class="brand-text">Isidorito</span>
+            </a>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+            <div class="navbar-menu" id="navbarMenu">
+                <a href="/administrador" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span>Inicio</span>
+                </a>
+                <a href="/administrador/productos" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span>Productos</span>
+                </a>
+                <a href="/administrador/buscar" class="nav-link">
+                    <span class="nav-icon">🔍</span>
+                    <span>Buscar</span>
+                </a>
+                <a href="/administrador/userpanel" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    <span>Usuarios</span>
+                </a>
+                <a href="/administrador/estacionesdecobro" class="nav-link">
+                    <span class="nav-icon">💰</span>
+                    <span>Estaciones</span>
+                </a>
+                <a href="/ingreso-caja" class="nav-link">
+                    <span class="nav-icon">🧾</span>
+                    <span>Caja</span>
+                </a>
+                <a href="/administrador/ofertas" class="nav-link">
+                    <span class="nav-icon">🎁</span>
+                    <span>Ofertas</span>
+                </a>
+                <a href="/administrador/cierres-caja" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span>Cierres</span>
+                </a>
+                <a href="/clientes" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="/cerrar-sesion" class="nav-link nav-link-logout">
+                    <span class="nav-icon">🚪</span>
+                    <span>Salir</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Submenú de Acceso Rápido -->
+    <div class="submenu-container">
+        <div class="submenu-quick-access">
+            <h3 class="submenu-title">⚡ Acceso Rápido</h3>
+            <ul class="submenu-links">
+                <li>
+                    <a href="/administrador/buscar" class="submenu-link">
+                        <span class="submenu-link-icon">🔍</span>
+                        Buscar producto
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/productos/nuevo" class="submenu-link">
+                        <span class="submenu-link-icon">➕</span>
+                        Agregar producto
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/estacionesdecobro" class="submenu-link">
+                        <span class="submenu-link-icon">🏪</span>
+                        Todas las estaciones
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/estacionesdecobro/nuevaestacion" class="submenu-link">
+                        <span class="submenu-link-icon">🆕</span>
+                        Crear nueva caja
+                    </a>
+                </li>
+                <li>
+                    <a href="/ingreso-caja" class="submenu-link">
+                        <span class="submenu-link-icon">🧾</span>
+                        Abrir caja de cobro
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <%- include('../partials/flash.ejs'); %>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('navbarMenu');
+            if (menu) menu.classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('navbarMenu');
+            const toggle = document.querySelector('.navbar-toggle');
+            if (menu && menu.classList.contains('active') && 
+                !menu.contains(e.target) && 
+                toggle && !toggle.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+
+

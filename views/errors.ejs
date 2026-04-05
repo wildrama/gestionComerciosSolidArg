@@ -1,0 +1,99 @@
+<%- include('./partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="error-container">
+        <!-- Error Header -->
+        <div class="error-header">
+            <div class="error-icon">⚠️</div>
+            <h1 class="error-title">Algo salió mal</h1>
+            <p class="error-subtitle">Hubo un error inesperado en la aplicación</p>
+        </div>
+
+        <!-- Error Details -->
+        <div class="error-details-card">
+            <h3 class="error-section-title">📋 Detalles del Error</h3>
+            
+            <div class="error-detail-box">
+                <span class="error-detail-icon">❌</span>
+                <div>
+                    <p class="error-detail-label">Mensaje de Error</p>
+                    <p class="error-detail-value">
+                        <%= error && error.message ? error.message : 'Error desconocido' %>
+                    </p>
+                </div>
+            </div>
+
+            <% if (error && error.statusCode) { %>
+            <div class="error-detail-box">
+                <span class="error-detail-icon">🔢</span>
+                <div>
+                    <p class="error-detail-label">Código de Estado</p>
+                    <p class="error-detail-value"><%= error.statusCode %></p>
+                </div>
+            </div>
+            <% } %>
+
+            <% if (error && error.status) { %>
+            <div class="error-detail-box">
+                <span class="error-detail-icon">📍</span>
+                <div>
+                    <p class="error-detail-label">Tipo de Error</p>
+                    <p class="error-detail-value"><%= error.status %></p>
+                </div>
+            </div>
+            <% } %>
+
+            <div class="error-detail-box">
+                <span class="error-detail-icon">🕐</span>
+                <div>
+                    <p class="error-detail-label">Hora del Error</p>
+                    <p class="error-detail-value"><%= new Date().toLocaleString('es-ES') %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Actions -->
+        <div class="error-actions">
+            <p class="error-info-text">
+                Si el problema persiste, contacta al administrador del sistema.
+            </p>
+            
+            <div class="error-buttons">
+                <a href="/" class="btn-error-action btn-home">
+                    <span class="btn-icon">🏠</span>
+                    Ir al Inicio
+                </a>
+                <a href="/administrador" class="btn-error-action btn-admin">
+                    <span class="btn-icon">📊</span>
+                    Panel de Admin
+                </a>
+                <button onclick="window.history.back()" class="btn-error-action btn-back">
+                    <span class="btn-icon">←</span>
+                    Volver Atrás
+                </button>
+            </div>
+        </div>
+
+        <!-- Debug Info (solo en desarrollo) -->
+        <% if (process.env.NODE_ENV !== 'production') { %>
+        <div class="error-debug-section">
+            <details class="error-debug-details">
+                <summary class="error-debug-summary">
+                    🔧 Información Técnica (Solo Desarrollo)
+                </summary>
+                <div class="error-debug-content">
+                    <% if (error && error.stack) { %>
+                    <div class="error-stack">
+                        <p class="error-stack-label">Stack Trace:</p>
+                        <pre class="error-stack-text"><%= error.stack %></pre>
+                    </div>
+                    <% } %>
+                </div>
+            </details>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('./partials/footer.ejs'); %>
+

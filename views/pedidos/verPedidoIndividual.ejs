@@ -1,0 +1,122 @@
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+
+<script src="https://unpkg.com/jspdf-invoice-template@1.4.0/dist/index.js"></script>.
+
+
+<div class="container">
+
+    <a href="/pedidos/pedidos-todos">Atras</a>
+<p id="idPedido" class="d-none"><%= pedidoIndividual._id %></p>
+    <div class="my-1 text-end">
+        <h2><% pedidoIndividual.cliente.nombreLocal %></h2>
+        <p class="lead">
+            San Pedro, Buenos Aires <br>
+            (3329) 332211 <br>
+            contacto@isidorito.com.ar
+        </p>
+    </div>
+    <div class="lineTabla border mb-3" >
+
+    </div>
+    <p>Dirigido a : <b><%= pedidoIndividual.cliente.dueño %></b> 
+        || <b><%= pedidoIndividual.cliente.nombreLocal%></b> </p> 
+   Dirección de entrega: <p><%= pedidoIndividual.cliente.direccion %> </p>
+   Contacto vigente :<p><%= pedidoIndividual.cliente.telefono1 %> </p>
+
+    Correo: <p><%= pedidoIndividual.cliente.correo %> </p>
+    Fecha: <p> <%= pedidoIndividual.cliente.updatedAt.toLocaleString() %></p>
+
+    <br>    
+    <div class="container ">
+        <div class="col-8 d-flex justify-content-around text-end px-4" >
+            <a href="/pedidos/<%= pedidoIndividual._id %>/editar-pedido" id="editarPedido" class="btn btn-secondary" >Editar Pedido</a>
+            
+            <a href="/pedidos/archivar-pedido" id="archivarPedido" class="btn btn-outline-info d-none" >Archivar Pedido</a>
+            <btn  id="imprimir1" class="btn btn-info text-dark">Preparar Impresión</btn> 
+
+            <btn  id="imprimirIndividual" class="btn btn-info text-dark d-none">Imprimir</btn> 
+
+            
+          </div>
+          <div class="container">
+            <table class="table">
+                <thead>
+                  <tr>
+                    
+                    <th scope="col">Producto</th>
+        
+                    <th scope="col">Cantidad de productos</th>
+                    <th scope="col">Precio por unidad</th>
+    
+                    <th scope="col">Subtotal</th>
+    
+                    
+                
+                    <th scope="col">Total</th>
+                
+                  </tr>
+                </thead>
+                <tbody id="tableParaPedidoIndividual">
+                  
+                  
+                  
+                     
+                  
+                     <% for( let producto of pedidoIndividual.productosPedidosNombre ) { %>
+                        <tr>
+                        <td>
+                            
+                            <%= producto.nombre %>  -   <%= producto.marca %> 
+                        </td>     
+                    
+                          
+                      
+                        <td>
+                            <%= producto.cantidad %> 
+                        </td> 
+                        <td>
+
+                            <%= producto.precioUnidad %> 
+                        </td> 
+                           
+                        <td>
+                            <% let cantidadPorProducto = producto.precioMayorista * producto.cantidad %> 
+                            <%= cantidadPorProducto %> 
+
+                            <%= producto.precioMayorista %> 
+                        </td> 
+                    
+                       
+                 
+                   
+                    </td>
+                    </tr>
+             
+                    <% } %>
+                    
+    
+                    
+                </tbody>
+               
+              </table>
+              <p class="lead text-end px-3">
+                TOTAL: <br>
+                <span class="sparkline" style="width:100%; height:100%;" ></span>
+                
+               <%= pedidoIndividual.importeTotal %> 
+            </p>
+          </div>
+     
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<script type="module" src="/imprimirPedido.js" ></script>
+
+
+<%- include('../partials/footer.ejs'); %>

@@ -1,0 +1,15 @@
+#indexMobileContainer{
+    background-color: #f8f9fd;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Montserrat',sans-serif;
+    
+}
+a{
+    font-weight: 500;
+    font-size: 1.8em;
+   text-decoration: none;
+   color: black; 
+}

@@ -1,0 +1,509 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Agregar Ofertas en Lote</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">📦 Crear Ofertas en Lote</h1>
+            <p class="form-subtitle">Agrega múltiples productos a oferta de una sola vez</p>
+        </div>
+
+        <!-- Main Form -->
+        <form id="ofertasBatchForm" class="ofertas-batch-form">
+            <!-- Search Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Paso 1: Buscar y Agregar Productos</h5>
+                    <span class="badge bg-light text-dark" id="productCount">0 productos</span>
+                </div>
+                <div class="card-body">
+                    <!-- Search Modal Button -->
+                    <button type="button" class="btn btn-primary btn-lg mb-3" data-bs-toggle="modal" 
+                            data-bs-target="#productSearchModal">
+                        + Buscar Producto
+                    </button>
+
+                    <!-- Product Search Modal Component -->
+                    <%- include('../partials/productSearchModal', {
+                        modalId: 'productSearchModal',
+                        modalTitle: 'Buscar Productos para Oferta',
+                        modalSize: 'lg'
+                    }) %>
+
+                    <!-- Products Added List -->
+                    <div id="productsListContainer" style="display: none;">
+                        <h6 class="mt-4 mb-3">Productos agregados:</h6>
+                        <div class="list-group" id="productsList"></div>
+                    </div>
+
+                    <div id="noProductsMsg" class="alert alert-info">
+                        💡 Haz clic en "Buscar Producto" para comenzar
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Settings Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Paso 2: Configuración General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="descuentoGlobal" class="form-label">Descuento Global (%)</label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           id="descuentoGlobal" 
+                                           class="form-control"
+                                           placeholder="0"
+                                           min="0"
+                                           max="100"
+                                           step="0.5">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Se aplicará a todos los productos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="fechaInicioBatch" class="form-label">Fecha Inicio</label>
+                                <input type="date" 
+                                       id="fechaInicioBatch" 
+                                       class="form-control"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="fechaFinBatch" class="form-label">Fecha Fin</label>
+                                <input type="date" 
+                                       id="fechaFinBatch" 
+                                       class="form-control"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcionBatch" class="form-label">Descripción de la Campaña</label>
+                        <textarea id="descripcionBatch" 
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="ej: Oferta de fin de semana, Liquidación, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Preview Table -->
+            <div class="card mb-4" id="previewCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Vista Previa de Ofertas</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 30%;">Producto</th>
+                                <th style="width: 15%;">Precio Original</th>
+                                <th style="width: 15%;">Precio Oferta</th>
+                                <th style="width: 10%;">Descuento</th>
+                                <th style="width: 15%;">Stock</th>
+                                <th style="width: 15%;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="card mb-4" id="summaryCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Resumen del Lote</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="summary-stat">
+                                <div class="stat-label">Total Productos</div>
+                                <div class="stat-value" id="totalProductos">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-stat">
+                                <div class="stat-label">Ahorro Total</div>
+                                <div class="stat-value text-success" id="ahorroTotal">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-stat">
+                                <div class="stat-label">Descuento Promedio</div>
+                                <div class="stat-value text-info" id="descuentoPromedio">0%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-stat">
+                                <div class="stat-label">Vigencia</div>
+                                <div class="stat-value text-dark" id="vigencia">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                    ✓ Crear Ofertas
+                </button>
+                <a href="/administrador/ofertas" class="btn btn-secondary btn-lg">
+                    ← Cancelar
+                </a>
+            </div>
+
+            <!-- Hidden input for products JSON -->
+            <input type="hidden" id="productosJSON" name="productos">
+        </form>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+.admin-dashboard {
+    padding: 2rem;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions button,
+.form-actions a {
+    flex: 1;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.product-item-info {
+    flex: 1;
+}
+
+.product-item-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.product-item-details {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.product-item-price {
+    font-weight: 600;
+    margin: 0 1rem;
+    min-width: 80px;
+    text-align: right;
+}
+
+.summary-stat {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    text-align: center;
+    border-left: 4px solid #0d6efd;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.badge-custom {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #f0f0f0;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+}
+</style>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/productSearch.js"></script>
+
+<script>
+(function() {
+    const form = document.getElementById('ofertasBatchForm');
+    const productsList = document.getElementById('productsList');
+    const productsListContainer = document.getElementById('productsListContainer');
+    const noProductsMsg = document.getElementById('noProductsMsg');
+    const previewCard = document.getElementById('previewCard');
+    const previewTableBody = document.getElementById('previewTableBody');
+    const summaryCard = document.getElementById('summaryCard');
+    const productCount = document.getElementById('productCount');
+    const submitBtn = document.getElementById('submitBtn');
+    const productosJSON = document.getElementById('productosJSON');
+    
+    const descuentoGlobalInput = document.getElementById('descuentoGlobal');
+    const fechaInicioInput = document.getElementById('fechaInicioBatch');
+    const fechaFinInput = document.getElementById('fechaFinBatch');
+
+    let productos = []; // Array de productos seleccionados
+
+    // Set today's date as default start date
+    const today = new Date().toISOString().split('T')[0];
+    fechaInicioInput.value = today;
+
+    // Escuchar selección de producto en modal
+    document.addEventListener('productSelected', function(e) {
+        const producto = e.detail.producto;
+        
+        // Verificar que no esté duplicado
+        if (productos.find(p => p._id === producto._id)) {
+            alert('Este producto ya está en la lista');
+            return;
+        }
+
+        // Agregar a array
+        productos.push({
+            _id: producto._id,
+            nombre: producto.nombre,
+            marca: producto.marca,
+            codigo: producto.codigo,
+            precioMinorista: producto.precioMinorista,
+            cantidad: producto.cantidad,
+            precioOferta: producto.precioMinorista * 0.9 // Default 10% discount
+        });
+
+        renderProductsList();
+        updateSummary();
+
+        // Cerrar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('productSearchModal'));
+        if (modal) modal.hide();
+    });
+
+    function renderProductsList() {
+        productsList.innerHTML = '';
+        
+        productos.forEach((producto, index) => {
+            const descuento = (producto.precioMinorista - producto.precioOferta) / producto.precioMinorista * 100;
+            
+            const item = document.createElement('div');
+            item.className = 'list-group-item';
+            item.innerHTML = `
+                <div class="product-item-info">
+                    <div class="product-item-name">${producto.nombre}</div>
+                    <div class="product-item-details">
+                        ${producto.marca || 'S/M'} • Código: ${producto.codigo || 'N/A'} • Stock: ${producto.cantidad || 0}
+                    </div>
+                </div>
+                <div class="product-item-price">
+                    $${producto.precioOferta.toFixed(2)}
+                </div>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeProduct(${index})">
+                    ✕
+                </button>
+            `;
+            productsList.appendChild(item);
+        });
+
+        // Mostrar/ocultar elementos
+        if (productos.length === 0) {
+            productsListContainer.style.display = 'none';
+            noProductsMsg.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            productsListContainer.style.display = 'block';
+            noProductsMsg.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+
+        productCount.textContent = `${productos.length} producto${productos.length !== 1 ? 's' : ''}`;
+    }
+
+    window.removeProduct = function(index) {
+        if (confirm('¿Eliminar este producto?')) {
+            productos.splice(index, 1);
+            renderProductsList();
+            updateSummary();
+        }
+    };
+
+    // Aplicar descuento global
+    descuentoGlobalInput.addEventListener('change', function() {
+        const descuento = parseFloat(this.value) || 0;
+        
+        productos.forEach(p => {
+            p.precioOferta = p.precioMinorista * (1 - descuento / 100);
+        });
+
+        renderProductsList();
+        updateSummary();
+    });
+
+    // Actualizar vista previa y resumen
+    descuentoGlobalInput.addEventListener('input', updateSummary);
+    fechaInicioInput.addEventListener('change', updateSummary);
+    fechaFinInput.addEventListener('change', updateSummary);
+
+    function updateSummary() {
+        if (productos.length === 0) {
+            previewCard.style.display = 'none';
+            summaryCard.style.display = 'none';
+            return;
+        }
+
+        // Update preview table
+        previewTableBody.innerHTML = '';
+        let totalAhorro = 0;
+        let totalDescuentoPorcentaje = 0;
+
+        productos.forEach(p => {
+            const descuento = p.precioMinorista - p.precioOferta;
+            const porcentaje = (descuento / p.precioMinorista * 100).toFixed(1);
+            totalAhorro += descuento;
+            totalDescuentoPorcentaje += parseFloat(porcentaje);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small>${p.marca || 'S/M'}</small></td>
+                <td>$${p.precioMinorista.toFixed(2)}</td>
+                <td><strong class="text-success">$${p.precioOferta.toFixed(2)}</strong></td>
+                <td><span class="badge bg-warning text-dark">${porcentaje}%</span></td>
+                <td>${p.cantidad || 0} unidades</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editPrice(this, ${p.precioMinorista})">
+                        Editar
+                    </button>
+                </td>
+            `;
+            previewTableBody.appendChild(row);
+        });
+
+        previewCard.style.display = 'block';
+
+        // Update summary
+        document.getElementById('totalProductos').textContent = productos.length;
+        document.getElementById('ahorroTotal').textContent = `$${totalAhorro.toFixed(2)}`;
+        document.getElementById('descuentoPromedio').textContent = `${(totalDescuentoPorcentaje / productos.length).toFixed(1)}%`;
+        
+        const vigencia = `${fechaInicioInput.value || 'N/A'} a ${fechaFinInput.value || 'N/A'}`;
+        document.getElementById('vigencia').textContent = vigencia;
+
+        summaryCard.style.display = 'block';
+    }
+
+    window.editPrice = function(btn, precioOriginal) {
+        const newPrice = prompt('Ingresa el nuevo precio de oferta:', precioOriginal.toFixed(2));
+        if (newPrice !== null) {
+            const price = parseFloat(newPrice);
+            if (!isNaN(price) && price > 0) {
+                const index = Array.from(btn.closest('tr').parentNode.children).indexOf(btn.closest('tr'));
+                productos[index].precioOferta = price;
+                renderProductsList();
+                updateSummary();
+            } else {
+                alert('Por favor ingresa un precio válido');
+            }
+        }
+    };
+
+    // Enviar formulario
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (productos.length === 0) {
+            alert('Por favor agrega al menos un producto');
+            return;
+        }
+
+        if (!fechaInicioInput.value || !fechaFinInput.value) {
+            alert('Por favor selecciona las fechas de inicio y fin');
+            return;
+        }
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Guardando...';
+
+            const ofertas = productos.map(p => ({
+                productId: p._id,
+                precioOferta: p.precioOferta,
+                precioOriginal: p.precioMinorista
+            }));
+
+            const response = await axios.post('/administrador/ofertas/create-batch', {
+                ofertas: ofertas,
+                fechaInicio: fechaInicioInput.value,
+                fechaFin: fechaFinInput.value,
+                descripcion: document.getElementById('descripcionBatch').value || ''
+            });
+
+            if (response.data.success) {
+                alert(`✓ ${response.data.created} ofertas creadas correctamente`);
+                setTimeout(() => {
+                    window.location.href = '/administrador/ofertas';
+                }, 1000);
+            } else {
+                alert('Error: ' + response.data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '✓ Crear Ofertas';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al crear ofertas: ' + (error.response?.data?.message || error.message));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '✓ Crear Ofertas';
+        }
+    });
+
+    // Initialize
+    renderProductsList();
+})();
+</script>

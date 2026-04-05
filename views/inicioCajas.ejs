@@ -1,0 +1,45 @@
+<%- include('./partials/headerCaja.ejs'); %>
+<%- include('./partials/flash.ejs'); %>
+
+<div class="cajas-page">
+    <div class="cajas-container">
+        <!-- Header -->
+        <div class="cajas-header">
+            <div class="cajas-header-content">
+                <div>
+                    <h1 class="cajas-title">💰 Selecciona una Estación de Cobro</h1>
+                    <p class="cajas-subtitle">Elige la caja desde la cual deseas operar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estaciones Grid -->
+        <div class="estaciones-grid">
+            <% if(estacionesDeCobro && estacionesDeCobro.length > 0){ %>
+                <% estacionesDeCobro.forEach(estacion => { %>
+                <a href="/ingreso-caja/<%= estacion._id %>/login" class="estacion-card">
+                    <div class="estacion-card-icon">🏪</div>
+                    <div class="estacion-card-content">
+                        <h3 class="estacion-card-title"><%= estacion.ubicacionDeEstacion %></h3>
+                        <% if (estacion.numero) { %>
+                            <p class="estacion-card-meta">Caja #<%= estacion.numero %></p>
+                        <% } %>
+                        <% if (estacion.responsable) { %>
+                            <p class="estacion-card-meta">Responsable: <%= estacion.responsable %></p>
+                        <% } %>
+                    </div>
+                    <div class="estacion-card-arrow">→</div>
+                </a>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state-cajas">
+                    <div class="empty-icon">📦</div>
+                    <h3>No hay estaciones disponibles</h3>
+                    <p>Contacta al administrador para crear una estación de cobro</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer.ejs'); %>

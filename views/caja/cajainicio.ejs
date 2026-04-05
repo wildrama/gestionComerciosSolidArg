@@ -1,0 +1,52 @@
+<%- include('../partials/headerCompleto.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+
+    <div class="container px-lg-5">
+      <div class="row justify-content-center">
+        <ul class="nav d-flex justify-content-around">
+          <li> <a class="nav-link btn btn-outline-secondary mb-3" href="/caja/<%= estacionDeCobro._id%>/inicio"> Inicio </a> </li>
+          <li> <a class="nav-link btn btn-outline-success mb-3" href="/caja/<%= estacionDeCobro._id%>/cajaActiva"> Abrir la caja de cobro </a> </li>
+      </ul>
+        <div class="col-lg-6 px-md-3 py-lg-5 mt-2 border ">
+          <div class="row text-center ">
+         
+            <div class="col-12 mt-3 pb-3"> Estación de cobro: <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong>  </div>
+            <div class="col-12 mt-3 pb-3"> <a class="link-none p-2 border border-secondary" href="#"><%= estacionDeCobro.dineroEnEstacion %></a>  </div>
+            <div class="col-12 mt-3 pb-3">    
+                 Usuario actual: <%= usuario.username %> 
+            </div>
+            <div class="col-12 mt-3 pb-3"> Fecha de hoy: <%= fechaActual %>   </div>
+            
+
+            <form  action="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/egreso-efectivo" method="POST">
+                
+                
+              <div class="mb-3">
+                  <label for="dineroDeEgreso" class="form-label">Colocar el monto que se desea retirar de la estación</label>
+                  <input placeholder="" type="number" name="dineroDeEgreso" class="form-control" id="dineroDeEgreso2" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="comentarioDeEgreso" class="form-label">Agregar comentario</label>
+                  <textarea class="form-control" name="comentarioDeEgreso" id="comentarioDeEgreso2" rows="3"></textarea>
+                </div>
+                <!-- <div class="mb-3 form-check">
+                  <input type="checkbox" class="form-check-input" id="">
+                  <label class="form-check-label" for="">Check me out</label>
+                </div> -->
+             
+              <button type="submit" class="btn btn-primary">Retirar dinero a la estación</button>
+              
+
+      </form>
+          </div>
+        </div>
+      </div>
+        
+    </div>
+     
+    
+
+
+    <%- include('../partials/footer.ejs'); %>

@@ -1,0 +1,200 @@
+
+$textColor1:black;
+$textColor2:white;
+$colorAzul:#04710b;
+$textSize1:22px;
+$textSize2:1em;
+$textSize3:36px;
+$textSize4:46px;
+$textSize5:28px;
+$montserrat:  'Raleway', sans-serif;
+
+body{
+    font-family: $montserrat;
+}
+.body-inicio{
+    background-color: #8a8a8a;
+
+}
+.body-inicio{
+    background-color: #D2D6ED;
+
+}
+ nav{
+    font-family: $montserrat;
+}
+.subnav{
+    background-color: $colorAzul;
+    input{
+        border: 2px solid rgba(0, 0, 0, 0);
+        border-radius: 23px;
+        background-color: $colorAzul;
+        color: $textColor2;
+    }
+    .buscar{
+        background-color: $colorAzul;
+        color: $textColor2;
+        button{
+            border-color: rgba(255, 255, 255, 0);
+            border-radius: 23px;
+
+            &:hover{
+                background-color: #a38c1b;
+            }
+           
+        }
+    }
+    a {
+        border: 2px solid #FB982E;
+        border-radius: 13px;
+        text-decoration: none;
+        color: $textColor2;
+        font-size: $textSize2;
+    }
+}
+.accionesrapidas{
+    
+        font-family: $montserrat;
+     
+        a {
+            text-decoration: none;
+            color: $textColor1;
+            font-size: $textSize1;
+        }
+}
+
+.productosAcciones{
+    list-style: none;
+}
+.editButton{
+    width: 32px;
+}
+.cargarproductosform{
+
+    .campo-requerido{
+        padding-left: 12px ;
+        border-left: 2px solid green;
+    }
+}
+
+.caja-on{
+    width: 14px;
+    height: 14px;
+    background-color: rgb(1, 133, 1);
+    border-radius: 100%;
+}
+
+.contenedor-estaciones-inicio{
+    a{
+        text-decoration: none;
+        color: #2e2e95;
+    }
+}
+.container-split{
+    a{
+        text-decoration: none;
+        font-size: 3em;
+        transition: all .4s ease;
+        border: 2px solid #52529f;
+        &:hover{
+            font-size: 4.5em;
+        }
+    }
+ /* Split the screen in half */
+ .split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+  
+  /* Control the left side */
+  .left {
+    left: 0;
+    background-color: #1B4EA3;
+    a{
+        color: rgb(221, 222, 209);
+        &:hover{
+            border-color: #B4B4BB;
+        }
+    }
+    
+  }
+  
+  /* Control the right side */
+  .right {
+    right: 0;
+    background-color: #B4B4BB;
+    a{
+        color: rgb(11, 10, 10);
+        &:hover{
+            border-color: #1ba32f;
+        }
+    }
+  }
+  
+  /* If you want the content centered horizontally and vertically */
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  
+  }
+  
+ 
+}
+// .container-split{
+  
+
+//     a{
+//         text-decoration: none;
+//     }
+//     .col1{
+//         height: 100%;
+//   width: 50%;
+//   position: fixed;
+//   z-index: 1;
+//   top: 0;
+//   overflow-x: hidden;
+//   padding-top: 20px;
+        
+//     }
+//     .col2{
+//         height: 100%;
+//         width: 50%;
+//         position: fixed;
+//         z-index: 1;
+//         top: 0;
+//         overflow-x: hidden;
+//         padding-top: 20px;
+
+//     }
+// }
+@media print {
+    head{
+        display: none;
+    }
+    body {
+    width: 58mm;
+    height:100%;
+    margin-left: 2px;
+    margin-right: 2px;
+    position:absolute;
+    color: #000;
+    background-color: #fff;
+   }
+   .escososaTicket{
+       font-size: 12px;
+   }
+   .tittleTicket{
+       font-size: 10px;
+   }
+   .textTicket{
+    font-size: 8px;
+}
+}

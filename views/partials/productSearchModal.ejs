@@ -1,0 +1,268 @@
+<!-- PRODUCT SEARCH MODAL / COMPONENT -->
+<!-- Uso:
+     <%- include('../partials/productSearchModal', {
+         modalId: 'productSearchModal',
+         searchInputId: 'productSearchInput',
+         resultsId: 'productSearchResults',
+         onSelectCallback: 'handleProductSelected'
+     }) %>
+-->
+
+<div class="modal fade" id="<%= modalId || 'productSearchModal' %>" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">🔍 Buscar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <!-- Search Input -->
+                <div class="search-input-group mb-3">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" 
+                           id="<%= searchInputId || 'productSearchInput' %>" 
+                           class="form-control" 
+                           placeholder="Nombre, marca o código de barra...">
+                </div>
+
+                <!-- Search Options -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label class="form-check form-check-inline">
+                            <input type="checkbox" 
+                                   id="<%= modalId %>_barcode" 
+                                   class="form-check-input">
+                            <span class="form-check-label">Buscar por código</span>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" 
+                                class="btn btn-sm btn-secondary float-end"
+                                id="<%= modalId %>_clear">
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert -->
+                <div id="<%= modalId %>_alert" class="alert alert-info" style="display: none;">
+                    <span id="<%= modalId %>_alertText"></span>
+                </div>
+
+                <!-- Loading State -->
+                <div id="<%= modalId %>_loading" class="text-center" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Buscando...</span>
+                    </div>
+                </div>
+
+                <!-- Initial State -->
+                <div id="<%= modalId %>_initial" class="text-center py-4">
+                    <div style="font-size: 3rem;">📝</div>
+                    <p class="text-muted">Ingresa el nombre, marca o código del producto</p>
+                </div>
+
+                <!-- Results -->
+                <div id="<%= resultsId || 'productSearchResults' %>" class="search-results-container" style="display: none;">
+                    <!-- Results aquí -->
+                </div>
+
+                <!-- No Results -->
+                <div id="<%= modalId %>_noResults" class="text-center py-4" style="display: none;">
+                    <div style="font-size: 3rem;">🔍</div>
+                    <p class="text-muted">No se encontraron productos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template para tarjeta de producto en búsqueda -->
+<template id="<%= modalId %>_template">
+    <div class="product-search-item p-3 border-bottom cursor-pointer hover-highlight">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="fw-bold"><span class="product-name">Nombre del producto</span></div>
+                <small class="text-muted">
+                    Marca: <span class="product-brand">N/A</span> | 
+                    Código: <span class="product-code">N/A</span>
+                </small>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="fw-bold text-primary">$<span class="product-price">0.00</span></div>
+                <small class="text-muted">Stock: <span class="product-stock">0</span></small>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+}
+
+.search-input-group {
+    position: relative;
+}
+
+.search-input-group input {
+    padding-left: 40px;
+}
+
+.search-results-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.product-search-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.product-search-item:hover {
+    background-color: #f5f5f5;
+}
+
+.hover-highlight:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/searchManager.js"></script>
+
+<script>
+(function() {
+    const modalId = '<%= modalId ? modalId : "productSearchModal" %>';
+    const searchInputId = '<%= searchInputId ? searchInputId : "productSearchInput" %>';
+    const resultsId = '<%= resultsId ? resultsId : "productSearchResults" %>';
+    const onSelectCallback = '<%= onSelectCallback ? onSelectCallback : "" %>';
+
+    const searchInput = document.getElementById(searchInputId);
+    const resultsContainer = document.getElementById(resultsId);
+    const alertDiv = document.getElementById(modalId + '_alert');
+    const alertText = document.getElementById(modalId + '_alertText');
+    const loadingDiv = document.getElementById(modalId + '_loading');
+    const initialDiv = document.getElementById(modalId + '_initial');
+    const noResultsDiv = document.getElementById(modalId + '_noResults');
+    const template = document.getElementById(modalId + '_template');
+    const barcodeCheckbox = document.getElementById(modalId + '_barcode');
+    const clearBtn = document.getElementById(modalId + '_clear');
+
+    // Crear gestor de búsqueda
+    const searchManager = new SearchManager({
+        endpoint: '/api/search/smart',
+        debounceDelay: 300,
+        minChars: 1,
+        onSuccess: (productos) => {
+            if (!productos || productos.length === 0) {
+                resultsContainer.style.display = 'none';
+                noResultsDiv.style.display = 'block';
+                initialDiv.style.display = 'none';
+                alertDiv.style.display = 'none';
+                return;
+            }
+            displayResults(productos);
+        },
+        onError: (message) => {
+            alertText.textContent = message || 'Error en búsqueda';
+            alertDiv.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            initialDiv.style.display = 'none';
+            noResultsDiv.style.display = 'none';
+        },
+        onLoading: (isLoading) => {
+            loadingDiv.style.display = isLoading ? 'block' : 'none';
+        }
+    });
+
+    // Event: Input cambio
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (this.value.trim().length === 0) {
+                resultsContainer.style.display = 'none';
+                initialDiv.style.display = 'block';
+                noResultsDiv.style.display = 'none';
+                alertDiv.style.display = 'none';
+                return;
+            }
+
+            searchManager.search(this.value);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchManager.searchNow(this.value);
+            }
+        });
+    }
+
+    // Event: Clear button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
+            initialDiv.style.display = 'block';
+            noResultsDiv.style.display = 'none';
+            alertDiv.style.display = 'none';
+            searchManager.clear();
+            searchInput.focus();
+        });
+    }
+
+    // Mostrar resultados
+    function displayResults(productos) {
+        resultsContainer.innerHTML = '';
+
+        productos.forEach(producto => {
+            const clone = template.content.cloneNode(true);
+            
+            clone.querySelector('.product-name').textContent = producto.nombre;
+            clone.querySelector('.product-brand').textContent = producto.marca || 'N/A';
+            clone.querySelector('.product-code').textContent = producto.codigo || 'N/A';
+            clone.querySelector('.product-price').textContent = 
+                (producto.precioMinorista || 0).toFixed(2);
+            clone.querySelector('.product-stock').textContent = producto.cantidad || 0;
+
+            const item = clone.querySelector('.product-search-item');
+            item.addEventListener('click', function() {
+                selectProduct(producto);
+            });
+
+            resultsContainer.appendChild(clone);
+        });
+
+        resultsContainer.style.display = 'block';
+        initialDiv.style.display = 'none';
+        noResultsDiv.style.display = 'none';
+        alertDiv.style.display = 'none';
+    }
+
+    // Seleccionar producto
+    function selectProduct(producto) {
+        if (window[onSelectCallback] && typeof window[onSelectCallback] === 'function') {
+            window[onSelectCallback](producto);
+        } else {
+            // Callback por defecto: disparar evento
+            const event = new CustomEvent('productSelected', { detail: producto });
+            document.dispatchEvent(event);
+        }
+        
+        // Cerrar modal
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (bootstrapModal) bootstrapModal.hide();
+        }
+    }
+})();
+</script>

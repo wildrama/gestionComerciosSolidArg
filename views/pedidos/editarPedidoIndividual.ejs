@@ -1,0 +1,197 @@
+<%- include('../partials/headerPedido.ejs'); %>
+
+<%- include('../partials/flash.ejs'); %>
+
+
+
+<div class="container">
+
+    <a href="/pedidos/<%= pedidoIndividual._id %>/ver-pedido">Atras</a>
+    <p id="idPedido" class="d-none" ><%= pedidoIndividual._id %></p>
+    <p id="idCliente" class="d-none" ><%= pedidoIndividual.cliente._id %></p>
+
+
+    <h2>Editar Pedido</h2> 
+
+  
+    <div class="lineTabla">
+        <a href="/clientes/<%= pedidoIndividual.cliente._id %>/editar-cliente" id="EditarCliente" class="btn btn-info text-dark">Editar Cliente</a> 
+         
+    </div>
+    <div class="clienteInfo">
+        <p>Dirigido a : <b><%= pedidoIndividual.cliente.dueño %></b> 
+            || <b><%= pedidoIndividual.cliente.nombreLocal%></b> </p> 
+       Dirección de entrega: <p><%= pedidoIndividual.cliente.direccion %> </p>
+       Contacto vigente :<p><%= pedidoIndividual.cliente.telefono1 %> </p>
+    
+       
+            <% if (pedidoIndividual.cliente.correo) { %>
+                Correo: <p><%= pedidoIndividual.cliente.correo %> </p>
+
+            <% } %>
+    
+       <p class="text-muted" ><%= pedidoIndividual.cliente.comentario %> </p> 
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="checkboxEstado" id="checkboxEstado">
+                <label class="form-check-label" for="checkboxEstado">Estado de pedido</label>
+              </div>
+
+              <div class="form-check form-switch">
+                <input class="form-check-input" name="checkboxArchivar" type="checkbox" id="checkboxArchivar">
+                <label class="form-check-label" for="checkboxArchivar">Archivar</label>
+              </div>
+            </div>
+    </div>
+    <div class="container">
+        <div scope="col-6 d-flex justify-content-around text-end px-4" >
+            <btn  id="agregarProductos" class="btn btn-success  ">Agregar Producto</btn> 
+            
+
+          </div>
+          <div id="contenedorBusquedaGRAL" class="container d-none">
+
+    
+            <form id="formBuscarPedidos" class="row justify-content-between align-items-center ">
+              <div class="col-10">
+      
+                  <input class="form-control" placeholder="Tap para buscar" type="search" name="inputIrBuscar" id="inputIrBuscar">
+                
+                </div>
+                <div class="col-2 d-flex justify-content-around align-items-center ">
+                     <button id="lupaBusqueda" class="d-none btn">
+      
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                  </svg>          
+      
+                </button>
+                <div id="eliminarProductos" class="">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                  </svg>
+                </div>
+                </div>
+             
+              </form>
+              <div id="displayProductos" class="mt-2">
+      
+              </div>
+               
+                <!-- <table class="table">
+                  <thead>
+                    <tr>
+                      
+                      <th scope="col">Producto</th>
+          
+                      <th scope="col">Cantidad de productos</th>
+                      <th scope="col">Precio por unidad</th>
+      
+                      <th scope="col">Subtotal</th>
+      
+                      
+                  
+                      <th scope="col">Total</th>
+                  
+                    </tr>
+                  </thead>
+                  <tbody id="tableParaProductosEdit">
+                    
+                    
+                    
+                       
+                    
+                     
+               
+               
+                      
+      
+                      
+                  </tbody>
+                 
+                </table> -->
+           
+            
+            </div>
+
+
+          <div id="pedidoActualProductos" class="container">
+            <table class="table">
+                <thead>
+                  <tr>
+                    
+                    <th scope="col">Producto</th>
+        
+                    <th scope="col">Cantidad de productos</th>
+                    <th scope="col">Precio por unidad</th>
+    
+                    <th scope="col">Subtotal</th>
+    
+                    
+                
+                    <th scope="col">Total</th>
+                
+                  </tr>
+                </thead>
+                <tbody id="tableParaProductosEdit">
+                  
+                  
+                  
+                     
+                  
+                     <% for( let producto of pedidoIndividual.productosPedidosNombre ) { %>
+                        <tr>
+                        <td>
+                            
+                            <%= producto.nombre %>  -   <%= producto.marca %> 
+                        </td>     
+                    
+                          
+                      
+                        <td>
+                            <%= producto.cantidad %> 
+                        </td> 
+                        <td>
+                            <%= producto.precioMayorista %> 
+                        </td> 
+                           
+                        <td>
+                            <% let cantidadPorProducto = producto.precioMayorista * producto.cantidad %> 
+                            <%= cantidadPorProducto %> 
+                        </td> 
+                    
+                       
+                 
+                   
+                    </td>
+                    </tr>
+             
+                    <% } %>
+                    
+    
+                    
+                </tbody>
+               
+              </table>
+          
+            <div class="d-flex justify-content-around text-end ">
+              <button  id="finalizarPedidoBTN" class="btn btn-outline-success d-none">Finalizar Nueva carga</button>
+           
+              TOTAL:
+              <p id="montoFinalPedido" class="lead  px-3">
+                <%= pedidoIndividual.importeTotal %> 
+
+
+            </p>
+            </div>
+          </div>
+     
+    </div>
+</div>
+
+
+<%- include('../partials/footerEditarPedido.ejs'); %>

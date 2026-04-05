@@ -1,0 +1,10 @@
+.contenedorParaBotones{
+    width: 80vw;
+    height: 100vh;
+
+}
+.menuBoton{
+background-color: rgb(0, 136, 255);
+padding: 10px 100px;
+
+}

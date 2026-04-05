@@ -1,0 +1,277 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro" class="breadcrumb-link">Estaciones</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="breadcrumb-link"><%= estacionDeCobro.ubicacionDeEstacion %></a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Cierre de Caja</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="cierre-header">
+            <div class="cierre-header-content">
+                <h1 class="cierre-title">🔒 Cierre de Caja</h1>
+                <p class="cierre-subtitle"><%= estacionDeCobro.ubicacionDeEstacion %></p>
+            </div>
+            <div class="cierre-time">
+                <span class="time-label">Hora de Cierre:</span>
+                <span class="time-value" id="actualTime">--:--:--</span>
+            </div>
+        </div>
+
+        <div class="reset-info-box mb-4">
+            <span class="info-icon">ℹ️</span>
+            <p class="info-text">
+                <strong>Tipos de cierre recomendados:</strong>
+                <strong>Diario</strong> para fin de jornada, <strong>Semanal</strong> para control gerencial y <strong>Mensual</strong> para auditoría administrativa.
+            </p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="cierre-summary-grid">
+            <div class="summary-card">
+                <div class="card-icon">💵</div>
+                <div class="card-content">
+                    <p class="card-label">Dinero Inicial</p>
+                    <p class="card-value">$<%= estacionDeCobro.dineroDeInicio.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <p class="card-label">Dinero en Caja</p>
+                    <p class="card-value">$<%= estacionDeCobro.dineroEnEstacion.toFixed(2) %></p>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon">💸</div>
+                <div class="card-content">
+                    <p class="card-label">Ventas Efectivo</p>
+                    <p class="card-value"><%= cierrePreview ? cierrePreview.ventasEnEfectivo.cantidad : (estacionDeCobro.comprasRealizadasEnEfectivo || 0) %></p>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon">💳</div>
+                <div class="card-content">
+                    <p class="card-label">Ventas Tarjeta/Otro</p>
+                    <p class="card-value"><%= cierrePreview ? cierrePreview.ventasEnOtro.cantidad : (estacionDeCobro.comprasRealizadasEnOtro || 0) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingresos Accordion -->
+        <div class="cierre-section">
+            <div class="accordion custom-accordion" id="accordionIngresos">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngresos">
+                            <span class="accordion-icon">➕</span>
+                            Ingresos Manuales de Efectivo
+                        </button>
+                    </h2>
+                    <div id="collapseIngresos" class="accordion-collapse collapse show" data-bs-parent="#accordionIngresos">
+                        <div class="accordion-body">
+                            <% if (estacionDeCobro.ingresosDeEfectivoManual && estacionDeCobro.ingresosDeEfectivoManual.length > 0) { %>
+                            <div class="transactions-table-wrapper">
+                                <table class="transactions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Monto</th>
+                                            <th>Comentario</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% estacionDeCobro.ingresosDeEfectivoManual.forEach(ingreso => { %>
+                                        <tr>
+                                            <td>
+                                                <span class="amount-badge income">$<%= ingreso.cantidad.toFixed(2) %></span>
+                                            </td>
+                                            <td><%= ingreso.comentarioDeIngreso || '-' %></td>
+                                            <td><%= new Date(ingreso.fecha).toLocaleString('es-ES') %></td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } else { %>
+                            <p class="no-data">No hay ingresos registrados</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Egresos Accordion -->
+        <div class="cierre-section">
+            <div class="accordion custom-accordion" id="accordionEgresos">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEgresos">
+                            <span class="accordion-icon">➖</span>
+                            Egresos Manuales de Efectivo
+                        </button>
+                    </h2>
+                    <div id="collapseEgresos" class="accordion-collapse collapse show" data-bs-parent="#accordionEgresos">
+                        <div class="accordion-body">
+                            <% if (estacionDeCobro.egresoDeEfectivoManual && estacionDeCobro.egresoDeEfectivoManual.length > 0) { %>
+                            <div class="transactions-table-wrapper">
+                                <table class="transactions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Monto</th>
+                                            <th>Comentario</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% estacionDeCobro.egresoDeEfectivoManual.forEach(egreso => { %>
+                                        <tr>
+                                            <td>
+                                                <span class="amount-badge output">$<%= egreso.cantidad.toFixed(2) %></span>
+                                            </td>
+                                            <td><%= egreso.comentarioDeEgreso || '-' %></td>
+                                            <td><%= new Date(egreso.fecha).toLocaleString('es-ES') %></td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } else { %>
+                            <p class="no-data">No hay egresos registrados</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas Summary -->
+        <div class="cierre-section">
+            <h3 class="section-title">📊 Resumen del período <%= periodo || 'DIARIO' %></h3>
+            <p class="form-help mb-3">Rango evaluado: <strong><%= cierrePreview ? cierrePreview.rangoTexto : 'Actual' %></strong></p>
+            <div class="ventas-summary-grid">
+                <div class="summary-box">
+                    <span class="summary-label">Ventas en Efectivo</span>
+                    <span class="summary-amount">$<%= cierrePreview ? cierrePreview.ventasEnEfectivo.montoTotal.toFixed(2) : (estacionDeCobro.dineroDeVentasEnEfectivo || 0).toFixed(2) %></span>
+                    <span class="summary-qty">(<%= cierrePreview ? cierrePreview.ventasEnEfectivo.cantidad : (estacionDeCobro.comprasRealizadasEnEfectivo || 0) %> transacciones)</span>
+                </div>
+                <div class="summary-box">
+                    <span class="summary-label">Ventas Tarjeta / Transferencia</span>
+                    <span class="summary-amount">$<%= cierrePreview ? cierrePreview.ventasEnOtro.montoTotal.toFixed(2) : (estacionDeCobro.dineroDeVentasEnOtro || 0).toFixed(2) %></span>
+                    <span class="summary-qty">(<%= cierrePreview ? cierrePreview.ventasEnOtro.cantidad : (estacionDeCobro.comprasRealizadasEnOtro || 0) %> transacciones)</span>
+                </div>
+                <div class="summary-box">
+                    <span class="summary-label">Dinero esperado en caja</span>
+                    <span class="summary-amount">$<%= cierrePreview ? cierrePreview.dineroEsperado.toFixed(2) : (estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %></span>
+                    <span class="summary-qty">Incluye ingresos/egresos manuales del período</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comentarios -->
+        <form action="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja/guardar" method="POST" class="modern-form">
+            <div class="form-grid">
+                <div class="form-section">
+                    <h3 class="section-title-form">🧾 Configuración del cierre</h3>
+
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label for="periodo" class="form-label-modern">Tipo de cierre</label>
+                            <select id="periodo" name="periodo" class="form-control-modern">
+                                <option value="DIARIO" <%= (periodo || 'DIARIO') === 'DIARIO' ? 'selected' : '' %>>Diario</option>
+                                <option value="SEMANAL" <%= periodo === 'SEMANAL' ? 'selected' : '' %>>Semanal</option>
+                                <option value="MENSUAL" <%= periodo === 'MENSUAL' ? 'selected' : '' %>>Mensual</option>
+                            </select>
+                            <small class="form-help">Selecciona el tipo de corte que necesita revisar el administrador.</small>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="dineroReal" class="form-label-modern">Dinero contado en caja</label>
+                            <input id="dineroReal" 
+                                   name="dineroReal" 
+                                   type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   required
+                                   class="form-control-modern" 
+                                   value="<%= cierrePreview ? cierrePreview.dineroReal.toFixed(2) : (estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %>">
+                            <small class="form-help">Este valor se usa para comparar contra el dinero esperado del período.</small>
+                        </div>
+                    </div>
+
+                    <div class="reset-info-box mt-3">
+                        <span class="info-icon">📌</span>
+                        <p class="info-text">
+                            <strong>Dinero esperado:</strong> $<%= cierrePreview ? cierrePreview.dineroEsperado.toFixed(2) : (estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %>
+                            · <strong>Transacciones:</strong> <%= cierrePreview ? cierrePreview.totalTransacciones : ((estacionDeCobro.comprasRealizadasEnEfectivo || 0) + (estacionDeCobro.comprasRealizadasEnOtro || 0)) %>
+                        </p>
+                    </div>
+
+                    <div class="form-group-modern mt-3">
+                        <label for="comentarioDeCierre" class="form-label-modern">Notas de Cierre (Opcional)</label>
+                        <textarea id="comentarioDeCierre" 
+                                  name="comentarioDeCierre" 
+                                  class="form-control-modern textarea-modern" 
+                                  placeholder="Añade cualquier observación sobre el cierre de caja..."
+                                  rows="4"></textarea>
+                        <small class="form-help">Usa este espacio para documentar novedades, diferencias o incidencias.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="cierre-actions">
+                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">
+                    ← Cancelar
+                </a>
+                <button type="submit" class="btn-info-modern" formaction="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja/imprimir" formmethod="GET" formtarget="_blank">
+                    <span class="btn-icon">🖨️</span>
+                    Imprimir Resumen
+                </button>
+                <button type="submit" class="btn-primary-modern">
+                    <span class="btn-icon">🔒</span>
+                    Guardar Cierre
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/postCierre.js"></script>
+
+<script>
+// Actualizar hora en tiempo real
+function updateTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('actualTime').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+setInterval(updateTime, 1000);
+updateTime();
+
+const periodoSelect = document.getElementById('periodo');
+if (periodoSelect) {
+    periodoSelect.addEventListener('change', function () {
+        const params = new URLSearchParams(window.location.search);
+        params.set('periodo', this.value);
+        window.location.search = params.toString();
+    });
+}
+</script>
+
+<%- include('../partials/footer.ejs'); %>

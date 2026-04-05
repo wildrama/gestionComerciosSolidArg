@@ -1,0 +1,167 @@
+<%- include('../partials/headerAdm.ejs'); %>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current"><%= ofertaConjuntoParaVer.nombreOferta %></span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="form-header">
+            <h1 class="form-title">🎯 Detalles de Oferta Conjunto</h1>
+            <p class="form-subtitle"><%= ofertaConjuntoParaVer.nombreOferta %></p>
+        </div>
+
+        <!-- Main Info Card -->
+        <div class="oferta-detail-header">
+            <div class="oferta-header-content">
+                <div class="oferta-header-left">
+                    <span class="oferta-header-icon">🎯</span>
+                    <div>
+                        <h2 class="oferta-header-title"><%= ofertaConjuntoParaVer.nombreOferta %></h2>
+                        <p class="oferta-header-status">Oferta Activa</p>
+                    </div>
+                </div>
+                <div class="oferta-header-price">
+                    <p class="price-label">Precio Especial</p>
+                    <p class="price-amount">$<%= ofertaConjuntoParaVer.precioOferta.toFixed(2) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="oferta-details-grid">
+            <!-- Información General -->
+            <div class="oferta-detail-card">
+                <div class="card-header">
+                    <span class="card-icon">📋</span>
+                    <h3 class="card-title">Información General</h3>
+                </div>
+                <div class="card-body-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Nombre de la Oferta</span>
+                        <span class="detail-value"><%= ofertaConjuntoParaVer.nombreOferta %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Precio Especial</span>
+                        <span class="detail-value price">$<%= ofertaConjuntoParaVer.precioOferta.toFixed(2) %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Vigente Hasta</span>
+                        <span class="detail-value">
+                            <%= new Date(ofertaConjuntoParaVer.fechaDeVigencia).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estaciones -->
+            <div class="oferta-detail-card">
+                <div class="card-header">
+                    <span class="card-icon">🏪</span>
+                    <h3 class="card-title">Estaciones de Cobro</h3>
+                </div>
+                <div class="card-body-details">
+                    <div class="stations-list">
+                        <% if (ofertaConjuntoParaVer.estacionesDeCobro && ofertaConjuntoParaVer.estacionesDeCobro.length > 0) { %>
+                            <% ofertaConjuntoParaVer.estacionesDeCobro.forEach(estacion => { %>
+                            <div class="station-item">
+                                <span class="station-icon">🏪</span>
+                                <span class="station-name"><%= estacion.ubicacionDeEstacion %></span>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="no-data">No hay estaciones asignadas</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Productos Incluidos -->
+            <div class="oferta-detail-card full-width">
+                <div class="card-header">
+                    <span class="card-icon">📦</span>
+                    <h3 class="card-title">Productos Incluidos en la Oferta</h3>
+                </div>
+                <div class="card-body-details">
+                    <% if (ofertaConjuntoParaVer.productosEnOferta && ofertaConjuntoParaVer.productosEnOferta.length > 0) { %>
+                        <div class="products-table-wrapper">
+                            <table class="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th style="text-align: center;">Marca</th>
+                                        <th style="text-align: center;">Precio Original</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% ofertaConjuntoParaVer.productosEnOferta.forEach(producto => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="product-cell">
+                                                <span class="product-icon">📦</span>
+                                                <span><%= producto.nombre %></span>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center;"><%= producto.marca || '-' %></td>
+                                        <td style="text-align: center;">
+                                            <span class="price-badge">$<%= producto.precioMinorista ? producto.precioMinorista.toFixed(2) : '-' %></span>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="no-data">No hay productos asociados a esta oferta</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="oferta-summary-card">
+            <h3 class="summary-title">📊 Resumen</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-label">Productos Incluidos</span>
+                    <span class="summary-value">
+                        <%= ofertaConjuntoParaVer.productosEnOferta ? ofertaConjuntoParaVer.productosEnOferta.length : 0 %>
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Estaciones</span>
+                    <span class="summary-value">
+                        <%= ofertaConjuntoParaVer.estacionesDeCobro ? ofertaConjuntoParaVer.estacionesDeCobro.length : 0 %>
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Estado</span>
+                    <span class="summary-value status-active">Activa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <a href="/administrador/ofertas" class="btn-secondary-modern">
+                ← Volver a Ofertas
+            </a>
+            <form action="/administrador/ofertas/oferta-conjunto/<%= ofertaConjuntoParaVer._id %>?_method=DELETE" 
+                  method="POST" 
+                  style="display: inline;"
+                  onsubmit="return confirm('¿Estás seguro de eliminar esta oferta?')">
+                <button type="submit" class="btn-delete-full">
+                    🗑️ Eliminar Oferta
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>
