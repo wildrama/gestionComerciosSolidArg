@@ -14,7 +14,16 @@
         <!-- Page Header -->
         <div class="form-header">
             <h1 class="form-title">🎯 Nueva Oferta Conjunto</h1>
-            <p class="form-subtitle">Crea una oferta especial con múltiples productos</p>
+            <p class="form-subtitle">Armala en orden: datos básicos, cajas donde aplica, productos incluidos y guardado final.</p>
+        </div>
+
+        <div class="setup-next-steps offer-step-guide">
+            <h3 class="steps-title">Orden recomendado</h3>
+            <ul class="steps-list">
+                <li><span class="step-number">1</span><span class="step-text">Completá nombre, precio promocional y vigencia.</span></li>
+                <li><span class="step-number">2</span><span class="step-text">Elegí una o varias cajas donde va a estar disponible.</span></li>
+                <li><span class="step-number">3</span><span class="step-text">Buscá y agregá los productos del combo.</span></li>
+            </ul>
         </div>
 
         <!-- Info Alert -->
@@ -81,66 +90,74 @@
                     <h3 class="section-title-form">🏪 Aplicar en Estaciones</h3>
                     
                     <div class="form-group-modern">
-                        <label for="estacionDeCobroParaLaOferta" class="form-label-modern">
-                            Selecciona las Estaciones *
-                        </label>
-                        <div class="select-wrapper-multiple">
-                            <select id="estacionDeCobroParaLaOferta" 
-                                    name="estacionDeCobroParaLaOferta" 
-                                    class="form-control-modern form-select-multiple"
-                                    multiple
-                                    required>
-                                <% if (estacionesDeCobro && estacionesDeCobro.length > 0) { %>
-                                    <% estacionesDeCobro.forEach(estacion => { %>
-                                    <option value="<%= estacion._id %>">
-                                        🏪 <%= estacion.ubicacionDeEstacion %>
-                                    </option>
-                                    <% }); %>
-                                <% } else { %>
-                                    <option value="">No hay estaciones disponibles</option>
-                                <% } %>
-                            </select>
+                        <label class="form-label-modern">Seleccioná una o varias cajas *</label>
+                        <div class="station-select-actions">
+                            <button type="button" id="selectAllStationsBtn" class="btn-light-modern">Seleccionar todas</button>
+                            <button type="button" id="clearStationsBtn" class="btn-light-modern">Limpiar</button>
                         </div>
-                        <small class="form-help">Mantén presionado Ctrl/Cmd para seleccionar múltiples</small>
+                        <div class="stations-check-grid" id="estacionDeCobroParaLaOferta">
+                            <% if (estacionesDeCobro && estacionesDeCobro.length > 0) { %>
+                                <% estacionesDeCobro.forEach(estacion => { %>
+                                <label class="station-check-card">
+                                    <input type="checkbox"
+                                           name="estacionDeCobroParaLaOferta"
+                                           value="<%= estacion._id %>"
+                                           class="station-checkbox"
+                                           <%= estacion.ubicacionDeEstacion === 'CAJA 1' ? 'checked' : '' %>>
+                                    <span class="station-check-icon">🏪</span>
+                                    <span class="station-check-copy">
+                                        <strong><%= estacion.ubicacionDeEstacion %></strong>
+                                        <small>La oferta quedará disponible en esta caja.</small>
+                                    </span>
+                                </label>
+                                <% }); %>
+                            <% } else { %>
+                                <p class="no-selection">No hay estaciones disponibles.</p>
+                            <% } %>
+                        </div>
+                        <small class="form-help">Podés activar la misma oferta en varias cajas al mismo tiempo.</small>
                     </div>
 
                     <div class="estaciones-preview">
-                        <p class="preview-label">Estaciones Seleccionadas:</p>
+                        <p class="preview-label">Cajas seleccionadas:</p>
                         <div id="selectedStations" class="selected-stations-list"></div>
                     </div>
                 </div>
 
                 <!-- Productos Incluidos -->
                 <div class="form-section full-width">
-                    <h3 class="section-title-form">📦 Productos Incluidos en la Oferta</h3>
+                    <h3 class="section-title-form">📦 Productos vinculados al stock del combo</h3>
                     
-                    <p class="section-description">Agrega los productos que formarán parte de esta oferta conjunto</p>
+                    <p class="section-description">Este paso es <strong>opcional</strong>. Si vinculás productos de stock, al vender el combo se descontarán automáticamente. Si no agregás ninguno, la oferta se cobra igual sin tocar stock.</p>
                     
-                    <div class="products-search-area">
+                    <div id="formSearchOfertaConjunto" class="products-search-area" role="search">
                         <div class="search-box-conjunto">
                             <span class="search-icon-conjunto">🔍</span>
                             <input type="text" 
                                    id="searchProductCode" 
                                    class="search-input-conjunto" 
-                                   placeholder="Busca productos por código de barra"
+                                   placeholder="Ej: arroz, coca cola o 779..."
                                    autocomplete="off">
                         </div>
-                        <button type="button" class="btn-add-product" onclick="agregarProductoConjunto()">
-                            <span class="btn-icon">+</span>
-                            Agregar Producto
+                        <button type="button" id="btnBuscarProductoConjunto" class="btn-add-product">
+                            <span class="btn-icon">🔎</span>
+                            Buscar y agregar
                         </button>
                     </div>
+
+                    <div id="comboSearchResults" class="finder-results" style="margin-bottom: 1rem;"></div>
+                    <small class="form-help">Si elegís productos acá, cuando ese combo se venda en caja se descontará su stock automáticamente.</small>
 
                     <div class="products-list-container">
                         <div id="productosEnConjunto" class="productos-conjunto-list">
                             <div class="empty-products">
                                 <span class="empty-icon">📦</span>
-                                <p>No hay productos agregados aún</p>
+                                <p>Opcional: todavía no vinculaste productos de stock al combo</p>
                             </div>
                         </div>
                     </div>
 
-                    <input type="hidden" id="productosIds" name="productosEnOferta" value="">
+                    <input type="hidden" id="productosIds" name="productosEnOfertaConCodigo" value="">
                 </div>
             </div>
 
@@ -149,9 +166,9 @@
                 <a href="/administrador/ofertas" class="btn-secondary-modern">
                     ← Cancelar
                 </a>
-                <button type="submit" class="btn-primary-modern">
+                <button type="submit" class="btn-primary-modern btn-save-emphasis">
                     <span class="btn-icon">✓</span>
-                    Crear Oferta Conjunto
+                    Crear oferta conjunto
                 </button>
             </div>
         </form>
@@ -162,80 +179,51 @@
 <script src="/ofertasFunc.js"></script>
 
 <script>
-// Manejo de selección de estaciones
-const selectElement = document.getElementById('estacionDeCobroParaLaOferta');
+const stationCheckboxes = Array.from(document.querySelectorAll('.station-checkbox'));
 const selectedStationsList = document.getElementById('selectedStations');
+const selectAllStationsBtn = document.getElementById('selectAllStationsBtn');
+const clearStationsBtn = document.getElementById('clearStationsBtn');
+const comboForm = document.querySelector('.modern-form');
+const productosIds = document.getElementById('productosIds');
 
 function updateSelectedStations() {
-    const selected = Array.from(selectElement.selectedOptions).map(opt => opt.text);
-    
+    const selected = stationCheckboxes
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.closest('.station-check-card')?.querySelector('strong')?.textContent?.trim())
+        .filter(Boolean);
+
+    stationCheckboxes.forEach((checkbox) => {
+        checkbox.closest('.station-check-card')?.classList.toggle('selected', checkbox.checked);
+    });
+
     if (selected.length === 0) {
-        selectedStationsList.innerHTML = '<p class="no-selection">Selecciona al menos una estación</p>';
+        selectedStationsList.innerHTML = '<p class="no-selection">Seleccioná al menos una caja para publicar esta oferta.</p>';
         return;
     }
-    
+
     selectedStationsList.innerHTML = selected
-        .map(station => `<span class="station-badge">${station}</span>`)
+        .map((station) => `<span class="station-badge">${station}</span>`)
         .join('');
 }
 
-selectElement.addEventListener('change', updateSelectedStations);
+stationCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', updateSelectedStations));
+selectAllStationsBtn?.addEventListener('click', () => {
+    stationCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+    updateSelectedStations();
+});
+clearStationsBtn?.addEventListener('click', () => {
+    stationCheckboxes.forEach((checkbox) => { checkbox.checked = false; });
+    updateSelectedStations();
+});
+
+comboForm?.addEventListener('submit', (event) => {
+    if (!stationCheckboxes.some((checkbox) => checkbox.checked)) {
+        event.preventDefault();
+        window.alert('Seleccioná al menos una caja para aplicar la oferta.');
+    }
+});
+
 updateSelectedStations();
-
-// Manejo de productos en conjunto
-let productosSeleccionados = [];
-
-function agregarProductoConjunto() {
-    const codigo = document.getElementById('searchProductCode').value;
-    if (!codigo) {
-        alert('Ingresa un código de barra');
-        return;
-    }
-    
-    // Aquí iría la lógica para buscar y agregar el producto
-    console.log('Agregando producto con código:', codigo);
-}
-
-function eliminarProductoConjunto(index) {
-    productosSeleccionados.splice(index, 1);
-    actualizarListaProductos();
-}
-
-function actualizarListaProductos() {
-    const container = document.getElementById('productosEnConjunto');
-    
-    if (productosSeleccionados.length === 0) {
-        container.innerHTML = `
-            <div class="empty-products">
-                <span class="empty-icon">📦</span>
-                <p>No hay productos agregados aún</p>
-            </div>
-        `;
-        document.getElementById('productosIds').value = '';
-        return;
-    }
-    
-    container.innerHTML = productosSeleccionados
-        .map((prod, index) => `
-            <div class="product-item-conjunto">
-                <div class="item-info">
-                    <span class="item-icon">📦</span>
-                    <div>
-                        <p class="item-name">${prod.nombre}</p>
-                        <p class="item-meta">${prod.marca} | $${prod.precio}</p>
-                    </div>
-                </div>
-                <button type="button" class="btn-remove-item" onclick="eliminarProductoConjunto(${index})">
-                    ✕
-                </button>
-            </div>
-        `)
-        .join('');
-    
-    document.getElementById('productosIds').value = productosSeleccionados
-        .map(p => p.id)
-        .join(',');
-}
 </script>
 
 <%- include('../partials/footer.ejs'); %>

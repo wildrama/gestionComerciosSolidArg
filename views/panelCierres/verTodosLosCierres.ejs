@@ -1,106 +1,285 @@
 <%- include('../partials/headerAdm.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
+<%
+    const currentFilters = (typeof filters !== 'undefined' && filters) ? filters : { desde: '', hasta: '', q: '' };
+    const currentSummary = (typeof summary !== 'undefined' && summary) ? summary : {
+        totalCount: (cierresDeCaja || []).length,
+        totalVentas: (cierresDeCaja || []).reduce((acc, cierre) => acc + Number((cierre.ventasEnEfectivo?.montoTotal || 0) + (cierre.ventasEnOtro?.montoTotal || 0)), 0),
+        totalEnCaja: (cierresDeCaja || []).reduce((acc, cierre) => acc + Number(cierre.dineroReal || cierre.dineroEnCaja || 0), 0),
+        lastClose: (cierresDeCaja && cierresDeCaja[0]) ? cierresDeCaja[0].fechaDeCierre : null
+    };
+%>
 
 <div class="admin-dashboard">
     <div class="form-container">
-        <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
             <a href="/administrador" class="breadcrumb-link">Dashboard</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">Cierres de Caja</span>
         </nav>
 
-        <!-- Page Header -->
         <div class="form-header">
-            <h1 class="form-title">📊 Cierres de Caja</h1>
-            <p class="form-subtitle">Historial de todos los cierres realizados en las estaciones</p>
+            <h1 class="form-title">🧾 Historial de cierres</h1>
+            <p class="form-subtitle">Consultá los cierres realizados y filtrá por fecha, usuario, estación o período.</p>
         </div>
 
-        <!-- Stats -->
-        <div class="cierres-stats">
-            <div class="cierres-stat-card">
-                <div class="stat-icon">📦</div>
-                <div class="stat-content">
-                    <p class="stat-label">Total de Cierres</p>
-                    <h3 class="stat-value"><%= cierresDeCaja.length %></h3>
-                </div>
+        <form method="GET" action="/administrador/cierres-caja" class="cierres-filter-bar">
+            <div class="filter-field">
+                <label for="desde" class="filter-label">Desde</label>
+                <input type="date" id="desde" name="desde" class="form-control-modern" value="<%= currentFilters.desde || '' %>">
             </div>
-            <% if (cierresDeCaja.length > 0) { %>
-            <div class="cierres-stat-card">
-                <div class="stat-icon">📅</div>
-                <div class="stat-content">
-                    <p class="stat-label">Último Cierre</p>
-                    <h3 class="stat-value"><%= new Date(cierresDeCaja[0].createdAt).toLocaleDateString('es-ES') %></h3>
-                </div>
+            <div class="filter-field">
+                <label for="hasta" class="filter-label">Hasta</label>
+                <input type="date" id="hasta" name="hasta" class="form-control-modern" value="<%= currentFilters.hasta || '' %>">
             </div>
-            <% } %>
+            <div class="filter-field search-field">
+                <label for="q" class="filter-label">Buscar</label>
+                <input type="text" id="q" name="q" class="form-control-modern" placeholder="Caja, usuario, período..." value="<%= currentFilters.q || '' %>">
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-primary-modern">🔎 Filtrar</button>
+                <a href="/administrador/cierres-caja" class="btn-secondary-modern">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="cierres-summary-grid">
+            <article class="cierres-summary-card">
+                <span>Total de cierres</span>
+                <strong><%= currentSummary.totalCount || 0 %></strong>
+            </article>
+            <article class="cierres-summary-card">
+                <span>Ventas registradas</span>
+                <strong>$<%= Number(currentSummary.totalVentas || 0).toFixed(2) %></strong>
+            </article>
+            <article class="cierres-summary-card">
+                <span>Dinero contado</span>
+                <strong>$<%= Number(currentSummary.totalEnCaja || 0).toFixed(2) %></strong>
+            </article>
+            <article class="cierres-summary-card">
+                <span>Último cierre</span>
+                <strong><%= currentSummary.lastClose ? new Date(currentSummary.lastClose).toLocaleDateString('es-AR') : '—' %></strong>
+            </article>
         </div>
 
-        <!-- Cierres Grid -->
-        <div class="cierres-grid">
-            <% if (cierresDeCaja && cierresDeCaja.length > 0) { %>
-                <% cierresDeCaja.forEach((cierreDeCajaRealizado, index) => { %>
-                <a href="/administrador/cierres-caja/<%= cierreDeCajaRealizado._id %>" class="cierre-card-link">
-                    <div class="cierre-card">
-                        <div class="cierre-card-header">
-                            <div class="cierre-card-number">#<%= cierresDeCaja.length - index %></div>
-                            <div class="cierre-card-date">
-                                <%= new Date(cierreDeCajaRealizado.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %>
-                            </div>
-                        </div>
-
-                        <div class="cierre-card-content">
-                            <div class="cierre-card-icon">🏪</div>
-                            <h3 class="cierre-card-title">
-                                <%= cierreDeCajaRealizado.estacionDeCobro.ubicacionDeEstacion %>
-                            </h3>
-                            <p class="cierre-card-time">
-                                <%= new Date(cierreDeCajaRealizado.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
-                            </p>
-                        </div>
-
-                        <div class="cierre-card-stats">
-                            <div class="stat-row">
-                                <span class="stat-label">Dinero en Caja:</span>
-                                <span class="stat-value">$<%= cierreDeCajaRealizado.dineroEnCaja.toFixed(2) %></span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">Total Ventas:</span>
-                                <span class="stat-value">
-                                    $<%= Number((cierreDeCajaRealizado.ventasEnEfectivo?.montoTotal || 0) + (cierreDeCajaRealizado.ventasEnOtro?.montoTotal || 0)).toFixed(2) %>
-                                </span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">Transacciones:</span>
-                                <span class="stat-value">
-                                    <%= (cierreDeCajaRealizado.ventasEnEfectivo?.cantidad || 0) + (cierreDeCajaRealizado.ventasEnOtro?.cantidad || 0) %>
-                                </span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">Período:</span>
-                                <span class="stat-value"><%= cierreDeCajaRealizado.periodo || 'DIARIO' %></span>
-                            </div>
-                        </div>
-
-                        <div class="cierre-card-footer">
-                            <span class="view-link">Ver detalles →</span>
-                        </div>
-                    </div>
-                </a>
-                <% }); %>
-            <% } else { %>
-                <div class="empty-state-cierres">
-                    <div class="empty-icon">📊</div>
-                    <h3>No hay cierres registrados</h3>
-                    <p>Los cierres de caja aparecerán aquí</p>
-                    <a href="/administrador" class="btn-primary-modern">
-                        <span class="btn-icon">🏠</span>
-                        Ir al Dashboard
-                    </a>
-                </div>
-            <% } %>
-        </div>
+        <% if (cierresDeCaja && cierresDeCaja.length > 0) { %>
+            <div class="cierres-table-shell">
+                <table class="cierres-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Estación</th>
+                            <th>Usuario</th>
+                            <th>Período</th>
+                            <th>Ventas</th>
+                            <th>Esperado</th>
+                            <th>Real</th>
+                            <th>Diferencia</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% cierresDeCaja.forEach((cierre) => { %>
+                            <tr>
+                                <td data-label="Fecha"><%= cierre.fechaDeCierre ? new Date(cierre.fechaDeCierre).toLocaleString('es-AR') : '—' %></td>
+                                <td data-label="Estación"><strong><%= cierre.ubicacionDeEstacion || cierre.estacionDeCobro?.ubicacionDeEstacion || 'Caja' %></strong></td>
+                                <td data-label="Usuario"><%= cierre.nombreDelUsuario || '—' %></td>
+                                <td data-label="Período"><span class="period-badge"><%= cierre.periodo || 'DIARIO' %></span></td>
+                                <td data-label="Ventas">$<%= Number((cierre.ventasEnEfectivo?.montoTotal || 0) + (cierre.ventasEnOtro?.montoTotal || 0)).toFixed(2) %></td>
+                                <td data-label="Esperado">$<%= Number(cierre.dineroEsperado || 0).toFixed(2) %></td>
+                                <td data-label="Real">$<%= Number(cierre.dineroReal || cierre.dineroEnCaja || 0).toFixed(2) %></td>
+                                <td data-label="Diferencia">
+                                    <span class="difference-pill <%= Number(cierre.diferencia || 0) > 0 ? 'up' : Number(cierre.diferencia || 0) < 0 ? 'down' : 'even' %>">
+                                        <%= Number(cierre.diferencia || 0) > 0 ? '+' : '' %>$<%= Number(cierre.diferencia || 0).toFixed(2) %>
+                                    </span>
+                                </td>
+                                <td class="action-cell">
+                                    <a href="/administrador/cierres-caja/<%= cierre._id %>" class="btn-primary-modern btn-small">Ver detalle</a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-state-cierres">
+                <div class="empty-icon">🧾</div>
+                <h3>No hay cierres para los filtros seleccionados</h3>
+                <p>Probá ampliando el rango de fechas o limpiando la búsqueda.</p>
+                <a href="/administrador/cierres-caja" class="btn-secondary-modern">Limpiar filtros</a>
+            </div>
+        <% } %>
     </div>
 </div>
+
+<style>
+.cierres-filter-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.9rem;
+    align-items: end;
+    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    margin-bottom: 1.25rem;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.search-field {
+    min-width: 220px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.cierres-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.cierres-summary-card {
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.cierres-summary-card span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.cierres-summary-card strong {
+    color: #0f172a;
+    font-size: 1.2rem;
+}
+
+.cierres-table-shell {
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.cierres-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cierres-table thead {
+    background: #eff6ff;
+}
+
+.cierres-table th,
+.cierres-table td {
+    padding: 0.9rem 0.8rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.cierres-table th {
+    color: #1e3a8a;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.period-badge {
+    display: inline-flex;
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+
+.difference-pill {
+    display: inline-flex;
+    padding: 0.32rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+.difference-pill.up { background: #dcfce7; color: #166534; }
+.difference-pill.down { background: #fee2e2; color: #991b1b; }
+.difference-pill.even { background: #e5e7eb; color: #374151; }
+
+.action-cell {
+    white-space: nowrap;
+}
+
+.btn-small {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.82rem;
+}
+
+.empty-state-cierres {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #475569;
+}
+
+.empty-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 880px) {
+    .cierres-table thead {
+        display: none;
+    }
+
+    .cierres-table,
+    .cierres-table tbody,
+    .cierres-table tr,
+    .cierres-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .cierres-table tr {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .cierres-table td {
+        padding: 0.45rem 0;
+        border: none;
+    }
+
+    .cierres-table td::before {
+        content: attr(data-label) ': ';
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .action-cell {
+        padding-top: 0.75rem !important;
+    }
+}
+</style>
 
 <%- include('../partials/footer.ejs'); %>

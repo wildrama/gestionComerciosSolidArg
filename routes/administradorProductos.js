@@ -6,6 +6,39 @@ const Producto = require('../models/productos');
 
 const roleADM = 'ADMINISTRADOR';
 
+function normalizeIdArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+async function findProductByBarcode(codigoInput, excludeId = null) {
+  const codigoTexto = String(codigoInput ?? '').trim();
+  const codigoNormalizado = Number(codigoTexto);
+
+  if (!codigoTexto || !Number.isFinite(codigoNormalizado)) {
+    return null;
+  }
+
+  const filtro = {
+    $or: [
+      { codigo: codigoNormalizado },
+      { $expr: { $eq: [{ $toString: '$codigo' }, codigoTexto] } }
+    ]
+  };
+
+  if (excludeId) {
+    filtro._id = { $ne: excludeId };
+  }
+
+  return Producto.findOne(filtro);
+}
+
 // ==================================================
 // DEBUG: TEST PUT (sin autenticación)
 // ==================================================
@@ -68,12 +101,58 @@ router.get('/:id/precios', catchAsync(async (req, res) => {
 // READ: VER TABLA DE STOCK
 // ==================================================
 router.get('/',isLoggedIn ,isAdmin(roleADM), catchAsync(async (req, res) => {
-   const busqueda = req.body.busqueda
     console.log(req.user.funcion)
-    const productos = await Producto.find({});
-    const cantidadTotalDeProductos = await Producto.countDocuments({}).exec();
-    res.render('stock/verStock', { productos, cantidadTotalDeProductos });
+
+    const [productosRecientes, cantidadTotalDeProductos, categorias, stockResumen] = await Promise.all([
+      Producto.find({}).sort({ createdAt: -1, _id: -1 }).limit(15).lean(),
+      Producto.countDocuments({}).exec(),
+      Producto.distinct('categoriaInterna'),
+      Producto.aggregate([
+        {
+          $group: {
+            _id: null,
+            stockTotal: { $sum: { $ifNull: ['$cantidad', 0] } },
+            stockBajoCount: {
+              $sum: {
+                $cond: [{ $lt: [{ $ifNull: ['$cantidad', 0] }, 10] }, 1, 0]
+              }
+            }
+          }
+        }
+      ])
+    ]);
+
+    const resumen = stockResumen[0] || { stockTotal: 0, stockBajoCount: 0 };
+
+    res.render('stock/verStock', {
+      productos: productosRecientes,
+      cantidadTotalDeProductos,
+      categorias: (categorias || []).filter(Boolean).sort(),
+      stockTotalGeneral: resumen.stockTotal || 0,
+      stockBajoCount: resumen.stockBajoCount || 0,
+      showingRecentOnly: true
+    });
 }))
+
+router.get('/api/listado-completo', isLoggedIn, isAdmin(roleADM), catchAsync(async (req, res) => {
+  const productos = await Producto.find({})
+    .sort({ createdAt: -1, _id: -1 })
+    .lean();
+
+  const data = productos.map((producto) => ({
+    _id: String(producto._id),
+    nombre: producto.nombre || '',
+    marca: producto.marca || '',
+    categoriaInterna: producto.categoriaInterna || '',
+    cantidad: Number(producto.cantidad || 0),
+    precioMinorista: Number(producto.precioMinorista || 0),
+    precioMayorista: Number(producto.precioMayorista || 0),
+    presentacion: producto.presentacion || '',
+    peso: producto.peso || ''
+  }));
+
+  res.json({ success: true, data });
+}));
 
 // ==================================================
 // CREATE: FORMULARIO Y GUARDAR NUEVO PRODUCTO
@@ -84,11 +163,55 @@ router.get('/nuevo', isLoggedIn,isAdmin(roleADM), (req, res) => {
 })
 
 router.post('/',isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
-  const nuevoProducto = new Producto(req.body);
+  const codigoNormalizado = Number(String(req.body.codigo || '').trim());
+
+  if (!Number.isFinite(codigoNormalizado) || codigoNormalizado <= 0) {
+    req.flash('error', 'El código de barras es obligatorio y debe ser numérico.');
+    return res.redirect('/administrador/productos/nuevo#codigo');
+  }
+
+  const productoDuplicado = await findProductByBarcode(req.body.codigo);
+  if (productoDuplicado) {
+    req.flash('error', `El código de barras ${codigoNormalizado} ya existe en el sistema.`);
+    return res.redirect('/administrador/productos/nuevo#codigo');
+  }
+
+  const nuevoProducto = new Producto({
+    ...req.body,
+    codigo: codigoNormalizado
+  });
+
   await nuevoProducto.save();
-  req.flash('success', 'Producto cargado correctamente correctamente');
+  req.flash('success', 'Producto cargado correctamente');
   res.redirect(`/administrador/productos/${nuevoProducto._id}`)
 }))
+
+// ==================================================
+// PRINT: MÓDULO DE ETIQUETAS Y CÓDIGOS DE BARRA
+// ==================================================
+router.get('/imprimir-codigos', isLoggedIn, isAdmin(roleADM), catchAsync(async (req, res) => {
+  const productos = await Producto.find({ codigo: { $exists: true, $ne: null } })
+    .sort({ nombre: 1 })
+    .lean();
+
+  const preselectedIds = normalizeIdArray(req.query.ids);
+  const productosPayload = JSON.stringify(productos.map((producto) => ({
+    _id: String(producto._id),
+    nombre: producto.nombre || 'Producto',
+    marca: producto.marca || 'Sin marca',
+    codigo: producto.codigo || '',
+    precioMinorista: Number(producto.precioMinorista || 0),
+    cantidad: Number(producto.cantidad || 0),
+    categoriaInterna: producto.categoriaInterna || ''
+  })));
+
+  res.render('stock/imprimirCodigos', {
+    productos,
+    preselectedIds,
+    productosPayload,
+    preselectedPayload: JSON.stringify(preselectedIds)
+  });
+}));
 
 // ==================================================
 // READ: VER DETALLE DEL PRODUCTO (Read-only)
@@ -187,9 +310,29 @@ router.put('/:id',isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
     }
   }
 
+  const codigoNormalizado = codigo !== undefined && codigo !== null && String(codigo).trim() !== ''
+    ? Number(String(codigo).trim())
+    : productoExistente.codigo;
+
+  if (!Number.isFinite(codigoNormalizado) || codigoNormalizado <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El código de barras debe ser numérico y válido'
+    });
+  }
+
+  const codigoDuplicado = await findProductByBarcode(codigoNormalizado, id);
+
+  if (codigoDuplicado) {
+    return res.status(400).json({
+      success: false,
+      message: `El código de barras ${codigoNormalizado} ya está asignado a otro producto`
+    });
+  }
+
   // ========== ACTUALIZAR PRODUCTO ==========
   const producto = await Producto.findByIdAndUpdate(id, {
-    codigo: codigo || productoExistente.codigo,
+    codigo: codigoNormalizado,
     nombre: nombre || productoExistente.nombre,
     cantidad: cantidad !== undefined ? parseInt(cantidad) : productoExistente.cantidad,
     marca: marca || productoExistente.marca,

@@ -19,12 +19,32 @@ module.exports.isLoggedIn = async (req, res, next) => {
     
     // Verificar caché de sesión para obtener datos frescos del usuario
     if (req.user && req.user._id) {
-        const cachedUser = sessionCache.getUser(req.user._id.toString());
+        const userId = req.user._id.toString();
+        const cachedUser = sessionCache.getUser(userId);
         if (cachedUser) {
             console.log('[MIDDLEWARE] Usuario obtenido de caché');
-            // Usar datos cacheados sin hacer query a BD
             req.user.funcion = cachedUser.funcion;
             req.user.username = cachedUser.username;
+            req.user.activeSessionToken = cachedUser.activeSessionToken;
+        }
+
+        const currentSessionToken = req.session.userSessionToken || null;
+        const storedToken = req.user.activeSessionToken || null;
+
+        if (storedToken && currentSessionToken !== storedToken) {
+            const redirectTarget = req.user?.funcion === 'CAJA' ? '/ingresar?panel=CAJA' : '/ingresar?panel=ADMINISTRADOR';
+            console.log('[MIDDLEWARE] Sesión desplazada por nuevo login para:', req.user.username);
+            req.session.userSessionToken = null;
+            req.flash('error', 'Tu cuenta se abrió en otro navegador. Volvé a iniciar sesión.');
+
+            return req.logOut((err) => {
+                if (err) {
+                    console.error('[MIDDLEWARE] Error al cerrar sesión desplazada:', err);
+                    return res.redirect('/ingresar');
+                }
+
+                return res.redirect(redirectTarget);
+            });
         }
     }
     

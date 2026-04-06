@@ -5,17 +5,20 @@ const currency = new Intl.NumberFormat('es-AR', {
   minimumFractionDigits: 2
 });
 
-const lastTicketStorageKey = `isidorito-last-ticket:${cajaData.estacionId || 'default'}`;
+const lastTicketStorageKey = `solidarg-comercios-last-ticket:${cajaData.estacionId || 'default'}`;
 
 const state = {
   items: [],
   lastFinderResults: [],
-  salesHistory: []
+  lastOfferResults: [],
+  salesHistory: [],
+  finderMode: 'product'
 };
 
 const elements = {
   barcodeForm: document.getElementById('barcodeForm'),
   barcodeInput: document.getElementById('barcodeInput'),
+  focusBarcodeBtn: document.getElementById('focusBarcodeBtn'),
   cartTableBody: document.getElementById('cartTableBody'),
   subtotalAmount: document.getElementById('subtotalAmount'),
   discountAmount: document.getElementById('discountAmount'),
@@ -26,11 +29,16 @@ const elements = {
   lastTicketBtn: document.getElementById('lastTicketBtn'),
   salesHistoryBtn: document.getElementById('salesHistoryBtn'),
   openFinderBtn: document.getElementById('openFinderBtn'),
+  openOfferFinderBtn: document.getElementById('openOfferFinderBtn'),
   closeFinderBtn: document.getElementById('closeFinderBtn'),
   finderModal: document.getElementById('finderModal'),
+  finderTitle: document.getElementById('finderTitle'),
+  finderSubtitle: document.getElementById('finderSubtitle'),
   finderSearchForm: document.getElementById('finderSearchForm'),
   finderQuery: document.getElementById('finderQuery'),
   finderResults: document.getElementById('finderResults'),
+  finderModeProducts: document.getElementById('finderModeProducts'),
+  finderModeOffers: document.getElementById('finderModeOffers'),
   salesHistoryModal: document.getElementById('salesHistoryModal'),
   closeSalesHistoryBtn: document.getElementById('closeSalesHistoryBtn'),
   salesHistoryBody: document.getElementById('salesHistoryBody'),
@@ -38,11 +46,13 @@ const elements = {
   cashReceivedInput: document.getElementById('cashReceivedInput'),
   cashReceivedGroup: document.getElementById('cashReceivedGroup'),
   paymentInputs: Array.from(document.querySelectorAll('input[name="metodoPago"]')),
-  offerButtons: Array.from(document.querySelectorAll('.offer-button')),
+  offerButtons: Array.from(document.querySelectorAll('.offer-button[data-offer-id]')),
+  individualOfferButtons: Array.from(document.querySelectorAll('.individual-offer-button')),
   ticketToggle: document.getElementById('ticketToggle')
 };
 
 const offerMap = new Map((cajaData.ofertasConjunto || []).map((offer) => [String(offer._id), offer]));
+const individualOffersById = new Map((cajaData.ofertasIndividuales || []).map((offer) => [String(offer._id), offer]));
 const individualOfferMap = new Map(
   (cajaData.ofertasIndividuales || [])
     .filter((offer) => offer.productoEnOferta && offer.productoEnOferta._id)
@@ -63,6 +73,16 @@ const escapeHtml = (value) => String(value ?? '')
   .replace(/'/g, '&#39;');
 
 let statusTimer;
+
+function focusBarcodeInput(selectText = true) {
+  if (!elements.barcodeInput) return;
+
+  elements.barcodeInput.focus();
+  if (selectText && typeof elements.barcodeInput.select === 'function') {
+    elements.barcodeInput.select();
+  }
+}
+
 function showStatus(message, type = 'info') {
   if (!elements.statusMessage) return;
 
@@ -227,7 +247,7 @@ function resetSale(message) {
   elements.cashReceivedInput.value = '';
   if (elements.ticketToggle) elements.ticketToggle.checked = true;
   renderCart();
-  elements.barcodeInput.focus();
+  focusBarcodeInput(false);
   if (message) showStatus(message, 'success');
 }
 
@@ -259,6 +279,7 @@ function addProduct(producto, quantity = 1) {
 
   renderCart();
   showStatus(`${producto.nombre} agregado a la compra.`, 'success');
+  focusBarcodeInput();
 }
 
 function addOffer(offerId) {
@@ -283,6 +304,19 @@ function addOffer(offerId) {
 
   renderCart();
   showStatus(`Se agregó ${offer.nombreOferta}.`, 'success');
+  focusBarcodeInput();
+}
+
+function addIndividualOffer(offerId) {
+  const offer = individualOffersById.get(String(offerId));
+  if (!offer || !offer.productoEnOferta) {
+    showStatus('La oferta individual ya no está disponible.', 'error');
+    return;
+  }
+
+  addProduct(offer.productoEnOferta, toQuantity(offer.cantidadDeUnidadesNecesarias || 1));
+  showStatus(`Oferta individual preparada: ${offer.descripcion || offer.productoEnOferta.nombre}.`, 'success');
+  focusBarcodeInput();
 }
 
 function changeQuantity(key, delta) {
@@ -306,17 +340,46 @@ function changeQuantity(key, delta) {
   }
 
   renderCart();
+  focusBarcodeInput(false);
 }
 
-function openFinder(results = [], query = '') {
+function setFinderMode(mode = 'product') {
+  state.finderMode = mode === 'offer' ? 'offer' : 'product';
+
+  const productMode = state.finderMode === 'product';
+  if (elements.finderTitle) {
+    elements.finderTitle.textContent = productMode ? 'Mini búsqueda de productos' : 'Mini búsqueda de ofertas';
+  }
+  if (elements.finderSubtitle) {
+    elements.finderSubtitle.textContent = productMode
+      ? 'Buscá sin perder la compra actual'
+      : 'Buscá combos u ofertas individuales por nombre, código o descripción';
+  }
+  if (elements.finderQuery) {
+    elements.finderQuery.placeholder = productMode ? 'Nombre, marca o código' : 'Nombre de oferta, producto o código';
+  }
+  if (elements.finderModeProducts) {
+    elements.finderModeProducts.className = `btn btn-sm ${productMode ? 'btn-primary' : 'btn-outline-primary'}`;
+  }
+  if (elements.finderModeOffers) {
+    elements.finderModeOffers.className = `btn btn-sm ${productMode ? 'btn-outline-warning' : 'btn-warning'}`;
+  }
+}
+
+function openFinder(results = [], query = '', mode = state.finderMode) {
   if (!elements.finderModal) return;
 
+  setFinderMode(mode);
   elements.finderModal.hidden = false;
-  if (query) {
+  if (typeof query === 'string') {
     elements.finderQuery.value = query;
   }
   if (results.length) {
-    renderFinderResults(results);
+    if (state.finderMode === 'offer') {
+      renderOfferResults(results);
+    } else {
+      renderFinderResults(results);
+    }
   }
   window.setTimeout(() => elements.finderQuery.focus(), 40);
 }
@@ -325,7 +388,7 @@ function closeFinder() {
   if (elements.finderModal) {
     elements.finderModal.hidden = true;
   }
-  elements.barcodeInput.focus();
+  focusBarcodeInput(false);
 }
 
 function openSalesHistoryModal() {
@@ -338,7 +401,7 @@ function closeSalesHistoryModal() {
   if (elements.salesHistoryModal) {
     elements.salesHistoryModal.hidden = true;
   }
-  elements.barcodeInput.focus();
+  focusBarcodeInput(false);
 }
 
 function renderFinderResults(results) {
@@ -357,6 +420,30 @@ function renderFinderResults(results) {
       <button type="button" class="btn btn-sm btn-success" data-add-product="${escapeHtml(producto._id)}">Agregar</button>
     </article>
   `).join('');
+}
+
+function renderOfferResults(results) {
+  if (!results.length) {
+    elements.finderResults.innerHTML = '<p class="finder-empty">No se encontraron ofertas activas.</p>';
+    return;
+  }
+
+  elements.finderResults.innerHTML = results.map((offer) => {
+    const actionAttr = offer.kind === 'combo'
+      ? `data-add-offer="${escapeHtml(offer.id)}"`
+      : `data-add-individual-offer="${escapeHtml(offer.id)}"`;
+
+    return `
+      <article class="finder-result-card">
+        <div>
+          <h3>${escapeHtml(offer.title)}</h3>
+          <p>${escapeHtml(offer.code || 'Sin código')} · ${escapeHtml(offer.kind === 'combo' ? 'Combo' : 'Individual')}</p>
+          <small>${escapeHtml(offer.subtitle || 'Oferta vigente')} · ${formatMoney(offer.price)}</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-warning" ${actionAttr}>Agregar</button>
+      </article>
+    `;
+  }).join('');
 }
 
 async function searchProducts(query, { autoAdd = false, keepOpen = false } = {}) {
@@ -386,12 +473,48 @@ async function searchProducts(query, { autoAdd = false, keepOpen = false } = {})
   }
 
   renderFinderResults(results);
-  openFinder(results, trimmed);
+  openFinder(results, trimmed, 'product');
+  return results;
+}
+
+async function searchOffers(query, { autoAdd = false, keepOpen = false } = {}) {
+  const trimmed = String(query || '').trim();
+  if (!trimmed) return [];
+
+  const response = await fetch(`/caja/${cajaData.estacionId}/ofertas/buscar?q=${encodeURIComponent(trimmed)}`);
+  const payload = await response.json();
+  const results = Array.isArray(payload.data) ? payload.data : [];
+
+  if (!response.ok) {
+    throw new Error(payload.message || 'No se pudo realizar la búsqueda de ofertas.');
+  }
+
+  state.lastOfferResults = results;
+
+  if (!results.length) {
+    if (!keepOpen) showStatus('No se encontró ninguna oferta activa con ese criterio.', 'error');
+    renderOfferResults([]);
+    return [];
+  }
+
+  const exactCodeMatch = results.find((offer) => String(offer.code) === trimmed);
+  if (autoAdd && (exactCodeMatch || results.length === 1)) {
+    const selected = exactCodeMatch || results[0];
+    if (selected.kind === 'combo') {
+      addOffer(selected.id);
+    } else {
+      addIndividualOffer(selected.id);
+    }
+    return results;
+  }
+
+  renderOfferResults(results);
+  openFinder(results, trimmed, 'offer');
   return results;
 }
 
 function buildTicketHtml(ticketData) {
-  const negocioNombre = escapeHtml(ticketData.negocioNombre || cajaData.negocioNombre || 'Nombre del negocio');
+  const negocioNombre = escapeHtml(ticketData.negocioNombre || cajaData.negocioNombre || 'SOLIDARG-COMERCIOS');
   const estacionNombre = escapeHtml(ticketData.estacionNombre || cajaData.estacionNombre || 'Caja de Cobro');
   const fechaHora = escapeHtml(ticketData.fecha || new Date().toLocaleString('es-AR'));
 
@@ -752,21 +875,39 @@ elements.finderSearchForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   try {
-    await searchProducts(elements.finderQuery.value, { keepOpen: true });
+    if (state.finderMode === 'offer') {
+      await searchOffers(elements.finderQuery.value, { keepOpen: true });
+    } else {
+      await searchProducts(elements.finderQuery.value, { keepOpen: true });
+    }
   } catch (error) {
     showStatus(error.message, 'error');
   }
 });
 
 elements.finderResults?.addEventListener('click', (event) => {
-  const button = event.target.closest('[data-add-product]');
-  if (!button) return;
+  const productButton = event.target.closest('[data-add-product]');
+  if (productButton) {
+    const productId = productButton.getAttribute('data-add-product');
+    const producto = state.lastFinderResults.find((item) => String(item._id) === String(productId));
 
-  const productId = button.getAttribute('data-add-product');
-  const producto = state.lastFinderResults.find((item) => String(item._id) === String(productId));
+    if (producto) {
+      addProduct(producto);
+      closeFinder();
+    }
+    return;
+  }
 
-  if (producto) {
-    addProduct(producto);
+  const comboButton = event.target.closest('[data-add-offer]');
+  if (comboButton) {
+    addOffer(comboButton.getAttribute('data-add-offer'));
+    closeFinder();
+    return;
+  }
+
+  const individualButton = event.target.closest('[data-add-individual-offer]');
+  if (individualButton) {
+    addIndividualOffer(individualButton.getAttribute('data-add-individual-offer'));
     closeFinder();
   }
 });
@@ -806,7 +947,19 @@ elements.paymentInputs.forEach((input) => {
 elements.cashReceivedInput?.addEventListener('input', updateChange);
 elements.checkoutBtn?.addEventListener('click', handleCheckout);
 elements.newSaleBtn?.addEventListener('click', () => resetSale('Compra limpia para iniciar una nueva venta.'));
-elements.openFinderBtn?.addEventListener('click', () => openFinder());
+elements.focusBarcodeBtn?.addEventListener('click', () => focusBarcodeInput());
+elements.openFinderBtn?.addEventListener('click', () => openFinder([], '', 'product'));
+elements.openOfferFinderBtn?.addEventListener('click', () => openFinder([], '', 'offer'));
+elements.finderModeProducts?.addEventListener('click', () => {
+  setFinderMode('product');
+  elements.finderResults.innerHTML = '<p class="finder-empty">Buscá productos por nombre, marca o código.</p>';
+  elements.finderQuery.focus();
+});
+elements.finderModeOffers?.addEventListener('click', () => {
+  setFinderMode('offer');
+  elements.finderResults.innerHTML = '<p class="finder-empty">Buscá ofertas activas por nombre, producto o código.</p>';
+  elements.finderQuery.focus();
+});
 elements.closeFinderBtn?.addEventListener('click', closeFinder);
 elements.lastTicketBtn?.addEventListener('click', () => {
   const ticketData = getLastTicket();
@@ -822,6 +975,9 @@ elements.closeSalesHistoryBtn?.addEventListener('click', closeSalesHistoryModal)
 elements.offerButtons.forEach((button) => {
   button.addEventListener('click', () => addOffer(button.dataset.offerId));
 });
+elements.individualOfferButtons.forEach((button) => {
+  button.addEventListener('click', () => addIndividualOffer(button.dataset.individualOfferId));
+});
 
 window.addEventListener('click', (event) => {
   if (event.target === elements.finderModal) {
@@ -834,9 +990,19 @@ window.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'F2') {
+    event.preventDefault();
+    focusBarcodeInput();
+  }
+
   if (event.key === 'F4') {
     event.preventDefault();
-    openFinder();
+    openFinder([], '', 'product');
+  }
+
+  if (event.key === 'F6') {
+    event.preventDefault();
+    openFinder([], '', 'offer');
   }
 
   if (event.key === 'F9') {
@@ -855,7 +1021,8 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+setFinderMode('product');
 renderCart();
 syncPaymentLabels();
 updateLastTicketButton();
-elements.barcodeInput?.focus();
+focusBarcodeInput(false);

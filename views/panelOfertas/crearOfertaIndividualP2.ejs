@@ -14,7 +14,16 @@
         <!-- Page Header -->
         <div class="form-header">
             <h1 class="form-title">🎁 Configurar Oferta Individual</h1>
-            <p class="form-subtitle">Paso 2: Define los parámetros de la oferta</p>
+            <p class="form-subtitle">Definí la promo en orden: cantidad, precio, vigencia y en qué cajas se mostrará.</p>
+        </div>
+
+        <div class="setup-next-steps offer-step-guide">
+            <h3 class="steps-title">Pasos de esta pantalla</h3>
+            <ul class="steps-list">
+                <li><span class="step-number">1</span><span class="step-text">Indicá cuántas unidades activan la promo.</span></li>
+                <li><span class="step-number">2</span><span class="step-text">Definí el precio promocional y la fecha de vigencia.</span></li>
+                <li><span class="step-number">3</span><span class="step-text">Marcá una o varias cajas donde querés habilitarla.</span></li>
+            </ul>
         </div>
 
         <!-- Product Info Card -->
@@ -23,7 +32,7 @@
                 <span class="info-icon">📦</span>
                 <div>
                     <h3 class="info-product-name"><%= productoParaOfertaIndividual.nombre %></h3>
-                    <p class="info-product-meta"><%= productoParaOfertaIndividual.marca %></p>
+                    <p class="info-product-meta"><%= productoParaOfertaIndividual.marca %> · Cod. <%= productoParaOfertaIndividual.codigo || 'sin código' %></p>
                 </div>
             </div>
             <div class="info-price">
@@ -91,27 +100,32 @@
                     <h3 class="section-title-form">🏪 Aplicar en Estaciones</h3>
                     
                     <div class="form-group-modern">
-                        <label for="estacionDeCobroParaLaOferta" class="form-label-modern">
-                            Selecciona las Estaciones *
-                        </label>
-                        <div class="select-wrapper-multiple">
-                            <select id="estacionDeCobroParaLaOferta" 
-                                    name="estacionDeCobroParaLaOferta" 
-                                    class="form-control-modern form-select-multiple"
-                                    multiple
-                                    required>
-                                <% for(let estacionDeCobro of estacionesDeCobro) { %>
-                                    <option value="<%= estacionDeCobro._id %>">
-                                        🏪 <%= estacionDeCobro.ubicacionDeEstacion %>
-                                    </option>
-                                <% } %>
-                            </select>
+                        <label class="form-label-modern">Seleccioná una o varias cajas *</label>
+                        <div class="station-select-actions">
+                            <button type="button" id="selectAllStationsBtn" class="btn-light-modern">Seleccionar todas</button>
+                            <button type="button" id="clearStationsBtn" class="btn-light-modern">Limpiar</button>
                         </div>
-                        <small class="form-help">Mantén presionado Ctrl/Cmd para seleccionar múltiples estaciones</small>
+                        <div class="stations-check-grid" id="estacionDeCobroParaLaOferta">
+                            <% for(let estacionDeCobro of estacionesDeCobro) { %>
+                                <label class="station-check-card">
+                                    <input type="checkbox"
+                                           name="estacionDeCobroParaLaOferta"
+                                           value="<%= estacionDeCobro._id %>"
+                                           class="station-checkbox"
+                                           <%= estacionDeCobro.ubicacionDeEstacion === 'CAJA 1' ? 'checked' : '' %>>
+                                    <span class="station-check-icon">🏪</span>
+                                    <span class="station-check-copy">
+                                        <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong>
+                                        <small>La oferta también se mostrará en esta caja.</small>
+                                    </span>
+                                </label>
+                            <% } %>
+                        </div>
+                        <small class="form-help">Podés marcar varias cajas sin usar Ctrl ni combinaciones raras.</small>
                     </div>
 
                     <div class="estaciones-preview">
-                        <p class="preview-label">Estaciones Seleccionadas:</p>
+                        <p class="preview-label">Cajas seleccionadas:</p>
                         <div id="selectedStations" class="selected-stations-list"></div>
                     </div>
                 </div>
@@ -127,9 +141,9 @@
                 <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-secondary-modern">
                     ← Volver al Paso 1
                 </a>
-                <button type="submit" class="btn-primary-modern">
+                <button type="submit" class="btn-primary-modern btn-save-emphasis">
                     <span class="btn-icon">✓</span>
-                    Crear Oferta
+                    Crear oferta individual
                 </button>
             </div>
         </form>
@@ -138,24 +152,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-// Mostrar estaciones seleccionadas
-const selectElement = document.getElementById('estacionDeCobroParaLaOferta');
+const stationCheckboxes = Array.from(document.querySelectorAll('.station-checkbox'));
 const selectedStationsList = document.getElementById('selectedStations');
+const selectAllStationsBtn = document.getElementById('selectAllStationsBtn');
+const clearStationsBtn = document.getElementById('clearStationsBtn');
+const offerForm = document.querySelector('.modern-form');
 
 function updateSelectedStations() {
-    const selected = Array.from(selectElement.selectedOptions).map(opt => opt.text);
-    
+    const selected = stationCheckboxes
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.closest('.station-check-card')?.querySelector('strong')?.textContent?.trim())
+        .filter(Boolean);
+
+    stationCheckboxes.forEach((checkbox) => {
+        checkbox.closest('.station-check-card')?.classList.toggle('selected', checkbox.checked);
+    });
+
     if (selected.length === 0) {
-        selectedStationsList.innerHTML = '<p class="no-selection">Selecciona al menos una estación</p>';
+        selectedStationsList.innerHTML = '<p class="no-selection">Seleccioná al menos una caja para continuar.</p>';
         return;
     }
-    
+
     selectedStationsList.innerHTML = selected
-        .map(station => `<span class="station-badge">${station}</span>`)
+        .map((station) => `<span class="station-badge">${station}</span>`)
         .join('');
 }
 
-selectElement.addEventListener('change', updateSelectedStations);
+stationCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', updateSelectedStations));
+selectAllStationsBtn?.addEventListener('click', () => {
+    stationCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+    updateSelectedStations();
+});
+clearStationsBtn?.addEventListener('click', () => {
+    stationCheckboxes.forEach((checkbox) => { checkbox.checked = false; });
+    updateSelectedStations();
+});
+
+offerForm?.addEventListener('submit', (event) => {
+    if (!stationCheckboxes.some((checkbox) => checkbox.checked)) {
+        event.preventDefault();
+        window.alert('Seleccioná al menos una caja para aplicar la oferta.');
+    }
+});
+
 updateSelectedStations();
 </script>
 

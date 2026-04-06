@@ -14,12 +14,22 @@
         <!-- Page Header -->
         <div class="form-header">
             <h1 class="form-title">🎁 Nueva Oferta Individual</h1>
-            <p class="form-subtitle">Paso 1: Selecciona el producto para la oferta</p>
+            <p class="form-subtitle">Creala en orden: buscá el producto, revisalo y seguí al paso de configuración.</p>
+        </div>
+
+        <div class="setup-next-steps offer-step-guide">
+            <h3 class="steps-title">Orden recomendado</h3>
+            <ul class="steps-list">
+                <li><span class="step-number">1</span><span class="step-text"><strong>Buscá</strong> el producto por nombre, marca o código de barras.</span></li>
+                <li><span class="step-number">2</span><span class="step-text"><strong>Seleccioná</strong> el producto correcto del listado.</span></li>
+                <li><span class="step-number">3</span><span class="step-text"><strong>Configurá</strong> precio, vigencia y cajas en el siguiente paso.</span></li>
+            </ul>
         </div>
 
         <!-- Search Section -->
         <div class="offer-search-card">
-            <h3 class="offer-search-title">🔍 Buscar Producto</h3>
+            <h3 class="offer-search-title">Paso 1 · Buscar producto</h3>
+            <p class="section-description">Podés escribir texto o escanear directamente el código de barras.</p>
             
             <form id="searchBarFormCodigoIndividual" class="offer-search-form">
                 <div class="search-box-offer">
@@ -28,20 +38,24 @@
                            name="codigoDeProducto" 
                            id="codigoIndividualInput" 
                            class="search-input-offer" 
-                           placeholder="Busca por código de barra del producto"
+                           placeholder="Ej: coca cola, pepsi o 779..."
                            autocomplete="off">
                 </div>
                 
                 <button type="submit" class="btn-search-offer">
                     <span class="btn-icon">🔍</span>
-                    Buscar Producto
+                    Buscar productos
                 </button>
             </form>
+            <small class="form-help">La búsqueda funciona igual que la del stock: por texto o por código de barra. Después elegí el producto desde las tarjetas de abajo.</small>
         </div>
+
+        <div id="offerSearchResults" class="finder-results" style="margin-bottom: 1rem;"></div>
 
         <!-- Product Result -->
         <div class="offer-result-section">
-            <h3 class="offer-result-title">📋 Información del Producto</h3>
+            <h3 class="offer-result-title">Paso 2 · Revisar producto seleccionado</h3>
+            <p class="section-description">Verificá que sea el producto correcto antes de pasar a la configuración de la oferta.</p>
             
             <div id="productoIndividualContainer" class="product-result-card">
                 <div class="result-empty-state">
@@ -84,12 +98,12 @@
         <!-- Action Buttons -->
         <div class="form-actions">
             <a href="/administrador/ofertas" class="btn-secondary-modern">
-                ← Cancelar
+                ← Volver a ofertas
             </a>
-            <button id="btn2daPantalla" class="btn-primary-modern" disabled>
+            <a id="btn2daPantalla" href="#" class="btn-primary-modern btn-save-emphasis is-disabled" aria-disabled="true">
                 <span class="btn-icon">→</span>
-                Continuar al Paso 2
-            </button>
+                Seguir a configurar la oferta
+            </a>
         </div>
     </div>
 </div>
@@ -98,26 +112,36 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-// Mostrar/ocultar resultado cuando se busca
 const container = document.getElementById('productoIndividualContainer');
 const resultContent = document.getElementById('productResultContent');
 const emptyState = container.querySelector('.result-empty-state');
 
-// Monitorear cambios en el resultado
-const observer = new MutationObserver(function() {
+function updateSelectedProductState() {
     const hasContent = document.getElementById('nombreProdIndividual')?.textContent?.trim();
+
     if (hasContent) {
         emptyState.style.display = 'none';
         resultContent.style.display = 'block';
-        document.getElementById('btn2daPantalla').disabled = false;
+        btn2daPantalla?.setAttribute('aria-disabled', 'false');
+        btn2daPantalla?.classList.remove('is-disabled');
     } else {
         emptyState.style.display = 'flex';
         resultContent.style.display = 'none';
-        document.getElementById('btn2daPantalla').disabled = true;
+        btn2daPantalla?.setAttribute('href', '#');
+        btn2daPantalla?.setAttribute('aria-disabled', 'true');
+        btn2daPantalla?.classList.add('is-disabled');
+    }
+}
+
+const observer = new MutationObserver(updateSelectedProductState);
+observer.observe(container, { childList: true, subtree: true, characterData: true });
+updateSelectedProductState();
+
+btn2daPantalla?.addEventListener('click', function(event) {
+    if (btn2daPantalla.getAttribute('aria-disabled') === 'true') {
+        event.preventDefault();
     }
 });
-
-observer.observe(container, { childList: true, subtree: true, characterData: true });
 </script>
 
 <%- include('../partials/footer.ejs'); %>

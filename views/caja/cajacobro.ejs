@@ -41,8 +41,8 @@
                     <strong>$<%= Number(cajaData.dineroActual || 0).toFixed(2) %></strong>
                 </article>
                 <article class="stat-card">
-                    <span>Modo</span>
-                    <strong>Desktop POS</strong>
+                    <span>Fondo de cambio</span>
+                    <strong>$<%= Number(cajaData.fondoCambio || 0).toFixed(2) %></strong>
                 </article>
             </div>
         </header>
@@ -51,19 +51,22 @@
             <section class="cash-panel cash-panel-main">
                 <div class="cash-toolbar">
                     <form id="barcodeForm" class="cash-search-form">
-                        <label for="barcodeInput" class="form-label">Escanear / buscar por código</label>
+                        <label for="barcodeInput" class="form-label">Lector / búsqueda principal</label>
                         <div class="search-input-row">
-                            <input id="barcodeInput" type="text" class="form-control" autocomplete="off"
+                            <input id="barcodeInput" type="text" class="form-control cash-barcode-input" autocomplete="off"
                                 placeholder="Escaneá el código o escribí nombre / marca" autofocus>
-                            <button type="submit" class="btn btn-success">Agregar</button>
+                            <button type="submit" class="btn btn-success cash-main-search-btn">Agregar</button>
+                            <button type="button" id="focusBarcodeBtn" class="btn btn-outline-success cash-main-focus-btn">🎯 Activar lector</button>
                         </div>
                     </form>
 
                     <div class="cash-toolbar-actions">
-                        <button type="button" id="openFinderBtn" class="btn btn-outline-primary">🔎 Buscar producto</button>
-                        <button type="button" id="newSaleBtn" class="btn btn-outline-secondary">🧹 Nueva compra</button>
-                        <button type="button" id="lastTicketBtn" class="btn btn-outline-dark">🖨️ Reimprimir último ticket</button>
-                        <button type="button" id="salesHistoryBtn" class="btn btn-outline-info">📋 Ventas últimas 24h</button>
+                        <a href="/caja/<%= estacionDeCobro._id %>/inicio" class="btn btn-outline-secondary cash-toolbar-btn">← Resumen</a>
+                        <button type="button" id="openFinderBtn" class="btn btn-outline-primary cash-toolbar-btn">🔎 Producto</button>
+                        <button type="button" id="openOfferFinderBtn" class="btn btn-outline-warning cash-toolbar-btn">🎁 Oferta</button>
+                        <button type="button" id="newSaleBtn" class="btn btn-outline-secondary cash-toolbar-btn">🧹 Nueva</button>
+                        <button type="button" id="lastTicketBtn" class="btn btn-outline-dark cash-toolbar-btn">🖨️ Ticket</button>
+                        <button type="button" id="salesHistoryBtn" class="btn btn-outline-info cash-toolbar-btn">📋 24h</button>
                     </div>
                 </div>
 
@@ -91,7 +94,7 @@
                 </div>
 
                 <div class="cash-shortcuts-note">
-                    <span>💡 Atajos: <strong>F4</strong> buscar producto · <strong>F9</strong> registrar venta · <strong>Esc</strong> cerrar búsqueda</span>
+                    <span>💡 Atajos: <strong>F2</strong> activar lector · <strong>F4</strong> buscar producto · <strong>F6</strong> buscar oferta · <strong>F9</strong> registrar venta · <strong>Esc</strong> cerrar búsqueda</span>
                 </div>
             </section>
 
@@ -107,7 +110,7 @@
                         <strong id="subtotalAmount">$0.00</strong>
                     </div>
                     <div class="summary-line discount-line">
-                        <span>Descuentos / ofertas</span>
+                        <span>Descuentos</span>
                         <strong id="discountAmount">$0.00</strong>
                     </div>
                     <div class="summary-line total-line">
@@ -159,39 +162,55 @@
 
                 <section class="offers-card">
                     <div class="summary-card-head">
-                        <h2>Ofertas precargadas 1-9</h2>
-                        <p>Listas para sumar a la compra</p>
+                        <h2>🎁 Ofertas vigentes en esta caja</h2>
+                        <p>Podés cargar combos o seleccionar ofertas individuales sin salir de la venta.</p>
                     </div>
 
-                    <div class="offers-grid">
-                        <% if (cajaData.ofertasConjunto && cajaData.ofertasConjunto.length) { %>
-                            <% cajaData.ofertasConjunto.slice(0, 9).forEach((oferta, index) => { %>
-                                <button type="button" class="offer-button" data-offer-id="<%= oferta._id %>">
-                                    <span class="offer-index">Oferta <%= index + 1 %></span>
-                                    <strong><%= oferta.nombreOferta %></strong>
-                                    <small><%= oferta.productosTexto || 'Combo cargado' %></small>
-                                    <span class="offer-price">$<%= Number(oferta.precioOferta || 0).toFixed(2) %></span>
-                                </button>
-                            <% }) %>
-                        <% } else { %>
-                            <div class="empty-offer-box">No hay ofertas de conjunto asignadas a esta estación.</div>
-                        <% } %>
-                    </div>
+                    <% if (cajaData.ofertasConjunto && cajaData.ofertasConjunto.length > 0) { %>
+                        <div class="offer-block">
+                            <h3 class="offer-block-title">Combos</h3>
+                            <div class="offers-grid">
+                                <% cajaData.ofertasConjunto.forEach((oferta, index) => { %>
+                                    <button type="button" class="offer-button" data-offer-id="<%= oferta._id %>">
+                                        <span class="offer-index">Combo <%= index + 1 %></span>
+                                        <strong><%= oferta.nombreOferta %></strong>
+                                        <small><%= oferta.productosTexto || 'Oferta combo' %></small>
+                                        <span class="offer-price">$<%= Number(oferta.precioOferta || 0).toFixed(2) %></span>
+                                    </button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <% if (cajaData.ofertasIndividuales && cajaData.ofertasIndividuales.length > 0) { %>
+                        <div class="offer-block">
+                            <h3 class="offer-block-title">Ofertas individuales</h3>
+                            <div class="offers-grid">
+                                <% cajaData.ofertasIndividuales.forEach((oferta) => { %>
+                                    <button type="button" class="offer-button individual-offer-button" data-individual-offer-id="<%= oferta._id %>">
+                                        <span class="offer-index">Oferta individual</span>
+                                        <strong><%= oferta.productoEnOferta?.nombre || 'Producto' %></strong>
+                                        <small><%= oferta.descripcion || `${oferta.cantidadDeUnidadesNecesarias}u por $${Number(oferta.precioOferta || 0).toFixed(2)}` %></small>
+                                        <span class="offer-price">Agregar pack promocional</span>
+                                    </button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <% if ((!cajaData.ofertasConjunto || !cajaData.ofertasConjunto.length) && (!cajaData.ofertasIndividuales || !cajaData.ofertasIndividuales.length)) { %>
+                        <div class="empty-offer-box">
+                            No hay ofertas activas asignadas a esta caja en este momento.
+                        </div>
+                    <% } %>
 
                     <div class="auto-offers-box">
-                        <h3>Ofertas automáticas por cantidad</h3>
-                        <% if (cajaData.ofertasIndividuales && cajaData.ofertasIndividuales.length) { %>
-                            <ul>
-                                <% cajaData.ofertasIndividuales.forEach((oferta) => { %>
-                                    <li>
-                                        <strong><%= oferta.productoEnOferta ? oferta.productoEnOferta.nombre : 'Producto' %></strong>
-                                        <span><%= oferta.descripcion %></span>
-                                    </li>
-                                <% }) %>
-                            </ul>
-                        <% } else { %>
-                            <p class="mb-0 text-muted">Sin ofertas automáticas configuradas.</p>
-                        <% } %>
+                        <h3>Cómo se aplican</h3>
+                        <ul>
+                            <li>Las <strong>ofertas individuales</strong> se agregan desde esta misma caja y aplican el descuento automáticamente.</li>
+                            <li>Los <strong>combos</strong> se suman como una línea de venta lista para cobrar.</li>
+                            <li>Las promociones vencidas no se muestran en la operación diaria.</li>
+                        </ul>
                     </div>
                 </section>
             </aside>
@@ -202,10 +221,15 @@
         <div class="finder-dialog">
             <div class="finder-header">
                 <div>
-                    <h2>Mini búsqueda de productos</h2>
-                    <p>Buscá sin perder la compra actual</p>
+                    <h2 id="finderTitle">Mini búsqueda de productos</h2>
+                    <p id="finderSubtitle">Buscá sin perder la compra actual</p>
                 </div>
                 <button type="button" id="closeFinderBtn" class="btn btn-outline-secondary btn-sm">Cerrar</button>
+            </div>
+
+            <div class="finder-mode-switch" style="display:flex; gap:.5rem; margin-bottom: .75rem;">
+                <button type="button" id="finderModeProducts" class="btn btn-sm btn-primary">Productos</button>
+                <button type="button" id="finderModeOffers" class="btn btn-sm btn-outline-warning">Ofertas</button>
             </div>
 
             <form id="finderSearchForm" class="finder-form">

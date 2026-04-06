@@ -7,14 +7,16 @@ const User = require('../models/usuario');
 
 const passport = require('passport');
 const roleADM = 'ADMINISTRADOR';
+const allowedVisibleRoles = ['ADMINISTRADOR', 'CAJA'];
 
 router.use(isLoggedIn, isAdmin(roleADM));
 
 // mostrar todos los usuarios
 router.get('/', catchAsync(async(req,res)=>{
   console.log(req.user.funcion);
-  const usuariosTotales = await User.find({});
-  const cantidadDeUsuarios = await User.countDocuments({}).exec();
+  const filtroUsuarios = { funcion: { $in: allowedVisibleRoles } };
+  const usuariosTotales = await User.find(filtroUsuarios).sort({ username: 1 });
+  const cantidadDeUsuarios = await User.countDocuments(filtroUsuarios).exec();
   console.log(usuariosTotales)
     res.render('panelUsuarios/todosLosUsuarios',{usuariosTotales, cantidadDeUsuarios})
 }))
@@ -36,6 +38,11 @@ router.post('/nuevousuario', catchAsync(async(req,res)=>{
 
   try {
       const { funcion, username, password } = req.body;
+
+      if (!allowedVisibleRoles.includes(funcion)) {
+        req.flash('error', 'En esta versión solo se permiten usuarios ADMINISTRADOR o CAJA.');
+        return res.redirect('/administrador/userpanel/nuevousuario');
+      }
     
       const user = new User({username, funcion});
       const usuarioRegistrado = await User.register(user,password);

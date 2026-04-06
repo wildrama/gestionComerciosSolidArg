@@ -24,7 +24,7 @@
                     <span class="oferta-header-icon">🎯</span>
                     <div>
                         <h2 class="oferta-header-title"><%= ofertaConjuntoParaVer.nombreOferta %></h2>
-                        <p class="oferta-header-status">Oferta Activa</p>
+                        <p class="oferta-header-status">Estado actual: <strong><%= ofertaConjuntoParaVer.estado || 'ACTIVA' %></strong></p>
                     </div>
                 </div>
                 <div class="oferta-header-price">
@@ -54,8 +54,12 @@
                     <div class="detail-row">
                         <span class="detail-label">Vigente Hasta</span>
                         <span class="detail-value">
-                            <%= new Date(ofertaConjuntoParaVer.fechaDeVigencia).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                            <%= ofertaConjuntoParaVer.fechaDeVigencia ? new Date(ofertaConjuntoParaVer.fechaDeVigencia).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin fecha límite' %>
                         </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Código de oferta</span>
+                        <span class="detail-value"><span class="code-chip"><%= ofertaConjuntoParaVer.codigoOferta || 'Sin código' %></span></span>
                     </div>
                 </div>
             </div>
@@ -68,8 +72,8 @@
                 </div>
                 <div class="card-body-details">
                     <div class="stations-list">
-                        <% if (ofertaConjuntoParaVer.estacionesDeCobro && ofertaConjuntoParaVer.estacionesDeCobro.length > 0) { %>
-                            <% ofertaConjuntoParaVer.estacionesDeCobro.forEach(estacion => { %>
+                        <% if (ofertaConjuntoParaVer.estacionesDeCobroParaLaOferta && ofertaConjuntoParaVer.estacionesDeCobroParaLaOferta.length > 0) { %>
+                            <% ofertaConjuntoParaVer.estacionesDeCobroParaLaOferta.forEach(estacion => { %>
                             <div class="station-item">
                                 <span class="station-icon">🏪</span>
                                 <span class="station-name"><%= estacion.ubicacionDeEstacion %></span>
@@ -89,7 +93,7 @@
                     <h3 class="card-title">Productos Incluidos en la Oferta</h3>
                 </div>
                 <div class="card-body-details">
-                    <% if (ofertaConjuntoParaVer.productosEnOferta && ofertaConjuntoParaVer.productosEnOferta.length > 0) { %>
+                    <% if (ofertaConjuntoParaVer.productosEnOfertaConCodigo && ofertaConjuntoParaVer.productosEnOfertaConCodigo.length > 0) { %>
                         <div class="products-table-wrapper">
                             <table class="products-table">
                                 <thead>
@@ -100,7 +104,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% ofertaConjuntoParaVer.productosEnOferta.forEach(producto => { %>
+                                    <% ofertaConjuntoParaVer.productosEnOfertaConCodigo.forEach(producto => { %>
                                     <tr>
                                         <td>
                                             <div class="product-cell">
@@ -131,27 +135,41 @@
                 <div class="summary-item">
                     <span class="summary-label">Productos Incluidos</span>
                     <span class="summary-value">
-                        <%= ofertaConjuntoParaVer.productosEnOferta ? ofertaConjuntoParaVer.productosEnOferta.length : 0 %>
+                        <%= ofertaConjuntoParaVer.productosEnOfertaConCodigo ? ofertaConjuntoParaVer.productosEnOfertaConCodigo.length : 0 %>
                     </span>
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Estaciones</span>
                     <span class="summary-value">
-                        <%= ofertaConjuntoParaVer.estacionesDeCobro ? ofertaConjuntoParaVer.estacionesDeCobro.length : 0 %>
+                        <%= ofertaConjuntoParaVer.estacionesDeCobroParaLaOferta ? ofertaConjuntoParaVer.estacionesDeCobroParaLaOferta.length : 0 %>
                     </span>
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Estado</span>
-                    <span class="summary-value status-active">Activa</span>
+                    <span class="summary-value <%= (ofertaConjuntoParaVer.estado || 'ACTIVA') === 'PAUSADA' ? 'status-paused' : 'status-active' %>"><%= ofertaConjuntoParaVer.estado || 'ACTIVA' %></span>
                 </div>
             </div>
         </div>
 
         <!-- Actions -->
+        <div class="reset-info-box mt-3">
+            <span class="info-icon">ℹ️</span>
+            <p class="info-text">Las ofertas combo no se editan: si hay que cambiar precio, productos o vigencia, <strong>pausala o eliminála y creá una nueva</strong>.</p>
+        </div>
+
         <div class="form-actions">
             <a href="/administrador/ofertas" class="btn-secondary-modern">
                 ← Volver a Ofertas
             </a>
+            <a href="/administrador/ofertas/imprimir-codigos?ids=<%= ofertaConjuntoParaVer._id %>" class="btn-primary-modern btn-save-emphasis" target="_blank" rel="noopener">
+                🖨️ Imprimir código del combo
+            </a>
+            <form action="/administrador/ofertas/oferta-conjunto/<%= ofertaConjuntoParaVer._id %>/estado" method="POST" style="display:inline;">
+                <input type="hidden" name="estado" value="<%= (ofertaConjuntoParaVer.estado || 'ACTIVA') === 'PAUSADA' ? 'ACTIVA' : 'PAUSADA' %>">
+                <button type="submit" class="<%= (ofertaConjuntoParaVer.estado || 'ACTIVA') === 'PAUSADA' ? 'btn-primary-modern btn-save-emphasis' : 'btn-secondary-modern btn-offers-entry' %>">
+                    <%= (ofertaConjuntoParaVer.estado || 'ACTIVA') === 'PAUSADA' ? '▶️ Reactivar oferta' : '⏸️ Pausar oferta' %>
+                </button>
+            </form>
             <form action="/administrador/ofertas/oferta-conjunto/<%= ofertaConjuntoParaVer._id %>?_method=DELETE" 
                   method="POST" 
                   style="display: inline;"
@@ -161,6 +179,11 @@
                 </button>
             </form>
         </div>
+
+        <style>
+            .code-chip { font-family:'Courier New', monospace; background:#eef2ff; color:#3730a3; padding:0.25rem 0.55rem; border-radius:999px; }
+            .status-paused { color:#991b1b; }
+        </style>
     </div>
 </div>
 

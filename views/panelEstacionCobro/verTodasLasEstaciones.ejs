@@ -11,31 +11,27 @@
 
         <!-- Page Header -->
         <div class="form-header">
-            <h1 class="form-title">🏪 Estaciones de Cobro</h1>
-            <p class="form-subtitle">Gestiona y accede a todas las cajas disponibles en el sistema</p>
+            <h1 class="form-title">💰 Caja principal</h1>
+            <p class="form-subtitle">Supervisa la caja operativa y el historial de la estación principal</p>
         </div>
 
         <!-- Info Section -->
         <div class="estaciones-info-card">
             <div class="info-icon-lg">📍</div>
             <p class="info-text">
-                Las estaciones de cobro identifican las cajas distribuidas en el negocio. 
-                Accediendo a cada estación podrás visualizar información en tiempo real.
+                Esta versión del sistema trabaja por defecto con <strong>CAJA 1</strong>. 
+                Si más adelante necesitás cajas adicionales, se habilitan por una ruta administrativa interna.
             </p>
         </div>
 
-        <!-- Action Button -->
-        <div class="estaciones-actions">
-            <a href="/administrador/estacionesdecobro/nuevaestacion" class="btn-primary-modern">
-                <span class="btn-icon">+</span>
-                Nueva Estación de Cobro
-            </a>
+        <div class="form-actions" style="margin-bottom: 1.5rem;">
+            <a href="/administrador" class="btn-secondary-modern">← Volver al panel</a>
         </div>
 
         <!-- Stats -->
         <div class="estaciones-stats">
             <div class="stat-card">
-                <span class="stat-icon">🏪</span>
+                <span class="stat-icon">💰</span>
                 <div class="stat-content">
                     <p class="stat-label">Total de Estaciones</p>
                     <h3 class="stat-value"><%= estacionesDeCobro.length %></h3>
@@ -96,12 +92,8 @@
             <% } else { %>
                 <div class="empty-state-estaciones">
                     <div class="empty-icon">🏪</div>
-                    <h3>No hay estaciones de cobro</h3>
-                    <p>Crea la primera estación de cobro para comenzar</p>
-                    <a href="/administrador/estacionesdecobro/nuevaestacion" class="btn-primary-modern">
-                        <span class="btn-icon">+</span>
-                        Crear Estación
-                    </a>
+                    <h3>No hay estaciones visibles</h3>
+                    <p>La estación principal se generará automáticamente como <strong>CAJA 1</strong>.</p>
                 </div>
             <% } %>
         </div>

@@ -59,7 +59,7 @@ async function main() {
     serverSelectionTimeoutMS: 10000
   });
   console.log('[DB] MongoDB conectada OK:', dbUrl);
-  app.listen(port, () => console.log(`Isidorito v.0.1 ${port}!`));
+  app.listen(port, () => console.log(`SOLIDARG-COMERCIOS v1.0 ${port}!`));
 }
 
 const store = new MongoStore({
@@ -74,7 +74,7 @@ store.on("error", function(e){
 const sessionConfig = {
   store,
   name:'session',
-  secret: process.env.SESSION_SECRET || 'sk-isidorito-2024-prod-abc123def456ghi789jkl012mno345pqr', // 60+ caracteres
+  secret: process.env.SESSION_SECRET || 'sk-solidargcomercios-2026-prod-abc123def456ghi789jkl012mno345pqr', // 60+ caracteres
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -127,6 +127,16 @@ app.use((req, res, next) => {
   next();
 })
 
+const redirectRetiredModule = (message) => (req, res) => {
+  req.flash('error', message);
+
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.funcion === 'ADMINISTRADOR') {
+    return res.redirect('/administrador');
+  }
+
+  return res.redirect('/');
+};
+
 
 
 app.use('/',loginRoutes);
@@ -134,12 +144,12 @@ app.use('/administrador/productos',administradorProductosRoutes);
 app.use('/administrador/userpanel',administradorUsuariosRoutes);
 app.use('/administrador/estacionesdecobro',administradorEstacionDeCobroRoutes);
 app.use('/administrador/cierres-caja',administradorCierresDeCajaRoutes);
-app.use('/clientes', clientesRoutes);
-app.use('/pedidos',pedidosRoutes);
+app.use('/clientes', redirectRetiredModule('El módulo de clientes fue retirado de esta versión simplificada.'));
+app.use('/pedidos', redirectRetiredModule('El módulo de repartidores fue retirado de esta versión simplificada.'));
 app.use('/caja',cajaRoutes);
 app.use('/administrador/caja', admCaja)
 app.use('/administrador/buscar',administradorBuscarRoutes);
-app.use('/administrador/ofertas',administradorOfertasRoutes)
+app.use('/administrador/ofertas', administradorOfertasRoutes);
 app.use('/administrador/stock', stockRoutes);
 app.use('/administrador/ofertas-search', ofertasSearchRoutes);
 app.use('/buscanombre', busquedaNombre)

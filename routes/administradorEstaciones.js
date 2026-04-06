@@ -12,6 +12,27 @@ const CierreCaja = require('../models/cierreDeCaja');
 const roleADM = 'ADMINISTRADOR';
 const roleCaja = 'CAJA';
 
+async function ensurePrimaryCashStation() {
+  let estacionPrincipal = await EstacionDeCobro.findOne({
+    ubicacionDeEstacion: { $regex: /^CAJA 1$/i }
+  });
+
+  if (estacionPrincipal) {
+    if (estacionPrincipal.isActive !== 'SI') {
+      estacionPrincipal.isActive = 'SI';
+      await estacionPrincipal.save();
+    }
+    return estacionPrincipal;
+  }
+
+  return EstacionDeCobro.create({
+    ubicacionDeEstacion: 'CAJA 1',
+    dineroDeInicio: 0,
+    dineroEnEstacion: 0,
+    isActive: 'SI'
+  });
+}
+
 const toNumber = (value, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -274,8 +295,10 @@ function buildCierreSnapshot(estacionDeCobro, ventas, periodo = 'DIARIO', dinero
     }))
   ].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
+  const dineroDeInicioBase = toNumber(estacionDeCobro.aperturaActual?.montoInicial, toNumber(estacionDeCobro.dineroDeInicio));
+
   const dineroEsperado = Number((
-    toNumber(estacionDeCobro.dineroDeInicio) + ventasEnEfectivo.montoTotal + ingresosTotal - egresosTotal
+    dineroDeInicioBase + ventasEnEfectivo.montoTotal + ingresosTotal - egresosTotal
   ).toFixed(2));
 
   const dineroReal = Number(
@@ -286,7 +309,7 @@ function buildCierreSnapshot(estacionDeCobro, ventas, periodo = 'DIARIO', dinero
     periodo,
     fechaDeApertura: inicio,
     fechaDeCierre: new Date(),
-    dineroDeInicio: Number(toNumber(estacionDeCobro.dineroDeInicio).toFixed(2)),
+    dineroDeInicio: Number(dineroDeInicioBase.toFixed(2)),
     dineroEnCaja: dineroReal,
     dineroEsperado,
     dineroReal,
@@ -321,8 +344,8 @@ router.use(isLoggedIn, isAdmin(roleADM));
 router.get('/', async (req, res) => {
   console.log(req.user.funcion)
   try {
-
-    const estacionesDeCobro = await EstacionDeCobro.find({});
+    const estacionPrincipal = await ensurePrimaryCashStation();
+    const estacionesDeCobro = [estacionPrincipal];
 
     res.render('panelEstacionCobro/verTodasLasEstaciones', { estacionesDeCobro })
   } catch (error) {
@@ -348,7 +371,8 @@ router.post('/nuevaestacion', catchAsync(async (req, res) => {
   const nuevaEstacion = new EstacionDeCobro({ 
     dineroDeInicio: dineroDeInicio, 
     dineroEnEstacion: dineroDeInicio, 
-    ubicacionDeEstacion: ubicacionDeEstacion 
+    ubicacionDeEstacion: ubicacionDeEstacion,
+    isActive: 'SI'
   });
   await nuevaEstacion.save();
 
@@ -586,7 +610,7 @@ router.post('/:id/egreso-efectivo', catchAsync(async (req, res) => {
 
   req.flash('success', `Se realizo un retiro de efectivo de $${cantidad}`);
 
-  res.redirect(`/caja/${estacionDeCobro._id}/inicio`)
+  res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`)
 }))
 
 
@@ -599,13 +623,49 @@ router.post('/:id/reset', catchAsync(async (req, res) => {
   const estacionDeCobroId = req.params.id;
   if (req.body.dineroDeInicio) {
 
-    const estacionDeCobro = await EstacionDeCobro.findByIdAndUpdate(estacionDeCobroId, { dineroDeInicio: req.body.dineroDeInicio, dineroEnEstacion: req.body.dineroDeInicio, dineroDeVentasEnEfectivo: 0, dineroDeVentasEnOtro: 0, comprasRealizadasEnEfectivo: 0, comprasRealizadasEnOtro: 0 }).exec();
+    const estacionDeCobro = await EstacionDeCobro.findByIdAndUpdate(estacionDeCobroId, {
+      dineroDeInicio: req.body.dineroDeInicio,
+      dineroEnEstacion: req.body.dineroDeInicio,
+      dineroDeVentasEnEfectivo: 0,
+      dineroDeVentasEnOtro: 0,
+      comprasRealizadasEnEfectivo: 0,
+      comprasRealizadasEnOtro: 0,
+      estadoCaja: 'CERRADA',
+      aperturaActual: {
+        estado: 'CERRADA',
+        fechaCierre: new Date(),
+        montoInicial: Number(req.body.dineroDeInicio || 0),
+        fondoCambio: 0,
+        detalleEfectivo: '',
+        observaciones: 'Reinicio manual del día desde el panel administrador',
+        abiertaPor: req.user.username,
+        dineroAlCerrar: Number(req.body.dineroDeInicio || 0)
+      }
+    }).exec();
 
     req.flash('success', `Se reseteo el dia correctamente`);
 
     res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`);
   } else {
-    const estacionDeCobro1 = await EstacionDeCobro.findByIdAndUpdate(estacionDeCobroId, { dineroDeInicio: 0, dineroEnEstacion: 0, dineroDeVentasEnEfectivo: 0, dineroDeVentasEnOtro: 0, comprasRealizadasEnEfectivo: 0, comprasRealizadasEnOtro: 0 }).exec();
+    const estacionDeCobro1 = await EstacionDeCobro.findByIdAndUpdate(estacionDeCobroId, {
+      dineroDeInicio: 0,
+      dineroEnEstacion: 0,
+      dineroDeVentasEnEfectivo: 0,
+      dineroDeVentasEnOtro: 0,
+      comprasRealizadasEnEfectivo: 0,
+      comprasRealizadasEnOtro: 0,
+      estadoCaja: 'CERRADA',
+      aperturaActual: {
+        estado: 'CERRADA',
+        fechaCierre: new Date(),
+        montoInicial: 0,
+        fondoCambio: 0,
+        detalleEfectivo: '',
+        observaciones: 'Reinicio manual del día desde el panel administrador',
+        abiertaPor: req.user.username,
+        dineroAlCerrar: 0
+      }
+    }).exec();
 
     req.flash('success', `Se reseteo el dia correctamente`);
 
@@ -708,6 +768,14 @@ router.post('/:id/cierre-caja/guardar', catchAsync(async (req, res) => {
 
   await cierreCajaGuardado.save();
   estacionDeCobro.dineroEnEstacion = snapshot.dineroReal;
+  estacionDeCobro.estadoCaja = 'CERRADA';
+  estacionDeCobro.aperturaActual = {
+    ...(estacionDeCobro.aperturaActual || {}),
+    estado: 'CERRADA',
+    fechaCierre: snapshot.fechaDeCierre,
+    dineroAlCerrar: snapshot.dineroReal,
+    observaciones: comentarioDeCierre || (estacionDeCobro.aperturaActual?.observaciones || '')
+  };
   await estacionDeCobro.save();
 
   req.flash('success', 'Cierre realizado correctamente');

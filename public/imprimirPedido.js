@@ -57,15 +57,15 @@ console.log( 'object created' + pdfObject )
         compress: true,
 
         business: {
-          name: "Isidorito",
-          address: "San Pedro, Buenos",
+          name: "SOLIDARG-COMERCIOS",
+          address: "San Pedro, Buenos Aires",
           phone: "(3329) 563576",
-          email: "distribuidoraisidorito@hotmail.com.com",
+          email: "contacto@solidarg-comercios.local",
           
-          website: "www.isidorito.com.ar/nosotros",
+          website: "www.solidarg-comercios.local",
         },
         contact: {
-          label: "Remito dirigito a:",
+          label: "Remito dirigido a:",
           name: `${orderPrint.cliente.dueño}`,
           address:`${orderPrint.cliente.direccion}`,
           phone: `${orderPrint.cliente.telefono1}`,

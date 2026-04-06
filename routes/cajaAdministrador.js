@@ -5,9 +5,9 @@ const catchAsync =require('../utils/catchAsync');
 const Producto = require('../models/productos');
 const Venta = require('../models/ventas');
 
-const {isLoggedIn,isCaja} = require('../middleware');
+const { isLoggedIn, isAdmin } = require('../middleware');
 
-const rolecAJA= 'ADMIN';
+const roleADM = 'ADMINISTRADOR';
 
 
 // isCaja(rolecAJA)
@@ -18,12 +18,12 @@ const rolecAJA= 'ADMIN';
 
 
 // RENDER VER TABLA DE STOCK
-router.get('/', isLoggedIn,async (req, res) => {
+router.get('/', isLoggedIn, isAdmin(roleADM), async (req, res) => {
 
   res.render('caja/cajainicio');
 
 })
-router.get('/cajacobro', isLoggedIn,async (req, res) => {
+router.get('/cajacobro', isLoggedIn, isAdmin(roleADM), async (req, res) => {
 
   res.render('caja/cajacobro');
 
@@ -32,7 +32,7 @@ router.get('/cajacobro', isLoggedIn,async (req, res) => {
 
 
 
-router.post('/buscar', isLoggedIn, async (req, res) => {
+router.post('/buscar', isLoggedIn, isAdmin(roleADM), async (req, res) => {
   try {
     const codigo = req.body.codigo;
     console.log(codigo);
@@ -45,7 +45,7 @@ router.post('/buscar', isLoggedIn, async (req, res) => {
 
 })
 
-router.post('/finalizar-compra', isLoggedIn, async (req, res) => {
+router.post('/finalizar-compra', isLoggedIn, isAdmin(roleADM), async (req, res) => {
     const {compraFinalizada} = req.body;
     const producto = await Producto.findOne({codigo: codigoInput})
     
@@ -57,7 +57,7 @@ router.post('/finalizar-compra', isLoggedIn, async (req, res) => {
 
 // ENVIAR DATOS DEL FORMULARIO A LA BBDD
 
-router.post('/',isLoggedIn, catchAsync( async (req,res)=>{
+router.post('/',isLoggedIn, isAdmin(roleADM), catchAsync( async (req,res)=>{
  const nuevoProducto = new Producto (req.body);
  await nuevoProducto.save();
   res.redirect(`/administrador/productos/${nuevoProducto._id}`)

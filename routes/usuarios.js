@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
 const {isLoggedIn,logAdmin,logCaja} = require('../middleware');
@@ -32,34 +33,48 @@ const sessionCache = new SessionCache(5 * 60 * 1000); // 5 minutos
 
 
 router.get('/ingresar', (req, res) => {
-  res.render('home');
+  const panel = String(req.query.panel || 'ADMINISTRADOR').toUpperCase();
+
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    if (req.user?.funcion === 'ADMINISTRADOR' && panel === 'ADMINISTRADOR') {
+      return res.redirect('/administrador');
+    }
+
+    if (req.user?.funcion === 'CAJA' && panel === 'CAJA') {
+      return res.redirect('/ingreso-caja');
+    }
+  }
+
+  res.render('home', { panel });
 })
 
 router.post('/ingresar', async (req, res, next) => {
   try {
-    const { username, password, remember } = req.body;
+    const { username, password, remember, panel } = req.body;
     const clientIP = req.ip || req.connection.remoteAddress;
-    
+    const targetPanel = String(panel || '').toUpperCase();
+    const loginRedirect = targetPanel ? `/ingresar?panel=${encodeURIComponent(targetPanel)}` : '/ingresar';
+
     console.log(`[LOGIN] Intento de login desde ${clientIP} para usuario: ${username}`);
-    
+
     // 1. VALIDAR ENTRADA
     const validation = validateLoginCredentials(username, password);
     if (!validation.isValid) {
       auditor.logAttempt(clientIP, username, false, 'Validación fallida: ' + validation.errors[0]);
       req.flash('error', validation.errors[0]);
-      return res.redirect('/ingresar');
+      return res.redirect(loginRedirect);
     }
-    
+
     // 2. VERIFICAR RATE LIMITING
     const rateLimitCheck = rateLimiter.recordAttempt(clientIP, username);
     if (!rateLimitCheck.allowed) {
       auditor.logAttempt(clientIP, username, false, 'Rate limit excedido');
       req.flash('error', rateLimitCheck.message);
-      return res.redirect('/ingresar');
+      return res.redirect(loginRedirect);
     }
-    
+
     console.log(`[LOGIN] Validaciones pasadas. Intentos restantes: ${rateLimitCheck.remaining}`);
-    
+
     // 3. VERIFICAR CACHÉ DE SESIÓN
     let user = sessionCache.getUser(username);
     if (!user) {
@@ -68,68 +83,88 @@ router.post('/ingresar', async (req, res, next) => {
     } else {
       console.log(`[LOGIN] Usuario obtenido de caché`);
     }
-    
+
     // 4. USAR PASSPORT PARA AUTENTICAR
     passport.authenticate('local', (err, authenticatedUser, info) => {
       if (err) {
         console.error('[LOGIN ERROR]', err);
         auditor.logAttempt(clientIP, username, false, 'Error interno: ' + err.message);
         req.flash('error', 'Error interno del servidor');
-        return res.redirect('/ingresar');
+        return res.redirect(loginRedirect);
       }
-      
+
       if (!authenticatedUser) {
-        // Login fallido
         auditor.logAttempt(clientIP, username, false, info?.message || 'Credenciales inválidas');
         console.log('[LOGIN FAILED]', username, '- Razón:', info?.message || 'Credenciales inválidas');
-        
-        // Mensajes genéricos para evitar user enumeration
+
         req.flash('error', 'Usuario o contraseña incorrectos');
-        return res.redirect('/ingresar');
+        return res.redirect(loginRedirect);
       }
-      
+
+      if (targetPanel === 'ADMINISTRADOR' && authenticatedUser.funcion !== 'ADMINISTRADOR') {
+        auditor.logAttempt(clientIP, username, false, 'Intento de acceso cruzado al panel ADMINISTRADOR');
+        req.flash('error', 'Ese usuario no puede ingresar al panel de administración.');
+        return res.redirect('/ingresar?panel=ADMINISTRADOR');
+      }
+
+      if (targetPanel === 'CAJA' && authenticatedUser.funcion !== 'CAJA') {
+        auditor.logAttempt(clientIP, username, false, 'Intento de acceso cruzado al panel CAJA');
+        req.flash('error', 'Ese usuario no puede ingresar al panel de caja.');
+        return res.redirect('/ingresar?panel=CAJA');
+      }
+
       // LOGIN EXITOSO
-      req.logIn(authenticatedUser, (err) => {
+      req.logIn(authenticatedUser, async (err) => {
         if (err) {
           console.error('[LOGIN SESSION ERROR]', err);
           req.flash('error', 'Error al crear sesión');
-          return res.redirect('/ingresar');
+          return res.redirect(loginRedirect);
         }
-        
-        // Limpiar intentos fallidos
+
         rateLimiter.clearAttempts(clientIP, username);
-        
-        // Guardar en caché
+
+        const sessionToken = crypto.randomUUID();
+        req.session.userSessionToken = sessionToken;
+        req.session.loginPanel = authenticatedUser.funcion === 'CAJA' ? 'CAJA' : 'ADMINISTRADOR';
+
+        await User.findByIdAndUpdate(authenticatedUser._id, {
+          activeSessionToken: sessionToken,
+          lastLoginAt: new Date()
+        });
+
+        authenticatedUser.activeSessionToken = sessionToken;
+
         sessionCache.setUser(authenticatedUser._id.toString(), {
           _id: authenticatedUser._id,
           username: authenticatedUser.username,
           funcion: authenticatedUser.funcion,
+          activeSessionToken: sessionToken,
           loginTime: new Date(),
           ip: clientIP
         });
-        
-        // AUDITORÍA - LOGIN EXITOSO
+
         auditor.logAttempt(clientIP, username, true, 'Login exitoso - Rol: ' + authenticatedUser.funcion);
         console.log('[LOGIN SUCCESS] Usuario:', username, 'Rol:', authenticatedUser.funcion);
-        
-        // REMEMBER ME - Configurar cookie de larga duración si está checkeado
+
         if (remember === 'on') {
-          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 días
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
           console.log('[LOGIN] Remember Me activado - Sesión: 30 días');
+        } else {
+          req.session.cookie.expires = false;
+          req.session.cookie.maxAge = null;
         }
-        
-        // REDIRECCIONAR SEGÚN ROL
+
         if (authenticatedUser.funcion) {
           let role = authenticatedUser.funcion;
           let redirectUrl;
-          
-          switch(role) {
+
+          switch (role) {
             case 'ADMINISTRADOR':
               redirectUrl = req.session.returnTo || '/administrador';
               console.log('[LOGIN REDIRECT] ADMINISTRADOR → ' + redirectUrl);
               break;
             case 'REPARTIDOR':
-              redirectUrl = req.session.returnTo || '/pedidos/pedidos-repartidor';
+              redirectUrl = req.session.returnTo || '/';
               console.log('[LOGIN REDIRECT] REPARTIDOR → ' + redirectUrl);
               break;
             case 'CAJA':
@@ -140,13 +175,12 @@ router.post('/ingresar', async (req, res, next) => {
               redirectUrl = req.session.returnTo || '/';
               console.log('[LOGIN REDIRECT] UNKNOWN ROLE → ' + redirectUrl);
           }
-          
+
           delete req.session.returnTo;
           return res.redirect(redirectUrl);
         }
       });
     })(req, res, next);
-    
   } catch (error) {
     console.error('[LOGIN EXCEPTION]', error);
     auditor.logAttempt(req.ip, req.body.username || 'unknown', false, 'Excepción: ' + error.message);
@@ -166,17 +200,19 @@ router.get('/cerrar-sesion', (req, res, next) => {
   const clientIP = req.ip || req.connection.remoteAddress;
   
   // Logout con callback (nuevo estándar de Passport)
-  req.logOut((err) => {
+  req.logOut(async (err) => {
     if (err) {
       console.error('[LOGOUT ERROR]', err);
       req.flash('error', 'Error al cerrar sesión');
       return res.redirect('/administrador');
     }
     
-    // Invalidar caché ANTES de hacer logout
     if (userId) {
       sessionCache.invalidateUser(userId);
+      await User.findByIdAndUpdate(userId, { activeSessionToken: null });
     }
+
+    req.session.userSessionToken = null;
     
     // AUDITORÍA - LOGOUT
     auditor.logAttempt(clientIP, username, true, 'Logout exitoso');

@@ -9,7 +9,8 @@ const OfertaSingular = require('../models/ofertaSingular');
 const EstacionDeCobro = require('../models/estaciondecobro');
 const { isLoggedIn, hasAnyRole } = require('../middleware');
 
-const allowCashAccess = hasAnyRole(['CAJA', 'ADMINISTRADOR']);
+const ENABLE_OFFERS = true;
+const allowCashAccess = hasAnyRole(['CAJA']);
 
 const toNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -31,6 +32,8 @@ const summarizeProducto = (producto) => ({
 
 const summarizeOfertaConjunto = (oferta) => ({
   _id: oferta._id,
+  codigoOferta: oferta.codigoOferta || '',
+  estado: oferta.estado || 'ACTIVA',
   nombreOferta: oferta.nombreOferta,
   precioOferta: toNumber(oferta.precioOferta),
   productosEnOfertaConCodigo: (oferta.productosEnOfertaConCodigo || []).map(summarizeProducto),
@@ -42,6 +45,8 @@ const summarizeOfertaConjunto = (oferta) => ({
 
 const summarizeOfertaIndividual = (oferta) => ({
   _id: oferta._id,
+  codigoOferta: oferta.codigoOferta || '',
+  estado: oferta.estado || 'ACTIVA',
   cantidadDeUnidadesNecesarias: toNumber(oferta.cantidadDeUnidadesNecesarias, 1),
   precioOferta: toNumber(oferta.precioOferta),
   productoEnOferta: oferta.productoEnOferta ? summarizeProducto(oferta.productoEnOferta) : null,
@@ -57,15 +62,71 @@ async function getCajaContext(estacionId) {
     throw new Error('La estación de cobro no existe');
   }
 
+  if (!ENABLE_OFFERS) {
+    return {
+      estacionDeCobro,
+      ofertasConjuntoParaEstacion: [],
+      ofertasIndividualesParaEstacion: []
+    };
+  }
+
+  const vigenciaMinima = new Date();
+  vigenciaMinima.setHours(0, 0, 0, 0);
+
+  const ofertaActivaQuery = {
+    estacionesDeCobroParaLaOferta: estacionId,
+    $and: [
+      {
+        $or: [
+          { estado: { $exists: false } },
+          { estado: 'ACTIVA' }
+        ]
+      },
+      {
+        $or: [
+          { fechaDeVigencia: { $exists: false } },
+          { fechaDeVigencia: null },
+          { fechaDeVigencia: { $gte: vigenciaMinima } }
+        ]
+      }
+    ]
+  };
+
   const [ofertasConjuntoRaw, ofertasIndividualesRaw] = await Promise.all([
-    Oferta.find({ estacionesDeCobroParaLaOferta: estacionId }).populate('productosEnOfertaConCodigo').lean(),
-    OfertaSingular.find({ estacionesDeCobroParaLaOferta: estacionId }).populate('productoEnOferta').lean()
+    Oferta.find(ofertaActivaQuery).populate('productosEnOfertaConCodigo').lean(),
+    OfertaSingular.find(ofertaActivaQuery).populate('productoEnOferta').lean()
   ]);
 
   return {
     estacionDeCobro,
     ofertasConjuntoParaEstacion: ofertasConjuntoRaw.map(summarizeOfertaConjunto),
     ofertasIndividualesParaEstacion: ofertasIndividualesRaw.map(summarizeOfertaIndividual)
+  };
+}
+
+function isSameDay(dateA, dateB = new Date()) {
+  const a = new Date(dateA);
+  const b = new Date(dateB);
+
+  return a.getFullYear() === b.getFullYear()
+    && a.getMonth() === b.getMonth()
+    && a.getDate() === b.getDate();
+}
+
+function getCajaOpeningState(estacionDeCobro = {}) {
+  const aperturaActual = estacionDeCobro.aperturaActual || {};
+  const fechaApertura = aperturaActual.fechaApertura ? new Date(aperturaActual.fechaApertura) : null;
+  const abiertaHoy = Boolean(
+    estacionDeCobro.estadoCaja === 'ABIERTA'
+    && aperturaActual.estado === 'ABIERTA'
+    && fechaApertura
+    && isSameDay(fechaApertura)
+  );
+
+  return {
+    abiertaHoy,
+    fechaApertura,
+    aperturaActual
   };
 }
 
@@ -213,14 +274,83 @@ router.get('/:id/inicio', isLoggedIn, allowCashAccess, catchAsync(async (req, re
   const estacionDeCobroId = req.params.id;
   const usuario = req.user;
   const estacionDeCobro = await EstacionDeCobro.findById(estacionDeCobroId);
-  const fechaActual = new Date().toLocaleDateString('es-AR');
+  const now = new Date();
+  const fechaActual = now.toLocaleDateString('es-AR');
 
   if (!estacionDeCobro) {
     req.flash('error', 'No se encontró la estación de cobro');
     return res.redirect('/ingreso-caja');
   }
 
-  res.render('caja/cajainicio', { estacionDeCobro, usuario, fechaActual });
+  const openingState = getCajaOpeningState(estacionDeCobro);
+
+  res.render('caja/cajainicio', {
+    estacionDeCobro,
+    usuario,
+    fechaActual,
+    fechaActualLarga: now.toLocaleString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    requiereApertura: !openingState.abiertaHoy,
+    aperturaActual: openingState.aperturaActual,
+    fechaAperturaTexto: openingState.fechaApertura
+      ? openingState.fechaApertura.toLocaleString('es-AR')
+      : null
+  });
+}));
+
+router.post('/:id/apertura', isLoggedIn, allowCashAccess, catchAsync(async (req, res) => {
+  const estacionDeCobroId = req.params.id;
+  const montoInicial = Math.max(0, toNumber(req.body.montoInicial));
+  const fondoCambio = Math.max(0, toNumber(req.body.fondoCambio));
+  const detalleEfectivo = String(req.body.detalleEfectivo || '').trim();
+  const observaciones = String(req.body.observaciones || '').trim();
+
+  if (fondoCambio > montoInicial) {
+    req.flash('error', 'El fondo de cambio no puede ser mayor al monto inicial registrado.');
+    return res.redirect(`/caja/${estacionDeCobroId}/inicio`);
+  }
+
+  const estacionDeCobro = await EstacionDeCobro.findById(estacionDeCobroId);
+
+  if (!estacionDeCobro) {
+    req.flash('error', 'No se encontró la estación de cobro.');
+    return res.redirect('/ingreso-caja');
+  }
+
+  const openingState = getCajaOpeningState(estacionDeCobro);
+  if (openingState.abiertaHoy) {
+    req.flash('success', 'La caja ya está abierta para hoy.');
+    return res.redirect(`/caja/${estacionDeCobroId}/cajaActiva`);
+  }
+
+  estacionDeCobro.dineroDeInicio = montoInicial;
+  estacionDeCobro.dineroEnEstacion = montoInicial;
+  estacionDeCobro.dineroDeVentasEnEfectivo = 0;
+  estacionDeCobro.dineroDeVentasEnOtro = 0;
+  estacionDeCobro.comprasRealizadasEnEfectivo = 0;
+  estacionDeCobro.comprasRealizadasEnOtro = 0;
+  estacionDeCobro.estadoCaja = 'ABIERTA';
+  estacionDeCobro.aperturaActual = {
+    estado: 'ABIERTA',
+    fechaApertura: new Date(),
+    montoInicial,
+    fondoCambio,
+    detalleEfectivo,
+    observaciones,
+    abiertaPor: req.user.username,
+    dineroAlCerrar: 0
+  };
+
+  await estacionDeCobro.save();
+
+  req.flash('success', 'Caja abierta correctamente para el día.');
+  res.redirect(`/caja/${estacionDeCobroId}/cajaActiva`);
 }));
 
 router.get('/:id/cajaActiva', isLoggedIn, allowCashAccess, catchAsync(async (req, res) => {
@@ -230,13 +360,20 @@ router.get('/:id/cajaActiva', isLoggedIn, allowCashAccess, catchAsync(async (req
 
   try {
     const { estacionDeCobro, ofertasConjuntoParaEstacion, ofertasIndividualesParaEstacion } = await getCajaContext(estacionDeCobroId);
+    const openingState = getCajaOpeningState(estacionDeCobro);
+
+    if (!openingState.abiertaHoy) {
+      req.flash('error', 'Primero tenés que abrir la caja del día antes de comenzar a vender.');
+      return res.redirect(`/caja/${estacionDeCobroId}/inicio`);
+    }
 
     const cajaData = {
       estacionId: String(estacionDeCobro._id),
       estacionNombre: estacionDeCobro.ubicacionDeEstacion || 'Caja',
-      negocioNombre: 'Isidorito',
-      dineroBase: toNumber(estacionDeCobro.dineroDeInicio),
+      negocioNombre: 'SOLIDARG-COMERCIOS',
+      dineroBase: toNumber(estacionDeCobro.aperturaActual?.montoInicial, toNumber(estacionDeCobro.dineroDeInicio)),
       dineroActual: toNumber(estacionDeCobro.dineroEnEstacion),
+      fondoCambio: toNumber(estacionDeCobro.aperturaActual?.fondoCambio),
       usuarioId: usuarioID,
       usuarioNombre: req.user.username,
       tipoUsuario,
@@ -275,6 +412,47 @@ router.get('/:id/productos/buscar', isLoggedIn, allowCashAccess, catchAsync(asyn
   res.json({ success: true, data: productos.map(summarizeProducto) });
 }));
 
+router.get('/:id/ofertas/buscar', isLoggedIn, allowCashAccess, catchAsync(async (req, res) => {
+  const estacionDeCobroId = req.params.id;
+  const query = String(req.query.q || '').trim().toLowerCase();
+
+  if (!query) {
+    return res.json({ success: true, data: [] });
+  }
+
+  const { ofertasConjuntoParaEstacion, ofertasIndividualesParaEstacion } = await getCajaContext(estacionDeCobroId);
+
+  const ofertasCombo = (ofertasConjuntoParaEstacion || [])
+    .filter((oferta) => {
+      const texto = `${oferta.nombreOferta || ''} ${oferta.productosTexto || ''} ${oferta.codigoOferta || ''}`.toLowerCase();
+      return texto.includes(query);
+    })
+    .map((oferta) => ({
+      id: String(oferta._id),
+      kind: 'combo',
+      title: oferta.nombreOferta,
+      subtitle: oferta.productosTexto || 'Oferta combo',
+      price: oferta.precioOferta,
+      code: oferta.codigoOferta || ''
+    }));
+
+  const ofertasIndividuales = (ofertasIndividualesParaEstacion || [])
+    .filter((oferta) => {
+      const texto = `${oferta.productoEnOferta?.nombre || ''} ${oferta.productoEnOferta?.marca || ''} ${oferta.productoEnOferta?.codigo || ''} ${oferta.descripcion || ''} ${oferta.codigoOferta || ''}`.toLowerCase();
+      return texto.includes(query);
+    })
+    .map((oferta) => ({
+      id: String(oferta._id),
+      kind: 'individual',
+      title: oferta.productoEnOferta?.nombre || 'Oferta individual',
+      subtitle: oferta.descripcion || 'Promoción automática',
+      price: oferta.precioOferta,
+      code: oferta.codigoOferta || oferta.productoEnOferta?.codigo || ''
+    }));
+
+  res.json({ success: true, data: [...ofertasCombo, ...ofertasIndividuales].slice(0, 25) });
+}));
+
 router.post('/buscar', isLoggedIn, allowCashAccess, catchAsync(async (req, res) => {
   const productos = await searchProducts(req.body.codigo || req.body.query || '');
 
@@ -297,6 +475,11 @@ router.post('/:id/registrar-venta', isLoggedIn, allowCashAccess, catchAsync(asyn
 
   if (!estacionDeCobro) {
     return res.status(404).json({ success: false, message: 'La estación de cobro no existe.' });
+  }
+
+  const openingState = getCajaOpeningState(estacionDeCobro);
+  if (!openingState.abiertaHoy) {
+    return res.status(400).json({ success: false, message: 'La caja todavía no fue abierta para el día de hoy.' });
   }
 
   let totalVenta = 0;

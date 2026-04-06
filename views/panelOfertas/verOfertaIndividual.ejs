@@ -1,32 +1,107 @@
 <%- include('../partials/headerAdm.ejs'); %>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-6 ">
-            <a href="/administrador/ofertas" class="btn btn-outline-success px-md-2 my-2">Ir a OFERTAS</a>
-            <div class="ofertaCard">
-                <div class="card px-lg-4">
-                    <div class="card-title">
-                         Producto:   <%= ofertaIndividualParaVer.productoEnOferta.nombre %>
-                    </div>
-                    <h6 class="card-subtitle mb-2 ">Oferta de <%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %> por <%= ofertaIndividualParaVer.precioOferta %>  </h6>
-                    <div class="card-body ">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Precio de la oferta: <%= ofertaIndividualParaVer.precioOferta %></li>
-                            <li class="list-group-item">cantidad de productos para completar la oferta: <%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %></li>
-                            <li class="list-group-item">Vigente hasta: <%= ofertaIndividualParaVer.fechaDeVigencia %></li>
-                            <li class="list-group-item">Aplica en: 
-                                
-                               
-                              </li>
-                          </ul>
-                                           </div>
-                        <form class="d-inline px-2" action="/administrador/ofertas/oferta-individual/<%= ofertaIndividualParaVer._id%>?_method=DELETE" method="post">
-                            <button class="btn btn-warning text-end px-2">Eliminar</button>
-                        </form>
-                    </div>
-         
+<%
+    const estadoOferta = ofertaIndividualParaVer.estado || 'ACTIVA';
+    const ofertaPausada = estadoOferta === 'PAUSADA';
+%>
+
+<div class="admin-dashboard">
+    <div class="form-container">
+        <nav class="breadcrumb-nav">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Oferta Individual</span>
+        </nav>
+
+        <div class="form-header offer-detail-hero">
+            <div>
+                <h1 class="form-title">🎁 Oferta Individual</h1>
+                <p class="form-subtitle"><%= ofertaIndividualParaVer.productoEnOferta?.nombre || 'Producto en promoción' %></p>
             </div>
+            <span class="offer-status-badge <%= ofertaPausada ? 'paused' : 'active' %>"><%= estadoOferta %></span>
+        </div>
+
+        <div class="oferta-details-grid">
+            <div class="oferta-detail-card">
+                <div class="card-header">
+                    <span class="card-icon">📦</span>
+                    <h3 class="card-title">Producto y promoción</h3>
+                </div>
+                <div class="card-body-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Producto</span>
+                        <span class="detail-value"><%= ofertaIndividualParaVer.productoEnOferta?.nombre || '-' %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Marca</span>
+                        <span class="detail-value"><%= ofertaIndividualParaVer.productoEnOferta?.marca || '-' %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Regla automática</span>
+                        <span class="detail-value"><%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %> unidades por $<%= Number(ofertaIndividualParaVer.precioOferta || 0).toFixed(2) %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Código de oferta</span>
+                        <span class="detail-value code-chip"><%= ofertaIndividualParaVer.codigoOferta || 'Sin código' %></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="oferta-detail-card">
+                <div class="card-header">
+                    <span class="card-icon">🏪</span>
+                    <h3 class="card-title">Aplicación y vigencia</h3>
+                </div>
+                <div class="card-body-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Vigente hasta</span>
+                        <span class="detail-value"><%= ofertaIndividualParaVer.fechaDeVigencia ? new Date(ofertaIndividualParaVer.fechaDeVigencia).toLocaleDateString('es-AR') : 'Sin fecha límite' %></span>
+                    </div>
+                    <div class="detail-row detail-row-column">
+                        <span class="detail-label">Estaciones</span>
+                        <div class="stations-list-inline">
+                            <% if (ofertaIndividualParaVer.estacionesDeCobroParaLaOferta && ofertaIndividualParaVer.estacionesDeCobroParaLaOferta.length > 0) { %>
+                                <% ofertaIndividualParaVer.estacionesDeCobroParaLaOferta.forEach((estacion) => { %>
+                                    <span class="station-badge">🏪 <%= estacion.ubicacionDeEstacion %></span>
+                                <% }) %>
+                            <% } else { %>
+                                <span class="detail-value">Sin estaciones asignadas</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reset-info-box mt-3">
+            <span class="info-icon">ℹ️</span>
+            <p class="info-text">Esta oferta se aplica automáticamente en la caja cuando la compra alcanza <strong><%= ofertaIndividualParaVer.cantidadDeUnidadesNecesarias %> unidades</strong>. Si necesitás cambiar algo, <strong>pausala o eliminála y creá una nueva</strong>.</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="/administrador/ofertas" class="btn-secondary-modern">← Volver a Ofertas</a>
+            <form action="/administrador/ofertas/oferta-individual/<%= ofertaIndividualParaVer._id %>/estado" method="POST" style="display:inline;">
+                <input type="hidden" name="estado" value="<%= ofertaPausada ? 'ACTIVA' : 'PAUSADA' %>">
+                <button type="submit" class="<%= ofertaPausada ? 'btn-primary-modern btn-save-emphasis' : 'btn-secondary-modern btn-offers-entry' %>">
+                    <%= ofertaPausada ? '▶️ Reactivar oferta' : '⏸️ Pausar oferta' %>
+                </button>
+            </form>
+            <form action="/administrador/ofertas/oferta-individual/<%= ofertaIndividualParaVer._id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar esta oferta individual?');">
+                <button type="submit" class="btn-delete-full">🗑️ Eliminar oferta</button>
+            </form>
         </div>
     </div>
 </div>
+
+<style>
+.offer-detail-hero { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.offer-status-badge { padding:0.45rem 0.8rem; border-radius:999px; font-weight:700; }
+.offer-status-badge.active { background:#dcfce7; color:#166534; }
+.offer-status-badge.paused { background:#fee2e2; color:#991b1b; }
+.code-chip { font-family:'Courier New', monospace; background:#eef2ff; color:#3730a3; padding:0.25rem 0.55rem; border-radius:999px; }
+.detail-row-column { align-items:flex-start !important; flex-direction:column; }
+.stations-list-inline { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.4rem; }
+</style>
+
 <%- include('../partials/footer.ejs'); %>

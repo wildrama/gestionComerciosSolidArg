@@ -1,7 +1,7 @@
 <%- include('../partials/headerAdm.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard cash-movement-page ingreso-page">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -26,6 +26,21 @@
             <div class="info-opening-content">
                 <p class="info-opening-label">Estación de Cobro:</p>
                 <h2 class="info-opening-value"><%= estacionDeCobro.ubicacionDeEstacion %></h2>
+            </div>
+        </div>
+
+        <div class="info-strip-grid">
+            <div class="info-strip-card">
+                <span class="info-strip-label">Saldo actual registrado</span>
+                <strong class="info-strip-value">$<%= Number(estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %></strong>
+            </div>
+            <div class="info-strip-card">
+                <span class="info-strip-label">Fecha de apertura</span>
+                <strong class="info-strip-value"><%= new Date().toLocaleDateString('es-AR') %></strong>
+            </div>
+            <div class="info-strip-card">
+                <span class="info-strip-label">Operación</span>
+                <strong class="info-strip-value">Ingreso inicial</strong>
             </div>
         </div>
 
@@ -55,6 +70,8 @@
                                    placeholder="0.00"
                                    step="0.01"
                                    min="0"
+                                   inputmode="decimal"
+                                   autofocus
                                    required>
                         </div>
                         <small class="form-help">Ingresa solo números. Ej: 1000.50</small>

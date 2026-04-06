@@ -7,9 +7,10 @@
             <div class="login-icon">💳</div>
             <h1 class="login-title">Acceso a Caja</h1>
             <p class="login-subtitle">Estación: <strong><%= nombreEstacion %></strong></p>
+            <p class="security-text" style="margin-top: 0.5rem;">Solo el usuario <strong>CAJA</strong> puede operar aquí</p>
         </div>
 
-        <form action="/ingreso-caja/<%= estacionDeCobroId %>/login" method="POST" class="login-form">
+        <form action="/ingreso-caja/<%= estacionDeCobroId %>/login" method="POST" class="login-form" id="cashLoginForm" autocomplete="on">
             <div class="form-group-modern">
                 <label for="username" class="form-label-modern">Usuario</label>
                 <input type="text" 
@@ -17,6 +18,7 @@
                        name="username" 
                        class="form-control-modern" 
                        placeholder="Ingresa tu usuario"
+                       autocomplete="username"
                        required>
             </div>
 
@@ -28,6 +30,7 @@
                            name="password" 
                            class="form-control-modern" 
                            placeholder="Ingresa tu contraseña"
+                           autocomplete="current-password"
                            required>
                     <button type="button" class="password-toggle" onclick="togglePasswordCaja()">
                         <span id="eye-icon-caja">👁️</span>
@@ -36,7 +39,7 @@
             </div>
 
             <div class="form-check-modern">
-                <input type="checkbox" id="remember" class="checkbox-modern">
+                <input type="checkbox" id="remember" name="remember" class="checkbox-modern">
                 <label for="remember" class="checkbox-label">Recordar sesión</label>
             </div>
 
@@ -65,6 +68,27 @@ function togglePasswordCaja() {
         eyeIcon.textContent = '👁️';
     }
 }
+
+(function initRememberCaja() {
+    const rememberBox = document.getElementById('remember');
+    const usernameField = document.getElementById('username');
+    const loginForm = document.getElementById('cashLoginForm');
+    const storageKey = 'solidarg-last-user:CAJA';
+    const savedUsername = window.localStorage.getItem(storageKey);
+
+    if (savedUsername) {
+        usernameField.value = savedUsername;
+        rememberBox.checked = true;
+    }
+
+    loginForm.addEventListener('submit', () => {
+        if (rememberBox.checked) {
+            window.localStorage.setItem(storageKey, usernameField.value.trim());
+        } else {
+            window.localStorage.removeItem(storageKey);
+        }
+    });
+})();
 </script>
 
 <%- include('./partials/footer.ejs'); %>

@@ -8,10 +8,18 @@
                 <h1 class="page-title">📊 Gestión de Stock</h1>
                 <p class="page-subtitle">Total de productos: <%= cantidadTotalDeProductos %></p>
             </div>
-            <div class="page-actions">
-                <a href="/administrador/productos/nuevo" class="btn-primary-modern">
-                    <span class="btn-icon">+</span>
-                    Nuevo Producto
+            <div class="page-actions stock-page-actions">
+                <a href="/administrador/productos/imprimir-codigos" class="btn-secondary-modern btn-offers-entry" target="_blank" rel="noopener">
+                    <span class="btn-icon">🖨️</span>
+                    Imprimir códigos
+                </a>
+                <a href="/administrador/productos/nuevo#codigo" class="btn-secondary-modern btn-stock-shortcut">
+                    <span class="btn-icon">🏷️</span>
+                    Alta con código
+                </a>
+                <a href="/administrador/productos/nuevo" class="btn-primary-modern btn-save-emphasis btn-stock-main-action">
+                    <span class="btn-icon">➕</span>
+                    Agregar producto
                 </a>
             </div>
         </div>
@@ -29,16 +37,30 @@
         <div class="stock-stat-card">
             <div class="stock-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
             <div class="stock-stat-content">
-                <h3><%= productos.reduce((sum, p) => sum + (p.cantidad || 0), 0) %></h3>
+                <h3><%= stockTotalGeneral %></h3>
                 <p>Stock Total</p>
             </div>
         </div>
         <div class="stock-stat-card">
             <div class="stock-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚠️</div>
             <div class="stock-stat-content">
-                <h3><%= productos.filter(p => p.cantidad < 10).length %></h3>
+                <h3><%= stockBajoCount %></h3>
                 <p>Stock Bajo</p>
             </div>
+        </div>
+    </div>
+
+    <div class="stock-filters-card stock-quick-start">
+        <div class="scanner-guide-copy">
+            <span class="scanner-badge">Carga recomendada</span>
+            <h3>📷 Alta orientada a lector de código</h3>
+            <p>Entrá por <strong>Agregar producto</strong>, escaneá el código en el primer campo y, si el artículo no trae uno, generá un código nuevo en un solo toque.</p>
+        </div>
+        <div class="scanner-guide-actions">
+            <a href="/administrador/productos/nuevo#codigo" class="btn-primary-modern btn-save-emphasis btn-stock-main-action">
+                <span class="btn-icon">🚀</span>
+                Cargar producto ahora
+            </a>
         </div>
     </div>
 
@@ -56,8 +78,7 @@
             <div class="filter-group-stock">
                 <select id="filterCategoria" class="filter-select" onchange="filtrarStock()">
                     <option value="">Todas las categorías</option>
-                    <% const categorias = [...new Set(productos.map(p => p.categoriaInterna).filter(Boolean))]; %>
-                    <% categorias.forEach(cat => { %>
+                    <% (categorias || []).forEach(cat => { %>
                         <option value="<%= cat %>"><%= cat %></option>
                     <% }); %>
                 </select>
@@ -119,14 +140,19 @@
                         <td style="text-align: center;">
                             <div class="stock-actions">
                                 <a href="/administrador/productos/<%= producto._id %>/upstock" 
-                                   class="btn-stock-action" 
+                                   class="btn-stock-action is-stock" 
                                    title="Actualizar stock">
-                                    📦
+                                    <span>📦</span><span>Stock</span>
                                 </a>
                                 <a href="/administrador/productos/<%= producto._id %>" 
-                                   class="btn-stock-action" 
+                                   class="btn-stock-action is-view" 
                                    title="Ver detalles">
-                                    👁️
+                                    <span>🔎</span><span>Ver</span>
+                                </a>
+                                <a href="/administrador/productos/imprimir-codigos?ids=<%= producto._id %>" 
+                                   class="btn-stock-action is-print" 
+                                   title="Imprimir código" target="_blank" rel="noopener">
+                                    <span>🖨️</span><span>Código</span>
                                 </a>
                             </div>
                         </td>
@@ -196,70 +222,149 @@
 </div>
 
 <script>
-function filtrarStock() {
+let stockLoadedAll = false;
+let stockCatalog = <%- JSON.stringify((productos || []).map((producto) => ({
+    _id: String(producto._id),
+    nombre: producto.nombre || '',
+    marca: producto.marca || '',
+    categoriaInterna: producto.categoriaInterna || '',
+    cantidad: Number(producto.cantidad || 0),
+    precioMinorista: Number(producto.precioMinorista || 0),
+    precioMayorista: Number(producto.precioMayorista || 0),
+    presentacion: producto.presentacion || '',
+    peso: producto.peso || ''
+}))) %>;
+
+const stockTableBody = document.getElementById('stockTableBody');
+const stockCardsMobile = document.getElementById('stockCardsMobile');
+const noResults = document.getElementById('noResults');
+
+function formatMoney(value) {
+    return `$${Number(value || 0).toFixed(2)}`;
+}
+
+function renderStockDesktop(productosRender) {
+    stockTableBody.innerHTML = productosRender.map((producto) => `
+        <tr class="stock-row"
+            data-nombre="${(producto.nombre || '').toLowerCase()}"
+            data-marca="${(producto.marca || '').toLowerCase()}"
+            data-categoria="${(producto.categoriaInterna || '').toLowerCase()}"
+            data-stock="${Number(producto.cantidad || 0)}">
+            <td>
+                <div class="stock-product-cell">
+                    <div class="stock-product-placeholder">📦</div>
+                    <div class="stock-product-info">
+                        <h4>${producto.nombre || '-'}</h4>
+                        ${producto.peso ? `<p>${producto.peso}</p>` : ''}
+                    </div>
+                </div>
+            </td>
+            <td>${producto.marca || '-'}</td>
+            <td style="text-align: center;">
+                <span class="stock-number ${Number(producto.cantidad || 0) < 10 ? 'low' : (Number(producto.cantidad || 0) < 50 ? 'ok' : 'high')}">
+                    ${Number(producto.cantidad || 0)}
+                </span>
+            </td>
+            <td><strong style="color: #6366f1;">${formatMoney(producto.precioMinorista)}</strong></td>
+            <td><strong style="color: #10b981;">${formatMoney(producto.precioMayorista)}</strong></td>
+            <td>${producto.categoriaInterna || '-'}</td>
+            <td>${producto.presentacion || '-'}</td>
+            <td style="text-align: center;">
+                <div class="stock-actions">
+                    <a href="/administrador/productos/${producto._id}/upstock" class="btn-stock-action is-stock" title="Actualizar stock">
+                        <span>📦</span><span>Stock</span>
+                    </a>
+                    <a href="/administrador/productos/${producto._id}" class="btn-stock-action is-view" title="Ver detalles">
+                        <span>🔎</span><span>Ver</span>
+                    </a>
+                    <a href="/administrador/productos/imprimir-codigos?ids=${producto._id}" class="btn-stock-action is-print" title="Imprimir código" target="_blank" rel="noopener">
+                        <span>🖨️</span><span>Código</span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderStockMobile(productosRender) {
+    stockCardsMobile.innerHTML = productosRender.map((producto) => `
+        <div class="stock-card-mobile"
+             data-nombre="${(producto.nombre || '').toLowerCase()}"
+             data-marca="${(producto.marca || '').toLowerCase()}"
+             data-categoria="${(producto.categoriaInterna || '').toLowerCase()}"
+             data-stock="${Number(producto.cantidad || 0)}">
+            <div class="stock-card-header-mobile">
+                <div class="stock-card-icon">📦</div>
+                <div>
+                    <h3 class="stock-card-title">${producto.nombre || '-'}</h3>
+                    <p class="stock-card-subtitle">${producto.marca || 'Sin marca'}</p>
+                </div>
+            </div>
+            <div class="stock-card-body-mobile">
+                <div class="stock-card-row">
+                    <span class="label">Stock:</span>
+                    <span class="value stock-value ${Number(producto.cantidad || 0) < 10 ? 'low' : 'ok'}">${Number(producto.cantidad || 0)} unidades</span>
+                </div>
+                <div class="stock-card-row">
+                    <span class="label">Precio Minorista:</span>
+                    <span class="value price">${formatMoney(producto.precioMinorista)}</span>
+                </div>
+                <div class="stock-card-row">
+                    <span class="label">Precio Mayorista:</span>
+                    <span class="value price">${formatMoney(producto.precioMayorista)}</span>
+                </div>
+                ${producto.categoriaInterna ? `<div class="stock-card-row"><span class="label">Categoría:</span><span class="value">${producto.categoriaInterna}</span></div>` : ''}
+            </div>
+            <div class="stock-card-footer-mobile">
+                <a href="/administrador/productos/${producto._id}/upstock" class="btn-mobile-action primary">📦 Actualizar stock</a>
+                <a href="/administrador/productos/${producto._id}" class="btn-mobile-action secondary">🔎 Ver detalle</a>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function ensureFullStockCatalog() {
+    if (stockLoadedAll) return;
+
+    const response = await fetch('/administrador/productos/api/listado-completo');
+    const payload = await response.json();
+    if (payload.success && Array.isArray(payload.data)) {
+        stockCatalog = payload.data;
+        stockLoadedAll = true;
+    }
+}
+
+async function filtrarStock() {
     const searchValue = document.getElementById('searchStock').value.toLowerCase();
     const categoriaValue = document.getElementById('filterCategoria').value.toLowerCase();
     const stockValue = document.getElementById('filterStock').value;
-    
-    // Filtrar tabla desktop
-    const rows = document.querySelectorAll('.stock-row');
-    let visibleCountDesktop = 0;
-    
-    rows.forEach(row => {
-        const nombre = row.dataset.nombre;
-        const marca = row.dataset.marca;
-        const categoria = row.dataset.categoria;
-        const stock = parseInt(row.dataset.stock);
-        
-        const matchSearch = nombre.includes(searchValue) || marca.includes(searchValue) || categoria.includes(searchValue);
-        const matchCategoria = categoriaValue === '' || categoria === categoriaValue;
-        
-        let matchStock = true;
-        if (stockValue === 'bajo') matchStock = stock < 10;
-        else if (stockValue === 'medio') matchStock = stock >= 10 && stock <= 50;
-        else if (stockValue === 'alto') matchStock = stock > 50;
-        
-        if (matchSearch && matchCategoria && matchStock) {
-            row.style.display = '';
-            visibleCountDesktop++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // Filtrar cards mobile
-    const cards = document.querySelectorAll('.stock-card-mobile');
-    let visibleCountMobile = 0;
-    
-    cards.forEach(card => {
-        const nombre = card.dataset.nombre;
-        const marca = card.dataset.marca;
-        const categoria = card.dataset.categoria;
-        const stock = parseInt(card.dataset.stock);
-        
-        const matchSearch = nombre.includes(searchValue) || marca.includes(searchValue) || categoria.includes(searchValue);
-        const matchCategoria = categoriaValue === '' || categoria === categoriaValue;
-        
-        let matchStock = true;
-        if (stockValue === 'bajo') matchStock = stock < 10;
-        else if (stockValue === 'medio') matchStock = stock >= 10 && stock <= 50;
-        else if (stockValue === 'alto') matchStock = stock > 50;
-        
-        if (matchSearch && matchCategoria && matchStock) {
-            card.style.display = '';
-            visibleCountMobile++;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-    
-    // Mostrar mensaje de no resultados
-    const noResults = document.getElementById('noResults');
-    if (visibleCountDesktop === 0 && visibleCountMobile === 0) {
-        noResults.style.display = 'flex';
-    } else {
-        noResults.style.display = 'none';
+    const hasFilters = Boolean(searchValue || categoriaValue || stockValue);
+
+    if (hasFilters) {
+        await ensureFullStockCatalog();
     }
+
+    const source = hasFilters ? stockCatalog : stockCatalog.slice(0, 15);
+    const filtered = source.filter((producto) => {
+        const nombre = (producto.nombre || '').toLowerCase();
+        const marca = (producto.marca || '').toLowerCase();
+        const categoria = (producto.categoriaInterna || '').toLowerCase();
+        const stock = Number(producto.cantidad || 0);
+
+        const matchSearch = nombre.includes(searchValue) || marca.includes(searchValue) || categoria.includes(searchValue);
+        const matchCategoria = categoriaValue === '' || categoria === categoriaValue;
+
+        let matchStock = true;
+        if (stockValue === 'bajo') matchStock = stock < 10;
+        else if (stockValue === 'medio') matchStock = stock >= 10 && stock <= 50;
+        else if (stockValue === 'alto') matchStock = stock > 50;
+
+        return matchSearch && matchCategoria && matchStock;
+    });
+
+    renderStockDesktop(filtered);
+    renderStockMobile(filtered);
+    noResults.style.display = filtered.length === 0 ? 'flex' : 'none';
 }
 
 function limpiarFiltros() {

@@ -1,4 +1,4 @@
-# ISIDORITO
+# SOLIDARG-COMERCIOS
 
 Aplicacion para gestion de negocio minorista/mayorista con caja, stock, precios y administracion operativa.
 

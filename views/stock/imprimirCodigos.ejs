@@ -1,0 +1,327 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard barcode-module-page">
+    <div class="form-container barcode-print-shell">
+        <nav class="breadcrumb-nav no-print">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/productos" class="breadcrumb-link">Productos</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Imprimir códigos</span>
+        </nav>
+
+        <div class="form-header no-print">
+            <h1 class="form-title">🖨️ Etiquetas de productos para góndola</h1>
+            <p class="form-subtitle">Buscá, seleccioná varios productos y armá una hoja A4 en formato tipo supermercado, con 2 columnas.</p>
+        </div>
+
+        <div class="setup-next-steps offer-step-guide no-print">
+            <h3 class="steps-title">Cómo usarlo</h3>
+            <ul class="steps-list">
+                <li><span class="step-number">1</span><span class="step-text">Buscá productos por nombre, marca o código.</span></li>
+                <li><span class="step-number">2</span><span class="step-text">Marcá todos los que quieras imprimir.</span></li>
+                <li><span class="step-number">3</span><span class="step-text">Usá <strong>Imprimir hoja A4</strong> para sacar las etiquetas.</span></li>
+            </ul>
+        </div>
+
+        <div class="barcode-toolbar no-print">
+            <div class="search-box-offer barcode-search-grow">
+                <span class="search-icon-offer">🔎</span>
+                <input id="productLabelSearch" type="text" class="search-input-offer" placeholder="Buscar por nombre, marca o código">
+            </div>
+            <div class="barcode-toolbar-actions">
+                <button type="button" id="selectVisibleProductsBtn" class="btn-light-modern">Seleccionar visibles</button>
+                <button type="button" id="clearProductSelectionBtn" class="btn-light-modern">Limpiar selección</button>
+                <button type="button" id="printProductLabelsBtn" class="btn-primary-modern btn-save-emphasis">🖨️ Imprimir hoja A4</button>
+            </div>
+        </div>
+
+        <div class="barcode-layout no-print">
+            <section class="barcode-picker-panel">
+                <div class="barcode-panel-head">
+                    <h3>Productos disponibles</h3>
+                    <p id="pickerCounter"><%= productos.length %> productos con código</p>
+                </div>
+                <div id="productPickerList" class="barcode-pick-list"></div>
+            </section>
+
+            <aside class="barcode-helper-panel">
+                <h3>Resumen</h3>
+                <p id="productSelectionSummary">0 productos listos para imprimir.</p>
+                <ul>
+                    <li>Formato pensado para <strong>góndola</strong>.</li>
+                    <li>Incluye <strong>nombre + marca + precio + código + barra</strong>.</li>
+                    <li>Si el listado supera la hoja, la impresión continúa sola en otra página.</li>
+                </ul>
+            </aside>
+        </div>
+
+        <div class="print-preview-wrap">
+            <div class="preview-header no-print">
+                <h2>Vista previa de etiquetas</h2>
+                <p>Así salen en 2 columnas rectangulares, aprovechando toda la hoja.</p>
+            </div>
+            <div id="productPrintSheet" class="barcode-sheet-preview"></div>
+        </div>
+    </div>
+</div>
+
+<script id="productosData" type="application/json"><%- productosPayload %></script>
+<script id="preselectedProductsData" type="application/json"><%- preselectedPayload %></script>
+<script src="/jsBarcode.min.js"></script>
+<script>
+const PRODUCTOS = JSON.parse(document.getElementById('productosData')?.textContent || '[]');
+const PRESELECTED = new Set(JSON.parse(document.getElementById('preselectedProductsData')?.textContent || '[]'));
+
+const state = {
+  query: '',
+  selectedIds: new Set(PRESELECTED)
+};
+
+const elements = {
+  search: document.getElementById('productLabelSearch'),
+  picker: document.getElementById('productPickerList'),
+  pickerCounter: document.getElementById('pickerCounter'),
+  selectVisibleBtn: document.getElementById('selectVisibleProductsBtn'),
+  clearBtn: document.getElementById('clearProductSelectionBtn'),
+  printBtn: document.getElementById('printProductLabelsBtn'),
+  summary: document.getElementById('productSelectionSummary'),
+  sheet: document.getElementById('productPrintSheet')
+};
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(Number(value || 0));
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getFilteredProducts() {
+  const term = state.query.trim().toLowerCase();
+  if (!term) return PRODUCTOS;
+
+  return PRODUCTOS.filter((producto) => {
+    const haystack = `${producto.nombre} ${producto.marca} ${producto.codigo} ${producto.categoriaInterna}`.toLowerCase();
+    return haystack.includes(term);
+  });
+}
+
+function renderPicker() {
+  const filtered = getFilteredProducts();
+  elements.pickerCounter.textContent = `${filtered.length} producto(s) visibles`;
+
+  if (!filtered.length) {
+    elements.picker.innerHTML = '<p class="finder-empty">No hay productos para esa búsqueda.</p>';
+    return;
+  }
+
+  elements.picker.innerHTML = filtered.map((producto) => {
+    const checked = state.selectedIds.has(producto._id);
+    return `
+      <label class="barcode-pick-card ${checked ? 'selected' : ''}">
+        <input type="checkbox" data-pick-product="${escapeHtml(producto._id)}" ${checked ? 'checked' : ''}>
+        <div class="barcode-pick-copy">
+          <h4>${escapeHtml(producto.nombre)}</h4>
+          <p>${escapeHtml(producto.marca || 'Sin marca')} · Cod. ${escapeHtml(producto.codigo || '-')}</p>
+          <small>Precio ${escapeHtml(formatMoney(producto.precioMinorista))} · Stock ${escapeHtml(producto.cantidad)}</small>
+        </div>
+      </label>
+    `;
+  }).join('');
+}
+
+function renderSheet() {
+  const selectedProducts = PRODUCTOS.filter((producto) => state.selectedIds.has(producto._id));
+  elements.summary.textContent = `${selectedProducts.length} producto(s) listos para imprimir.`;
+
+  if (!selectedProducts.length) {
+    elements.sheet.innerHTML = `
+      <div class="empty-products print-empty-state">
+        <span class="empty-icon">🖨️</span>
+        <p>Seleccioná productos del panel izquierdo para armar la hoja.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = [];
+  for (let i = 0; i < selectedProducts.length; i += 2) {
+    const pair = selectedProducts.slice(i, i + 2);
+    rows.push(`
+      <tr>
+        ${pair.map((producto) => `
+          <td class="sheet-cell">
+            <article class="shelf-label">
+              <div class="shelf-label-head">
+                <div class="shelf-label-copy">
+                  <h3>${escapeHtml(producto.nombre)}</h3>
+                  <p>${escapeHtml(producto.marca || 'Sin marca')}</p>
+                </div>
+                <div class="shelf-price-tag">
+                  <strong>${escapeHtml(formatMoney(producto.precioMinorista))}</strong>
+                </div>
+              </div>
+              <div class="shelf-divider"></div>
+              <div class="shelf-barcode-wrap">
+                <div class="shelf-code-row">Código: ${escapeHtml(producto.codigo || '-')}</div>
+                <svg class="label-barcode" id="barcode-${escapeHtml(producto._id)}"></svg>
+              </div>
+            </article>
+          </td>
+        `).join('')}
+        ${pair.length === 1 ? '<td class="sheet-cell sheet-cell-empty"></td>' : ''}
+      </tr>
+    `);
+  }
+
+  elements.sheet.innerHTML = `
+    <table class="barcode-print-table" role="presentation">
+      <tbody>${rows.join('')}</tbody>
+    </table>
+  `;
+
+  selectedProducts.forEach((producto) => {
+    const svg = document.getElementById(`barcode-${producto._id}`);
+    if (!svg || !producto.codigo) return;
+
+    JsBarcode(svg, String(producto.codigo), {
+      format: 'CODE128',
+      width: 1.6,
+      height: 34,
+      displayValue: true,
+      fontSize: 10,
+      textMargin: 2,
+      margin: 0,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+  });
+}
+
+function syncView() {
+  renderPicker();
+  renderSheet();
+}
+
+elements.search?.addEventListener('input', (event) => {
+  state.query = event.target.value || '';
+  renderPicker();
+});
+
+elements.picker?.addEventListener('change', (event) => {
+  const checkbox = event.target.closest('[data-pick-product]');
+  if (!checkbox) return;
+
+  const productId = checkbox.getAttribute('data-pick-product');
+  if (checkbox.checked) {
+    state.selectedIds.add(productId);
+  } else {
+    state.selectedIds.delete(productId);
+  }
+
+  syncView();
+});
+
+elements.selectVisibleBtn?.addEventListener('click', () => {
+  getFilteredProducts().forEach((producto) => state.selectedIds.add(producto._id));
+  syncView();
+});
+
+elements.clearBtn?.addEventListener('click', () => {
+  state.selectedIds.clear();
+  syncView();
+});
+
+elements.printBtn?.addEventListener('click', () => {
+  if (!state.selectedIds.size) {
+    window.alert('Seleccioná al menos un producto para imprimir.');
+    return;
+  }
+
+  window.print();
+});
+
+syncView();
+</script>
+
+<style>
+.barcode-print-shell { max-width: 1320px; }
+.barcode-toolbar { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1.25rem; }
+.barcode-search-grow { flex:1 1 340px; }
+.barcode-toolbar-actions { display:flex; gap:.75rem; flex-wrap:wrap; }
+.barcode-layout { display:grid; grid-template-columns: minmax(320px, 1fr) 300px; gap:1rem; margin-bottom:1.5rem; }
+.barcode-picker-panel, .barcode-helper-panel, .print-preview-wrap { background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; }
+.barcode-panel-head h3, .barcode-helper-panel h3, .preview-header h2 { margin:0 0 .35rem 0; color:var(--text-primary); }
+.barcode-panel-head p, .barcode-helper-panel p, .preview-header p { margin:0; color:var(--text-secondary); }
+.barcode-helper-panel ul { margin:.9rem 0 0 1rem; color:var(--text-secondary); }
+.barcode-pick-list { display:grid; gap:.75rem; max-height:560px; overflow:auto; margin-top:1rem; }
+.barcode-pick-card { display:flex; gap:.75rem; align-items:flex-start; padding:.9rem; border:1px solid var(--border-color); border-radius:12px; cursor:pointer; transition:all .2s ease; background:#fff; }
+.barcode-pick-card:hover { border-color:var(--primary-color); box-shadow:0 10px 18px rgba(99,102,241,.1); }
+.barcode-pick-card.selected { border-color:var(--primary-color); background:#eef2ff; }
+.barcode-pick-card input { margin-top:.25rem; accent-color:var(--primary-color); }
+.barcode-pick-copy h4 { margin:0 0 .25rem 0; font-size:1rem; color:var(--text-primary); }
+.barcode-pick-copy p, .barcode-pick-copy small { margin:0; color:var(--text-secondary); }
+.barcode-sheet-preview { width:100%; margin-top:1rem; }
+.barcode-print-table { width:100%; table-layout:fixed; border-collapse:separate; border-spacing:6mm 6mm; }
+.sheet-cell { width:50%; vertical-align:top; padding:0; }
+.sheet-cell-empty { border:none; }
+.shelf-label { box-sizing:border-box; width:100%; border:2px solid #0f172a; border-radius:10px; padding:2.4mm 2.8mm; background:#fff; height:31mm; min-height:31mm; max-height:31mm; break-inside:avoid; page-break-inside:avoid; display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden; }
+.shelf-label-head { display:grid; grid-template-columns:minmax(0, 1fr) 24mm; gap:2.5mm; align-items:start; }
+.shelf-label-copy { min-width:0; max-width:100%; overflow:hidden; }
+.shelf-label-copy h3 { margin:0; font-size:11px; line-height:1.15; color:#111827; white-space:normal; word-break:normal; overflow-wrap:break-word; display:-webkit-box; line-clamp:2; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
+.shelf-label-copy p { margin:1px 0 0 0; font-size:9px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.shelf-price-tag { width:24mm; min-width:24mm; text-align:center; border:1px solid #cbd5e1; border-radius:8px; padding:1.3mm 1.4mm; background:#f8fafc; color:#111827; }
+.shelf-price-tag strong { display:block; font-size:15px; line-height:1.1; }
+.shelf-divider { border-top:1px solid #cbd5e1; margin:1.5mm 0 1.4mm 0; }
+.shelf-barcode-wrap { margin-top:auto; overflow:hidden; }
+.shelf-code-row { margin:0 0 1.2mm 0; font-size:8px; font-weight:700; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.label-barcode { display:block; width:100%; height:11mm; max-width:100%; }
+.print-empty-state { border:1px dashed var(--border-color); border-radius:12px; }
+@media screen and (max-width: 700px) {
+  .barcode-layout { grid-template-columns:1fr; }
+  .barcode-print-table, .barcode-print-table tbody, .barcode-print-table tr, .sheet-cell { display:block; width:100%; }
+  .barcode-print-table { border-spacing:0 4mm; }
+}
+@page { size:A4 landscape; margin:5mm; }
+@media print {
+  html, body { width:297mm !important; height:auto !important; background:#fff !important; }
+  body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .container, .admin-dashboard, .form-container, .barcode-print-shell, .print-preview-wrap {
+    width:100% !important;
+    max-width:none !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:none !important;
+    box-shadow:none !important;
+  }
+  .no-print, nav, header, footer, .breadcrumb-nav, .form-header, .setup-next-steps, .barcode-layout, .barcode-toolbar, .preview-header, .submenu-container, .navbar-admin { display:none !important; }
+  .barcode-sheet-preview { width:287mm !important; margin:0 auto !important; }
+  .barcode-print-table {
+    display:table !important;
+    width:287mm !important;
+    margin:0 auto !important;
+    table-layout:fixed !important;
+    border-collapse:separate !important;
+    border-spacing:4mm 4mm !important;
+  }
+  .barcode-print-table tbody { display:table-row-group !important; }
+  .barcode-print-table tr { display:table-row !important; }
+  .sheet-cell { display:table-cell !important; width:141.5mm !important; vertical-align:top !important; padding:0 !important; }
+  .shelf-label {
+    width:100% !important;
+    height:30mm !important;
+    min-height:30mm !important;
+    max-height:30mm !important;
+    box-shadow:none !important;
+  }
+}
+</style>
+
+<%- include('../partials/footer.ejs'); %>

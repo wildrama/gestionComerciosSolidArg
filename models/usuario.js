@@ -15,6 +15,14 @@ const UserSchema = new Schema({
     estacionDeCobroAsignada:{
         type: Schema.Types.ObjectId,
          ref: 'EstacionDeCobro'
+    },
+    activeSessionToken: {
+        type: String,
+        default: null
+    },
+    lastLoginAt: {
+        type: Date,
+        default: null
     }
 },
 { 

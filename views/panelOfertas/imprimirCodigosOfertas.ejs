@@ -1,0 +1,325 @@
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
+
+<div class="admin-dashboard barcode-module-page">
+    <div class="form-container barcode-print-shell">
+        <nav class="breadcrumb-nav no-print">
+            <a href="/administrador" class="breadcrumb-link">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/administrador/ofertas" class="breadcrumb-link">Ofertas</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Imprimir códigos de combos</span>
+        </nav>
+
+        <div class="form-header no-print">
+            <h1 class="form-title">🖨️ Códigos de barra para ofertas conjunto</h1>
+            <p class="form-subtitle">Módulo exclusivo para combos y ofertas de conjunto. Las ofertas individuales se aplican automáticamente con el producto ya existente.</p>
+        </div>
+
+        <div class="info-alert no-print">
+            <span class="alert-icon">ℹ️</span>
+            <p class="alert-text">Seleccioná uno o varios combos, revisá la hoja y luego imprimí los códigos para identificarlos en el salón o cerca de la caja.</p>
+        </div>
+
+        <div class="barcode-toolbar no-print">
+            <div class="search-box-offer barcode-search-grow">
+                <span class="search-icon-offer">🎁</span>
+                <input id="offerLabelSearch" type="text" class="search-input-offer" placeholder="Buscar por nombre del combo o código de oferta">
+            </div>
+            <div class="barcode-toolbar-actions">
+                <button type="button" id="selectVisibleOffersBtn" class="btn-light-modern">Seleccionar visibles</button>
+                <button type="button" id="clearOfferSelectionBtn" class="btn-light-modern">Limpiar selección</button>
+                <button type="button" id="printOfferLabelsBtn" class="btn-primary-modern btn-save-emphasis">🖨️ Imprimir combos</button>
+            </div>
+        </div>
+
+        <div class="barcode-layout no-print">
+            <section class="barcode-picker-panel">
+                <div class="barcode-panel-head">
+                    <h3>Combos disponibles</h3>
+                    <p id="offerPickerCounter"><%= ofertasConjunto.length %> oferta(s) conjunto</p>
+                </div>
+                <div id="offerPickerList" class="barcode-pick-list"></div>
+            </section>
+
+            <aside class="barcode-helper-panel">
+                <h3>Resumen</h3>
+                <p id="offerSelectionSummary">0 combos listos para imprimir.</p>
+                <ul>
+                    <li>Solo se imprimen <strong>ofertas conjunto</strong>.</li>
+                    <li>Incluye <strong>nombre del combo + precio + código de oferta + barra</strong>.</li>
+                    <li>Formato de hoja A4 con continuación automática en varias páginas.</li>
+                </ul>
+            </aside>
+        </div>
+
+        <div class="print-preview-wrap">
+            <div class="preview-header no-print">
+                <h2>Vista previa de combos</h2>
+                <p>Las etiquetas salen en 2 columnas rectangulares, listas para imprimir y usar en el local.</p>
+            </div>
+            <div id="offerPrintSheet" class="barcode-sheet-preview"></div>
+        </div>
+    </div>
+</div>
+
+<script id="ofertasData" type="application/json"><%- ofertasPayload %></script>
+<script id="preselectedOffersData" type="application/json"><%- preselectedPayload %></script>
+<script src="/jsBarcode.min.js"></script>
+<script>
+const OFERTAS = JSON.parse(document.getElementById('ofertasData')?.textContent || '[]');
+const PRESELECTED = new Set(JSON.parse(document.getElementById('preselectedOffersData')?.textContent || '[]'));
+
+const state = {
+  query: '',
+  selectedIds: new Set(PRESELECTED)
+};
+
+const elements = {
+  search: document.getElementById('offerLabelSearch'),
+  picker: document.getElementById('offerPickerList'),
+  pickerCounter: document.getElementById('offerPickerCounter'),
+  selectVisibleBtn: document.getElementById('selectVisibleOffersBtn'),
+  clearBtn: document.getElementById('clearOfferSelectionBtn'),
+  printBtn: document.getElementById('printOfferLabelsBtn'),
+  summary: document.getElementById('offerSelectionSummary'),
+  sheet: document.getElementById('offerPrintSheet')
+};
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(Number(value || 0));
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getFilteredOffers() {
+  const term = state.query.trim().toLowerCase();
+  if (!term) return OFERTAS;
+
+  return OFERTAS.filter((oferta) => {
+    const haystack = `${oferta.nombreOferta} ${oferta.codigoOferta} ${oferta.productosTexto}`.toLowerCase();
+    return haystack.includes(term);
+  });
+}
+
+function renderPicker() {
+  const filtered = getFilteredOffers();
+  elements.pickerCounter.textContent = `${filtered.length} combo(s) visibles`;
+
+  if (!filtered.length) {
+    elements.picker.innerHTML = '<p class="finder-empty">No hay combos para esa búsqueda.</p>';
+    return;
+  }
+
+  elements.picker.innerHTML = filtered.map((oferta) => {
+    const checked = state.selectedIds.has(oferta._id);
+    return `
+      <label class="barcode-pick-card ${checked ? 'selected' : ''}">
+        <input type="checkbox" data-pick-offer="${escapeHtml(oferta._id)}" ${checked ? 'checked' : ''}>
+        <div class="barcode-pick-copy">
+          <h4>${escapeHtml(oferta.nombreOferta)}</h4>
+          <p>Cód. ${escapeHtml(oferta.codigoOferta || 'Sin código')} · ${escapeHtml(oferta.estado)}</p>
+          <small>${escapeHtml(oferta.productosTexto || 'Sin productos vinculados')} · ${escapeHtml(formatMoney(oferta.precioOferta))}</small>
+        </div>
+      </label>
+    `;
+  }).join('');
+}
+
+function renderSheet() {
+  const selectedOffers = OFERTAS.filter((oferta) => state.selectedIds.has(oferta._id));
+  elements.summary.textContent = `${selectedOffers.length} combo(s) listos para imprimir.`;
+
+  if (!selectedOffers.length) {
+    elements.sheet.innerHTML = `
+      <div class="empty-products print-empty-state">
+        <span class="empty-icon">🎁</span>
+        <p>Seleccioná los combos que querés imprimir.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = [];
+  for (let i = 0; i < selectedOffers.length; i += 2) {
+    const pair = selectedOffers.slice(i, i + 2);
+    rows.push(`
+      <tr>
+        ${pair.map((oferta) => `
+          <td class="sheet-cell">
+            <article class="shelf-label offer-label">
+              <div class="offer-chip">COMBO</div>
+              <div class="shelf-label-head">
+                <div class="shelf-label-copy">
+                  <h3>${escapeHtml(oferta.nombreOferta)}</h3>
+                  <p>${escapeHtml(oferta.productosTexto || 'Oferta conjunto')}</p>
+                </div>
+                <div class="shelf-price-tag">
+                  <strong>${escapeHtml(formatMoney(oferta.precioOferta))}</strong>
+                </div>
+              </div>
+              <div class="shelf-divider"></div>
+              <div class="shelf-barcode-wrap">
+                <div class="shelf-code-row">Código: ${escapeHtml(oferta.codigoOferta || '-')}</div>
+                <svg class="label-barcode" id="offer-barcode-${escapeHtml(oferta._id)}"></svg>
+              </div>
+            </article>
+          </td>
+        `).join('')}
+        ${pair.length === 1 ? '<td class="sheet-cell sheet-cell-empty"></td>' : ''}
+      </tr>
+    `);
+  }
+
+  elements.sheet.innerHTML = `
+    <table class="barcode-print-table" role="presentation">
+      <tbody>${rows.join('')}</tbody>
+    </table>
+  `;
+
+  selectedOffers.forEach((oferta) => {
+    const svg = document.getElementById(`offer-barcode-${oferta._id}`);
+    if (!svg || !oferta.codigoOferta) return;
+
+    JsBarcode(svg, String(oferta.codigoOferta), {
+      format: 'CODE128',
+      width: 1.6,
+      height: 34,
+      displayValue: true,
+      fontSize: 10,
+      textMargin: 2,
+      margin: 0,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+  });
+}
+
+function syncView() {
+  renderPicker();
+  renderSheet();
+}
+
+elements.search?.addEventListener('input', (event) => {
+  state.query = event.target.value || '';
+  renderPicker();
+});
+
+elements.picker?.addEventListener('change', (event) => {
+  const checkbox = event.target.closest('[data-pick-offer]');
+  if (!checkbox) return;
+
+  const offerId = checkbox.getAttribute('data-pick-offer');
+  if (checkbox.checked) {
+    state.selectedIds.add(offerId);
+  } else {
+    state.selectedIds.delete(offerId);
+  }
+
+  syncView();
+});
+
+elements.selectVisibleBtn?.addEventListener('click', () => {
+  getFilteredOffers().forEach((oferta) => state.selectedIds.add(oferta._id));
+  syncView();
+});
+
+elements.clearBtn?.addEventListener('click', () => {
+  state.selectedIds.clear();
+  syncView();
+});
+
+elements.printBtn?.addEventListener('click', () => {
+  if (!state.selectedIds.size) {
+    window.alert('Seleccioná al menos un combo para imprimir.');
+    return;
+  }
+
+  window.print();
+});
+
+syncView();
+</script>
+
+<style>
+.barcode-print-shell { max-width: 1320px; }
+.barcode-toolbar { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1.25rem; }
+.barcode-search-grow { flex:1 1 340px; }
+.barcode-toolbar-actions { display:flex; gap:.75rem; flex-wrap:wrap; }
+.barcode-layout { display:grid; grid-template-columns: minmax(320px, 1fr) 300px; gap:1rem; margin-bottom:1.5rem; }
+.barcode-picker-panel, .barcode-helper-panel, .print-preview-wrap { background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; }
+.barcode-panel-head h3, .barcode-helper-panel h3, .preview-header h2 { margin:0 0 .35rem 0; color:var(--text-primary); }
+.barcode-panel-head p, .barcode-helper-panel p, .preview-header p { margin:0; color:var(--text-secondary); }
+.barcode-helper-panel ul { margin:.9rem 0 0 1rem; color:var(--text-secondary); }
+.barcode-pick-list { display:grid; gap:.75rem; max-height:560px; overflow:auto; margin-top:1rem; }
+.barcode-pick-card { display:flex; gap:.75rem; align-items:flex-start; padding:.9rem; border:1px solid var(--border-color); border-radius:12px; cursor:pointer; transition:all .2s ease; background:#fff; }
+.barcode-pick-card:hover { border-color:var(--primary-color); box-shadow:0 10px 18px rgba(99,102,241,.1); }
+.barcode-pick-card.selected { border-color:var(--primary-color); background:#eef2ff; }
+.barcode-pick-card input { margin-top:.25rem; accent-color:var(--primary-color); }
+.barcode-pick-copy h4 { margin:0 0 .25rem 0; font-size:1rem; color:var(--text-primary); }
+.barcode-pick-copy p, .barcode-pick-copy small { margin:0; color:var(--text-secondary); }
+.barcode-sheet-preview { width:100%; margin-top:1rem; }
+.barcode-print-table { width:100%; table-layout:fixed; border-collapse:separate; border-spacing:6mm 6mm; }
+.sheet-cell { width:50%; vertical-align:top; padding:0; }
+.sheet-cell-empty { border:none; }
+.shelf-label { box-sizing:border-box; width:100%; border:2px solid #0f172a; border-radius:10px; padding:2.4mm 2.8mm; background:#fff; height:31mm; min-height:31mm; max-height:31mm; break-inside:avoid; page-break-inside:avoid; display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden; }
+.offer-chip { display:inline-flex; width:max-content; margin-bottom:1.4mm; padding:.8mm 2.2mm; border-radius:999px; background:#fef3c7; color:#92400e; font-size:8px; font-weight:800; letter-spacing:.06em; }
+.shelf-label-head { display:grid; grid-template-columns:minmax(0, 1fr) 24mm; gap:2.5mm; align-items:start; }
+.shelf-label-copy { min-width:0; max-width:100%; overflow:hidden; }
+.shelf-label-copy h3 { margin:0; font-size:11px; line-height:1.15; color:#111827; white-space:normal; word-break:normal; overflow-wrap:break-word; display:-webkit-box; line-clamp:2; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
+.shelf-label-copy p { margin:1px 0 0 0; font-size:9px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.shelf-price-tag { width:24mm; min-width:24mm; text-align:center; border:1px solid #cbd5e1; border-radius:8px; padding:1.3mm 1.4mm; background:#f8fafc; color:#111827; }
+.shelf-price-tag strong { display:block; font-size:15px; line-height:1.1; }
+.shelf-divider { border-top:1px solid #cbd5e1; margin:1.5mm 0 1.4mm 0; }
+.shelf-barcode-wrap { margin-top:auto; overflow:hidden; }
+.shelf-code-row { margin:0 0 1.2mm 0; font-size:8px; font-weight:700; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.label-barcode { display:block; width:100%; height:11mm; max-width:100%; }
+.print-empty-state { border:1px dashed var(--border-color); border-radius:12px; }
+@media screen and (max-width: 700px) {
+  .barcode-layout { grid-template-columns:1fr; }
+  .barcode-print-table, .barcode-print-table tbody, .barcode-print-table tr, .sheet-cell { display:block; width:100%; }
+  .barcode-print-table { border-spacing:0 4mm; }
+}
+@page { size:A4 landscape; margin:5mm; }
+@media print {
+  html, body { width:297mm !important; height:auto !important; background:#fff !important; }
+  body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .container, .admin-dashboard, .form-container, .barcode-print-shell, .print-preview-wrap {
+    width:100% !important;
+    max-width:none !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:none !important;
+    box-shadow:none !important;
+  }
+  .no-print, nav, header, footer, .breadcrumb-nav, .form-header, .info-alert, .barcode-layout, .barcode-toolbar, .preview-header, .submenu-container, .navbar-admin { display:none !important; }
+  .barcode-sheet-preview { width:287mm !important; margin:0 auto !important; }
+  .barcode-print-table {
+    display:table !important;
+    width:287mm !important;
+    margin:0 auto !important;
+    table-layout:fixed !important;
+    border-collapse:separate !important;
+    border-spacing:4mm 4mm !important;
+  }
+  .barcode-print-table tbody { display:table-row-group !important; }
+  .barcode-print-table tr { display:table-row !important; }
+  .sheet-cell { display:table-cell !important; width:141.5mm !important; vertical-align:top !important; padding:0 !important; }
+  .shelf-label {
+    width:100% !important;
+    height:30mm !important;
+    min-height:30mm !important;
+    max-height:30mm !important;
+    box-shadow:none !important;
+  }
+}
+</style>
+
+<%- include('../partials/footer.ejs'); %>

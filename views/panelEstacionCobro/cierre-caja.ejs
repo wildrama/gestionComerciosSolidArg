@@ -1,5 +1,10 @@
 <%- include('../partials/headerAdm.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
+<%
+    const movimientosPeriodo = cierrePreview?.detallesIngresosEgresos || [];
+    const ingresosPeriodo = movimientosPeriodo.filter((mov) => mov.tipo === 'INGRESO');
+    const egresosPeriodo = movimientosPeriodo.filter((mov) => mov.tipo === 'EGRESO');
+%>
 
 <div class="admin-dashboard">
     <div class="form-container">
@@ -17,7 +22,7 @@
         <!-- Header -->
         <div class="cierre-header">
             <div class="cierre-header-content">
-                <h1 class="cierre-title">🔒 Cierre de Caja</h1>
+                <h1 class="cierre-title">🧾 Cierre de Caja</h1>
                 <p class="cierre-subtitle"><%= estacionDeCobro.ubicacionDeEstacion %></p>
             </div>
             <div class="cierre-time">
@@ -81,7 +86,21 @@
                     </h2>
                     <div id="collapseIngresos" class="accordion-collapse collapse show" data-bs-parent="#accordionIngresos">
                         <div class="accordion-body">
-                            <% if (estacionDeCobro.ingresosDeEfectivoManual && estacionDeCobro.ingresosDeEfectivoManual.length > 0) { %>
+                            <% if (ingresosPeriodo.length > 0) { %>
+                            <div class="transaction-summary-strip">
+                                <div class="transaction-mini-stat">
+                                    <strong><%= cierrePreview ? cierrePreview.ingresosManualDinero.cantidad : ingresosPeriodo.length %></strong>
+                                    <span>movimientos del período</span>
+                                </div>
+                                <div class="transaction-mini-stat">
+                                    <strong>$<%= cierrePreview ? cierrePreview.ingresosManualDinero.montoTotal.toFixed(2) : ingresosPeriodo.reduce((sum, mov) => sum + Number(mov.monto || 0), 0).toFixed(2) %></strong>
+                                    <span>total ingresado</span>
+                                </div>
+                                <div class="transaction-mini-stat">
+                                    <strong><%= cierrePreview ? cierrePreview.rangoTexto : 'Período actual' %></strong>
+                                    <span>rango analizado</span>
+                                </div>
+                            </div>
                             <div class="transactions-table-wrapper">
                                 <table class="transactions-table">
                                     <thead>
@@ -92,20 +111,20 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% estacionDeCobro.ingresosDeEfectivoManual.forEach(ingreso => { %>
+                                        <% ingresosPeriodo.forEach((ingreso) => { %>
                                         <tr>
-                                            <td>
-                                                <span class="amount-badge income">$<%= ingreso.cantidad.toFixed(2) %></span>
+                                            <td data-label="Monto">
+                                                <span class="amount-badge income">$<%= Number(ingreso.monto || 0).toFixed(2) %></span>
                                             </td>
-                                            <td><%= ingreso.comentarioDeIngreso || '-' %></td>
-                                            <td><%= new Date(ingreso.fecha).toLocaleString('es-ES') %></td>
+                                            <td data-label="Comentario"><%= ingreso.comentario || '-' %></td>
+                                            <td data-label="Fecha"><%= new Date(ingreso.fecha).toLocaleString('es-AR') %></td>
                                         </tr>
                                         <% }); %>
                                     </tbody>
                                 </table>
                             </div>
                             <% } else { %>
-                            <p class="no-data">No hay ingresos registrados</p>
+                            <p class="no-data">No hay ingresos manuales registrados para el período <strong><%= periodo || 'DIARIO' %></strong>.</p>
                             <% } %>
                         </div>
                     </div>
@@ -125,7 +144,21 @@
                     </h2>
                     <div id="collapseEgresos" class="accordion-collapse collapse show" data-bs-parent="#accordionEgresos">
                         <div class="accordion-body">
-                            <% if (estacionDeCobro.egresoDeEfectivoManual && estacionDeCobro.egresoDeEfectivoManual.length > 0) { %>
+                            <% if (egresosPeriodo.length > 0) { %>
+                            <div class="transaction-summary-strip">
+                                <div class="transaction-mini-stat">
+                                    <strong><%= cierrePreview ? cierrePreview.egresosManualDinero.cantidad : egresosPeriodo.length %></strong>
+                                    <span>movimientos del período</span>
+                                </div>
+                                <div class="transaction-mini-stat">
+                                    <strong>$<%= cierrePreview ? cierrePreview.egresosManualDinero.montoTotal.toFixed(2) : egresosPeriodo.reduce((sum, mov) => sum + Number(mov.monto || 0), 0).toFixed(2) %></strong>
+                                    <span>total retirado</span>
+                                </div>
+                                <div class="transaction-mini-stat">
+                                    <strong><%= cierrePreview ? cierrePreview.rangoTexto : 'Período actual' %></strong>
+                                    <span>rango analizado</span>
+                                </div>
+                            </div>
                             <div class="transactions-table-wrapper">
                                 <table class="transactions-table">
                                     <thead>
@@ -136,20 +169,20 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% estacionDeCobro.egresoDeEfectivoManual.forEach(egreso => { %>
+                                        <% egresosPeriodo.forEach((egreso) => { %>
                                         <tr>
-                                            <td>
-                                                <span class="amount-badge output">$<%= egreso.cantidad.toFixed(2) %></span>
+                                            <td data-label="Monto">
+                                                <span class="amount-badge output">$<%= Number(egreso.monto || 0).toFixed(2) %></span>
                                             </td>
-                                            <td><%= egreso.comentarioDeEgreso || '-' %></td>
-                                            <td><%= new Date(egreso.fecha).toLocaleString('es-ES') %></td>
+                                            <td data-label="Comentario"><%= egreso.comentario || '-' %></td>
+                                            <td data-label="Fecha"><%= new Date(egreso.fecha).toLocaleString('es-AR') %></td>
                                         </tr>
                                         <% }); %>
                                     </tbody>
                                 </table>
                             </div>
                             <% } else { %>
-                            <p class="no-data">No hay egresos registrados</p>
+                            <p class="no-data">No hay egresos manuales registrados para el período <strong><%= periodo || 'DIARIO' %></strong>.</p>
                             <% } %>
                         </div>
                     </div>
@@ -234,20 +267,97 @@
             <!-- Form Actions -->
             <div class="cierre-actions">
                 <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>" class="btn-secondary-modern">
-                    ← Cancelar
+                    ← Volver
                 </a>
-                <button type="submit" class="btn-info-modern" formaction="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja/imprimir" formmethod="GET" formtarget="_blank">
+                <button type="submit" class="btn-print-modern" formaction="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja/imprimir" formmethod="GET" formtarget="_blank">
                     <span class="btn-icon">🖨️</span>
-                    Imprimir Resumen
+                    Imprimir resumen
                 </button>
-                <button type="submit" class="btn-primary-modern">
-                    <span class="btn-icon">🔒</span>
-                    Guardar Cierre
+                <button type="submit" class="btn-save-modern">
+                    <span class="btn-icon">💾</span>
+                    Guardar cierre
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .modern-form .form-control-modern,
+    .modern-form select.form-control-modern,
+    .modern-form textarea.form-control-modern {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        -webkit-text-fill-color: #0f172a;
+        box-shadow: none;
+    }
+
+    .modern-form .form-control-modern::placeholder {
+        color: #94a3b8;
+    }
+
+    .modern-form .form-control-modern:focus,
+    .modern-form select.form-control-modern:focus,
+    .modern-form textarea.form-control-modern:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+        outline: none;
+    }
+
+    .modern-form select.form-control-modern option {
+        background: #ffffff;
+        color: #0f172a;
+    }
+
+    .cierre-actions {
+        display: flex;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .cierre-actions .btn-secondary-modern,
+    .cierre-actions .btn-print-modern,
+    .cierre-actions .btn-save-modern {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        min-height: 48px;
+        padding: 0.9rem 1.2rem;
+        border-radius: 10px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .cierre-actions .btn-secondary-modern {
+        background: #e5e7eb;
+        color: #111827;
+        border: 1px solid #cbd5e1;
+    }
+
+    .cierre-actions .btn-print-modern {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+        color: #ffffff;
+    }
+
+    .cierre-actions .btn-save-modern {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: #ffffff;
+    }
+
+    .cierre-actions .btn-secondary-modern:hover,
+    .cierre-actions .btn-print-modern:hover,
+    .cierre-actions .btn-save-modern:hover {
+        transform: translateY(-1px);
+        filter: brightness(0.98);
+    }
+</style>
 
 <script src="/postCierre.js"></script>
 

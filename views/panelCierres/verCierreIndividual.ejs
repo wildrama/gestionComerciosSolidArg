@@ -1,5 +1,5 @@
-<%- include('../partials/navbar') %>
-<%- include('../partials/flash') %>
+<%- include('../partials/headerAdm.ejs'); %>
+<%- include('../partials/flash.ejs'); %>
 
 <div class="container-fluid mt-4">
     <!-- Breadcrumb -->
@@ -83,7 +83,7 @@
                 </div>
                 <div class="dinero-card-content">
                     <p class="dinero-card-label">Dinero Inicial</p>
-                    <p class="dinero-card-value">$<%= cierre.dineroDeInicio.toFixed(2) %></p>
+                    <p class="dinero-card-value">$<%= Number(cierre.dineroDeInicio || 0).toFixed(2) %></p>
                 </div>
             </div>
 
@@ -94,7 +94,7 @@
                 </div>
                 <div class="dinero-card-content">
                     <p class="dinero-card-label">Dinero Esperado</p>
-                    <p class="dinero-card-value">$<%= cierre.dineroEsperado.toFixed(2) %></p>
+                    <p class="dinero-card-value">$<%= Number(cierre.dineroEsperado || 0).toFixed(2) %></p>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@
                 </div>
                 <div class="dinero-card-content">
                     <p class="dinero-card-label">Dinero Real</p>
-                    <p class="dinero-card-value">$<%= cierre.dineroReal.toFixed(2) %></p>
+                    <p class="dinero-card-value">$<%= Number(cierre.dineroReal || cierre.dineroEnCaja || 0).toFixed(2) %></p>
                 </div>
             </div>
 
@@ -118,7 +118,7 @@
                 <div class="dinero-card-content">
                     <p class="dinero-card-label">Diferencia</p>
                     <p class="dinero-card-value <%= cierre.diferencia > 0 ? 'positiva' : cierre.diferencia < 0 ? 'negativa' : 'neutra' %>">
-                        <%= cierre.diferencia > 0 ? '+' : '' %>$<%= cierre.diferencia.toFixed(2) %>
+                        <%= Number(cierre.diferencia || 0) > 0 ? '+' : '' %>$<%= Number(cierre.diferencia || 0).toFixed(2) %>
                     </p>
                 </div>
             </div>
@@ -141,11 +141,11 @@
                 <div class="ventas-card-body">
                     <div class="ventas-stat">
                         <span class="stat-label">Cantidad:</span>
-                        <span class="stat-value"><%= cierre.ventasEnEfectivo.cantidad %> operaciones</span>
+                        <span class="stat-value"><%= cierre.ventasEnEfectivo?.cantidad || 0 %> operaciones</span>
                     </div>
                     <div class="ventas-stat">
                         <span class="stat-label">Total:</span>
-                        <span class="stat-value monto">$<%= cierre.ventasEnEfectivo.montoTotal.toFixed(2) %></span>
+                        <span class="stat-value monto">$<%= Number(cierre.ventasEnEfectivo?.montoTotal || 0).toFixed(2) %></span>
                     </div>
                 </div>
             </div>
@@ -159,11 +159,11 @@
                 <div class="ventas-card-body">
                     <div class="ventas-stat">
                         <span class="stat-label">Cantidad:</span>
-                        <span class="stat-value"><%= cierre.ventasEnOtro.cantidad %> operaciones</span>
+                        <span class="stat-value"><%= cierre.ventasEnOtro?.cantidad || 0 %> operaciones</span>
                     </div>
                     <div class="ventas-stat">
                         <span class="stat-label">Total:</span>
-                        <span class="stat-value monto">$<%= cierre.ventasEnOtro.montoTotal.toFixed(2) %></span>
+                        <span class="stat-value monto">$<%= Number(cierre.ventasEnOtro?.montoTotal || 0).toFixed(2) %></span>
                     </div>
                 </div>
             </div>
@@ -198,7 +198,7 @@
                                     </span>
                                 </td>
                                 <td data-label="Monto">
-                                    <strong>$<%= detalle.monto.toFixed(2) %></strong>
+                                    <strong>$<%= Number(detalle.monto || 0).toFixed(2) %></strong>
                                 </td>
                             </tr>
                         <% }); %>
@@ -678,100 +678,5 @@
         }
     }
 </style>
-            </div>
-
-            <!-- Dinero de Inicio -->
-            <div class="cierre-detail-box">
-                <div class="detail-header">
-                    <span class="detail-icon">🔄</span>
-                    <h3 class="detail-title">Dinero Inicial</h3>
-                </div>
-                <div class="detail-body">
-                    <p class="detail-label">Ingresado al inicio</p>
-                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroDeInicio.toFixed(2) %></p>
-                </div>
-            </div>
-
-            <!-- Ventas en Efectivo -->
-            <div class="cierre-detail-box">
-                <div class="detail-header">
-                    <span class="detail-icon">💸</span>
-                    <h3 class="detail-title">Ventas en Efectivo</h3>
-                </div>
-                <div class="detail-body">
-                    <p class="detail-label">Cantidad de ventas</p>
-                    <p class="detail-amount"><%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnEfectivo %></p>
-                    <p class="detail-label">Monto total</p>
-                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnEfectivo.toFixed(2) %></p>
-                </div>
-            </div>
-
-            <!-- Ventas en Tarjeta/Transferencia -->
-            <div class="cierre-detail-box">
-                <div class="detail-header">
-                    <span class="detail-icon">💳</span>
-                    <h3 class="detail-title">Ventas Otros Medios</h3>
-                </div>
-                <div class="detail-body">
-                    <p class="detail-label">Cantidad de ventas</p>
-                    <p class="detail-amount"><%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnOtro %></p>
-                    <p class="detail-label">Monto total</p>
-                    <p class="detail-amount">$<%= cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnOtro.toFixed(2) %></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary Card -->
-        <div class="cierre-summary-card">
-            <h3 class="summary-title">📊 Resumen del Cierre</h3>
-            
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <span class="summary-label">Total de Transacciones:</span>
-                    <span class="summary-value">
-                        <%= cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnEfectivo + cierreDeCajaRealizadoIndividual.cantidadTotalDeVentasEnOtro %>
-                    </span>
-                </div>
-                
-                <div class="summary-item">
-                    <span class="summary-label">Total Recaudado:</span>
-                    <span class="summary-value total">
-                        $<%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnEfectivo) + parseFloat(cierreDeCajaRealizadoIndividual.dineroTotalDeVentasEnOtro)).toFixed(2) %>
-                    </span>
-                </div>
-                
-                <div class="summary-item">
-                    <span class="summary-label">Diferencia:</span>
-                    <span class="summary-value <%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroEnCaja) - parseFloat(cierreDeCajaRealizadoIndividual.dineroDeInicio)) >= 0 ? 'positive' : 'negative' %>">
-                        $<%= (parseFloat(cierreDeCajaRealizadoIndividual.dineroEnCaja) - parseFloat(cierreDeCajaRealizadoIndividual.dineroDeInicio)).toFixed(2) %>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Comentarios -->
-        <% if (cierreDeCajaRealizadoIndividual.comentarioDeCierre) { %>
-        <div class="cierre-comments-card">
-            <h3 class="comments-title">💬 Comentarios del Cierre</h3>
-            <div class="comments-body">
-                <p class="comments-text"><%= cierreDeCajaRealizadoIndividual.comentarioDeCierre %></p>
-            </div>
-        </div>
-        <% } %>
-
-        <!-- Actions -->
-        <div class="form-actions">
-            <a href="/administrador/cierres-caja" class="btn-secondary-modern">
-                ← Volver a Cierres
-            </a>
-            <a href="/administrador" class="btn-primary-modern">
-                <span class="btn-icon">🏠</span>
-                Ir al Dashboard
-            </a>
-        </div>
-    </div>
-</div>
-
-<script src="/ux.js?v=20260402-1"></script>
 
 <%- include('../partials/footer.ejs'); %>

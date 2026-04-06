@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 const Usuario = require('./usuario')
 const Venta = require('./ventas');
 
-EstacionDeCobroSchema = new Schema({
+const EstacionDeCobroSchema = new Schema({
     ubicacionDeEstacion:{
         type: String
     },
@@ -56,6 +56,44 @@ EstacionDeCobroSchema = new Schema({
         }
        
     ],
+    estadoCaja: {
+        type: String,
+        enum: ['ABIERTA', 'CERRADA'],
+        default: 'CERRADA'
+    },
+    aperturaActual: {
+        estado: {
+            type: String,
+            enum: ['ABIERTA', 'CERRADA'],
+            default: 'CERRADA'
+        },
+        fechaApertura: Date,
+        fechaCierre: Date,
+        montoInicial: {
+            type: Number,
+            default: 0
+        },
+        fondoCambio: {
+            type: Number,
+            default: 0
+        },
+        detalleEfectivo: {
+            type: String,
+            default: ''
+        },
+        observaciones: {
+            type: String,
+            default: ''
+        },
+        abiertaPor: {
+            type: String,
+            default: ''
+        },
+        dineroAlCerrar: {
+            type: Number,
+            default: 0
+        }
+    },
 
   
     // usuarioActual:{

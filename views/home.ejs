@@ -2,15 +2,26 @@
 
 <%- include('./partials/flash.ejs'); %>
 
+<%
+const selectedPanel = typeof panel !== 'undefined' && panel ? panel : 'ADMINISTRADOR';
+const isCajaPanel = selectedPanel === 'CAJA';
+const panelTitle = isCajaPanel ? 'Acceso a Caja' : 'Acceso Administrador';
+const panelSubtitle = isCajaPanel
+    ? 'Ingresa con el usuario autorizado para operar en caja'
+    : 'Ingresa con el usuario administrador para gestionar stock y caja';
+%>
+
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <div class="login-icon">🔐</div>
-            <h1 class="login-title">Panel de Administración</h1>
-            <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+            <div class="login-icon"><%= isCajaPanel ? '💳' : '🔐' %></div>
+            <h1 class="login-title"><%= panelTitle %></h1>
+            <p class="login-subtitle"><%= panelSubtitle %></p>
         </div>
 
-        <form action="/ingresar" method="POST" class="login-form">
+        <form action="/ingresar" method="POST" class="login-form" id="loginForm" autocomplete="on">
+            <input type="hidden" name="panel" value="<%= selectedPanel %>">
+
             <div class="form-group-modern">
                 <label for="username" class="form-label-modern">Usuario</label>
                 <input type="text" 
@@ -18,6 +29,7 @@
                        name="username" 
                        class="form-control-modern" 
                        placeholder="Ingresa tu usuario"
+                       autocomplete="username"
                        required>
             </div>
 
@@ -29,6 +41,7 @@
                            name="password" 
                            class="form-control-modern" 
                            placeholder="Ingresa tu contraseña"
+                           autocomplete="current-password"
                            required>
                     <button type="button" class="password-toggle" onclick="togglePassword()">
                         <span id="eye-icon">👁️</span>
@@ -37,7 +50,7 @@
             </div>
 
             <div class="form-check-modern">
-                <input type="checkbox" id="remember" class="checkbox-modern">
+                <input type="checkbox" id="remember" name="remember" class="checkbox-modern">
                 <label for="remember" class="checkbox-label">Recordar sesión</label>
             </div>
 
@@ -48,7 +61,8 @@
         </form>
 
         <div class="login-footer">
-            <p class="security-text">🔒 Conexión segura y encriptada</p>
+            <p class="security-text">🔒 Solo usuarios habilitados para <%= isCajaPanel ? 'CAJA' : 'ADMINISTRACIÓN' %></p>
+            <p style="margin-top: 0.75rem;"><a href="/" style="color: #667eea; text-decoration: none; font-weight: 600;">← Volver al inicio</a></p>
         </div>
     </div>
 </div>
@@ -66,6 +80,27 @@ function togglePassword() {
         eyeIcon.textContent = '👁️';
     }
 }
+
+(function initRememberSession() {
+    const rememberBox = document.getElementById('remember');
+    const usernameField = document.getElementById('username');
+    const loginForm = document.getElementById('loginForm');
+    const storageKey = `solidarg-last-user:<%= selectedPanel %>`;
+    const savedUsername = window.localStorage.getItem(storageKey);
+
+    if (savedUsername) {
+        usernameField.value = savedUsername;
+        rememberBox.checked = true;
+    }
+
+    loginForm.addEventListener('submit', () => {
+        if (rememberBox.checked) {
+            window.localStorage.setItem(storageKey, usernameField.value.trim());
+        } else {
+            window.localStorage.removeItem(storageKey);
+        }
+    });
+})();
 </script>
 
 <%- include('./partials/footer.ejs'); %>

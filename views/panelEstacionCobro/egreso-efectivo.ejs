@@ -1,7 +1,7 @@
 <%- include('../partials/headerAdm.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard cash-movement-page egreso-page">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -17,7 +17,7 @@
         <!-- Form Header -->
         <div class="form-header">
             <h1 class="form-title">➖ Egreso de Efectivo</h1>
-            <p class="form-subtitle">Retira dinero de la caja durante su operación diaria</p>
+            <p class="form-subtitle">Registrá un retiro con mejor contraste y un motivo claro para que el balance quede prolijo y auditable.</p>
         </div>
 
         <!-- Station Info Card -->
@@ -32,7 +32,22 @@
         <!-- Warning Alert -->
         <div class="warning-alert">
             <span class="alert-icon">⚠️</span>
-            <p class="alert-text">Registra cuidadosamente los egresos. Esto afectará el balance de la caja al momento del cierre.</p>
+            <p class="alert-text">Registra cuidadosamente los egresos. Este movimiento impacta el balance del período que luego se toma en el cierre de caja.</p>
+        </div>
+
+        <div class="info-strip-grid">
+            <div class="info-strip-card">
+                <span class="info-strip-label">Saldo actual en caja</span>
+                <strong class="info-strip-value">$<%= Number(estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %></strong>
+            </div>
+            <div class="info-strip-card">
+                <span class="info-strip-label">Fecha de registro</span>
+                <strong class="info-strip-value"><%= new Date().toLocaleDateString('es-AR') %></strong>
+            </div>
+            <div class="info-strip-card">
+                <span class="info-strip-label">Tipo de movimiento</span>
+                <strong class="info-strip-value">Egreso manual</strong>
+            </div>
         </div>
 
         <!-- Form -->
@@ -61,6 +76,8 @@
                                    placeholder="0.00"
                                    step="0.01"
                                    min="0"
+                                   inputmode="decimal"
+                                   autofocus
                                    required>
                         </div>
                         <small class="form-help">Ingresa solo números. Ej: 250.00</small>

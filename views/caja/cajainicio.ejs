@@ -1,52 +1,276 @@
 <%- include('../partials/headerCompleto.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
 
+<div class="cash-start-shell">
+  <div class="cash-start-card">
+    <div class="cash-start-header">
+      <div>
+        <p class="cash-start-kicker">💰 Apertura diaria de caja</p>
+        <h1><%= estacionDeCobro.ubicacionDeEstacion %></h1>
+        <p class="cash-start-subtitle">
+          Usuario: <strong><%= usuario.username %></strong> · Fecha: <strong><%= fechaActualLarga %></strong>
+        </p>
+      </div>
+      <div class="cash-status-pill <%= requiereApertura ? 'pending' : 'open' %>">
+        <%= requiereApertura ? 'Pendiente de apertura' : 'Caja abierta para hoy' %>
+      </div>
+    </div>
 
-    <div class="container px-lg-5">
-      <div class="row justify-content-center">
-        <ul class="nav d-flex justify-content-around">
-          <li> <a class="nav-link btn btn-outline-secondary mb-3" href="/caja/<%= estacionDeCobro._id%>/inicio"> Inicio </a> </li>
-          <li> <a class="nav-link btn btn-outline-success mb-3" href="/caja/<%= estacionDeCobro._id%>/cajaActiva"> Abrir la caja de cobro </a> </li>
-      </ul>
-        <div class="col-lg-6 px-md-3 py-lg-5 mt-2 border ">
-          <div class="row text-center ">
-         
-            <div class="col-12 mt-3 pb-3"> Estación de cobro: <strong><%= estacionDeCobro.ubicacionDeEstacion %></strong>  </div>
-            <div class="col-12 mt-3 pb-3"> <a class="link-none p-2 border border-secondary" href="#"><%= estacionDeCobro.dineroEnEstacion %></a>  </div>
-            <div class="col-12 mt-3 pb-3">    
-                 Usuario actual: <%= usuario.username %> 
-            </div>
-            <div class="col-12 mt-3 pb-3"> Fecha de hoy: <%= fechaActual %>   </div>
-            
+    <div class="cash-start-actions">
+      <a class="btn btn-outline-secondary" href="/">🏠 Inicio</a>
+      <% if (!requiereApertura) { %>
+        <a class="btn btn-success" href="/caja/<%= estacionDeCobro._id %>/cajaActiva">▶ Ir a caja activa</a>
+      <% } %>
+      <a class="btn btn-outline-danger" href="/cerrar-sesion">🚪 Cerrar sesión</a>
+    </div>
 
-            <form  action="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/egreso-efectivo" method="POST">
-                
-                
-              <div class="mb-3">
-                  <label for="dineroDeEgreso" class="form-label">Colocar el monto que se desea retirar de la estación</label>
-                  <input placeholder="" type="number" name="dineroDeEgreso" class="form-control" id="dineroDeEgreso2" required>
-                </div>
+    <div class="cash-info-grid">
+      <article class="cash-info-box">
+        <span>💵 Monto en caja</span>
+        <strong>$<%= Number(estacionDeCobro.dineroEnEstacion || 0).toFixed(2) %></strong>
+      </article>
+      <article class="cash-info-box">
+        <span>📊 Estado diario</span>
+        <strong><%= requiereApertura ? 'Sin abrir' : 'Operativa' %></strong>
+      </article>
+      <article class="cash-info-box">
+        <span>🧾 Usuario activo</span>
+        <strong><%= usuario.username %></strong>
+      </article>
+    </div>
 
-                <div class="mb-3">
-                  <label for="comentarioDeEgreso" class="form-label">Agregar comentario</label>
-                  <textarea class="form-control" name="comentarioDeEgreso" id="comentarioDeEgreso2" rows="3"></textarea>
-                </div>
-                <!-- <div class="mb-3 form-check">
-                  <input type="checkbox" class="form-check-input" id="">
-                  <label class="form-check-label" for="">Check me out</label>
-                </div> -->
-             
-              <button type="submit" class="btn btn-primary">Retirar dinero a la estación</button>
-              
+    <% if (requiereApertura) { %>
+      <div class="cash-helper-box">
+        <h2>Antes de vender, abrí la caja del día</h2>
+        <p>
+          Este paso registra el efectivo inicial, el fondo de cambio y cualquier observación del comienzo de jornada.
+          Luego vas directo a la terminal de ventas.
+        </p>
+        <ul>
+          <li>1. Contá el dinero físico disponible al comenzar.</li>
+          <li>2. Indicá cuánto corresponde a cambio o fondo fijo.</li>
+          <li>3. Guardá la apertura para habilitar la caja.</li>
+        </ul>
+      </div>
 
-      </form>
+      <form action="/caja/<%= estacionDeCobro._id %>/apertura" method="POST" class="cash-open-form">
+        <div class="cash-form-grid">
+          <div class="form-group">
+            <label for="montoInicial" class="form-label">💵 Dinero inicial total</label>
+            <input type="number" min="0" step="0.01" id="montoInicial" name="montoInicial" class="form-control" placeholder="0.00" required>
+            <small class="text-muted">Total físico con el que se abre la caja hoy.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="fondoCambio" class="form-label">🪙 Fondo de cambio</label>
+            <input type="number" min="0" step="0.01" id="fondoCambio" name="fondoCambio" class="form-control" placeholder="0.00" required>
+            <small class="text-muted">Parte del efectivo reservado para dar cambio.</small>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="detalleEfectivo" class="form-label">📋 Detalle de efectivo / cambio</label>
+            <textarea id="detalleEfectivo" name="detalleEfectivo" rows="3" class="form-control" placeholder="Ej: 10 x $1000, 8 x $500, monedas para vuelto..."></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="observaciones" class="form-label">📝 Observaciones de apertura</label>
+            <textarea id="observaciones" name="observaciones" rows="3" class="form-control" placeholder="Notas útiles del inicio del turno"></textarea>
           </div>
         </div>
+
+        <div class="cash-open-actions">
+          <button type="submit" class="btn btn-success btn-lg">💰 Abrir caja del día</button>
+        </div>
+      </form>
+    <% } else { %>
+      <div class="cash-helper-box success-box">
+        <h2>La caja ya está abierta para hoy</h2>
+        <p>Podés revisar los datos de apertura y continuar directo a la terminal de cobro.</p>
       </div>
-        
-    </div>
-     
-    
 
+      <div class="cash-open-summary">
+        <div class="summary-item">
+          <span>Monto inicial</span>
+          <strong>$<%= Number(aperturaActual?.montoInicial || estacionDeCobro.dineroDeInicio || 0).toFixed(2) %></strong>
+        </div>
+        <div class="summary-item">
+          <span>Fondo de cambio</span>
+          <strong>$<%= Number(aperturaActual?.fondoCambio || 0).toFixed(2) %></strong>
+        </div>
+        <div class="summary-item">
+          <span>Abierta por</span>
+          <strong><%= aperturaActual?.abiertaPor || usuario.username %></strong>
+        </div>
+        <div class="summary-item">
+          <span>Hora de apertura</span>
+          <strong><%= fechaAperturaTexto || '-' %></strong>
+        </div>
+      </div>
 
-    <%- include('../partials/footer.ejs'); %>
+      <% if (aperturaActual?.detalleEfectivo) { %>
+        <div class="cash-note-block">
+          <h3>Detalle de efectivo</h3>
+          <p><%= aperturaActual.detalleEfectivo %></p>
+        </div>
+      <% } %>
+
+      <% if (aperturaActual?.observaciones) { %>
+        <div class="cash-note-block">
+          <h3>Observaciones</h3>
+          <p><%= aperturaActual.observaciones %></p>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<style>
+.cash-start-shell {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+  padding: 2rem 1rem 3rem;
+}
+.cash-start-card {
+  max-width: 980px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+.cash-start-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+.cash-start-kicker {
+  margin: 0 0 0.3rem;
+  color: #475569;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.cash-start-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+.cash-start-subtitle {
+  color: #475569;
+  margin-top: .5rem;
+}
+.cash-status-pill {
+  border-radius: 999px;
+  padding: .6rem 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cash-status-pill.pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+.cash-status-pill.open {
+  background: #ecfdf5;
+  color: #047857;
+}
+.cash-start-actions {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.cash-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.cash-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+}
+.cash-info-box span {
+  display: block;
+  color: #64748b;
+  margin-bottom: .4rem;
+}
+.cash-info-box strong {
+  font-size: 1.15rem;
+}
+.cash-helper-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.cash-helper-box.success-box {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.cash-helper-box h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+.cash-helper-box ul {
+  margin: .75rem 0 0;
+  padding-left: 1.2rem;
+}
+.cash-open-form {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.2rem;
+}
+.cash-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.full-width {
+  grid-column: 1 / -1;
+}
+.cash-open-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+}
+.cash-open-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.summary-item {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+}
+.summary-item span {
+  display: block;
+  color: #64748b;
+  margin-bottom: .4rem;
+}
+.cash-note-block {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.cash-note-block h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+@media (max-width: 768px) {
+  .cash-start-header {
+    flex-direction: column;
+  }
+  .cash-start-card {
+    padding: 1rem;
+  }
+}
+</style>
+
+<%- include('../partials/footer.ejs'); %>

@@ -45,7 +45,7 @@ formEdit.addEventListener("submit", function(e) {
 		});
 		
 		// Cambiar botón
-		btnEditGuar.innerHTML = '💾 Guardar Cambios';
+		btnEditGuar.innerHTML = '💾 Guardar cambios del producto';
 		isEditMode = true;
 		
 		console.log('✅ [editPage.js] Modo edición activado');
@@ -86,7 +86,7 @@ formEdit.addEventListener("submit", function(e) {
 	
 	// Deshabilitar botón
 	btnEditGuar.disabled = true;
-	btnEditGuar.innerHTML = '⏳ Guardando...';
+	btnEditGuar.innerHTML = '⏳ Guardando cambios...';
 	
 	// ENVIAR DATOS
 	const datos = {
@@ -129,7 +129,7 @@ formEdit.addEventListener("submit", function(e) {
 			
 			// Revertir
 			btnEditGuar.disabled = false;
-			btnEditGuar.innerHTML = '💾 Guardar Cambios';
+			btnEditGuar.innerHTML = '💾 Guardar cambios del producto';
 			isEditMode = true;
 		});
 });

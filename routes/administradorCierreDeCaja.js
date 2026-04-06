@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 const roleADM = 'ADMINISTRADOR';
 const roleCaja = 'CAJA';
+const escapeRegex = (text = '') => String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // ============================================
 // FUNCIONES AUXILIARES
@@ -77,12 +78,64 @@ function obtenerPeriodo(tipo, fecha) {
 
 // Listar todos los cierres
 router.get('/', isLoggedIn, isAdmin(roleADM), catchAsync(async (req, res) => {
-    const cierresDeCaja = await CierreDeCaja.find({})
+    const { desde = '', hasta = '', q = '' } = req.query;
+    const filtros = {};
+
+    if (desde || hasta) {
+        filtros.fechaDeCierre = {};
+
+        if (desde) {
+            const fechaDesde = new Date(`${desde}T00:00:00.000`);
+            if (!Number.isNaN(fechaDesde.getTime())) {
+                filtros.fechaDeCierre.$gte = fechaDesde;
+            }
+        }
+
+        if (hasta) {
+            const fechaHasta = new Date(`${hasta}T23:59:59.999`);
+            if (!Number.isNaN(fechaHasta.getTime())) {
+                filtros.fechaDeCierre.$lte = fechaHasta;
+            }
+        }
+
+        if (Object.keys(filtros.fechaDeCierre).length === 0) {
+            delete filtros.fechaDeCierre;
+        }
+    }
+
+    if (String(q || '').trim()) {
+        const regex = new RegExp(escapeRegex(String(q).trim()), 'i');
+        filtros.$or = [
+            { ubicacionDeEstacion: regex },
+            { nombreDelUsuario: regex },
+            { periodo: regex },
+            { estado: regex }
+        ];
+    }
+
+    const cierresDeCaja = await CierreDeCaja.find(filtros)
         .populate('estacionDeCobro')
         .populate('usuarioQueCierra')
-        .sort({ fechaDeCierre: -1 });
-    
-    res.render('panelCierres/verTodosLosCierres', { cierresDeCaja });
+        .sort({ fechaDeCierre: -1 })
+        .lean();
+
+    const summary = cierresDeCaja.reduce((acc, cierre) => {
+        acc.totalCount += 1;
+        acc.totalVentas += Number(cierre?.ventasEnEfectivo?.montoTotal || 0) + Number(cierre?.ventasEnOtro?.montoTotal || 0);
+        acc.totalEnCaja += Number(cierre?.dineroReal ?? cierre?.dineroEnCaja ?? 0);
+        return acc;
+    }, {
+        totalCount: 0,
+        totalVentas: 0,
+        totalEnCaja: 0,
+        lastClose: cierresDeCaja[0]?.fechaDeCierre || null
+    });
+
+    res.render('panelCierres/verTodosLosCierres', {
+        cierresDeCaja,
+        filters: { desde, hasta, q },
+        summary
+    });
 }));
 
 // Ver detalle de un cierre
@@ -219,6 +272,14 @@ router.post('/crear', isLoggedIn, hasAnyRole(['ADMINISTRADOR', 'CAJA']), catchAs
     
     // Actualizar estación
     estacion.dineroEnEstacion = dineroEnCaja;
+    estacion.estadoCaja = 'CERRADA';
+    estacion.aperturaActual = {
+        ...(estacion.aperturaActual || {}),
+        estado: 'CERRADA',
+        fechaCierre: ahora,
+        dineroAlCerrar: dineroEnCaja,
+        observaciones: notasDelCierre || (estacion.aperturaActual?.observaciones || '')
+    };
     await estacion.save();
     
     req.flash('success', 'Cierre de caja registrado exitosamente');

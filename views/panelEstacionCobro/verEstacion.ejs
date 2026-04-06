@@ -14,8 +14,8 @@
         <!-- Header -->
         <div class="estacion-detail-header">
             <div class="header-left">
-                <h1 class="estacion-detail-title">🏪 <%= estacionDeCobro.ubicacionDeEstacion %></h1>
-                <p class="estacion-detail-subtitle">Panel de Gestión de Caja</p>
+                <h1 class="estacion-detail-title">💰 <%= estacionDeCobro.ubicacionDeEstacion %></h1>
+                <p class="estacion-detail-subtitle">Panel de gestión de caja y movimientos operativos</p>
             </div>
             <div class="header-right">
                 <div class="current-time">
@@ -86,7 +86,7 @@
                 </a>
 
                 <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/cierre-caja" class="estacion-action-btn">
-                    <span class="action-icon">🔒</span>
+                    <span class="action-icon">🧾</span>
                     <span class="action-text">Cierre de Caja</span>
                 </a>
 
@@ -94,11 +94,6 @@
                     <span class="action-icon">🔄</span>
                     <span class="action-text">Resetear Día</span>
                 </button>
-
-                <a href="/administrador/estacionesdecobro/<%= estacionDeCobro._id %>/eliminar-caja" class="estacion-action-btn btn-danger">
-                    <span class="action-icon">🗑️</span>
-                    <span class="action-text">Eliminar Estación</span>
-                </a>
             </div>
         </div>
 

@@ -1,30 +1,23 @@
 <!-- PRODUCT SEARCH INPUT - Componente reutilizable -->
-<!-- 
-Uso simple:
-    <%- include('../partials/productSearchInput', {
-        inputId: 'productInput',
-        resultsId: 'productResults',
-        selectedProductId: 'selectedProductId'
-    }) %>
--->
 
 <div class="product-search-widget">
     <!-- Input de búsqueda -->
     <div class="search-input-wrapper mb-2">
-        <div class="input-group">
+        <div class="input-group modern-search-group">
             <span class="input-group-text">🔍</span>
             <input type="text" 
                    id="<%= inputId || 'productSearchInput' %>" 
-                   class="form-control" 
-                   placeholder="Buscar producto..."
+                   class="form-control product-search-control" 
+                   placeholder="Buscar por nombre, marca o código"
                    autocomplete="off">
             <button type="button" 
-                    class="btn btn-outline-secondary"
+                    class="btn btn-outline-secondary product-search-clear"
                     id="<%= inputId %>_clear"
                     style="display: none;">
                 ✕
             </button>
         </div>
+        <small class="product-search-help">Escribí al menos un dato del producto para encontrarlo rápido.</small>
     </div>
 
     <!-- Dropdown de resultados -->
@@ -55,51 +48,117 @@ Uso simple:
     position: relative;
 }
 
+.modern-search-group {
+    display: flex;
+    align-items: stretch;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.input-group-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 1rem;
+    border-right: 1px solid #dbeafe;
+}
+
+.product-search-control {
+    flex: 1;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+.product-search-control::placeholder {
+    color: #94a3b8;
+}
+
+.product-search-clear {
+    border: none;
+    background: #f8fafc;
+    color: #475569;
+    padding: 0 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.product-search-help {
+    display: block;
+    margin-top: 0.45rem;
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
 .product-search-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    max-height: 300px;
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 14px;
+    max-height: 320px;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
 }
 
 .product-search-item {
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.15s;
+    border-bottom: 1px solid #eef2f7;
+    transition: background-color 0.15s ease;
 }
 
 .product-search-item:hover {
-    background-color: #f8f9fa;
+    background-color: #f8fbff;
 }
 
 .product-search-item:last-child {
     border-bottom: none;
 }
 
+.product-search-name {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.product-search-meta {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+.product-search-item.state-item {
+    color: #475569;
+}
+
 .product-info-selected {
     padding: 1rem;
-    background-color: #e7f3ff;
-    border: 1px solid #b3d9ff;
-    border-radius: 0.375rem;
-    margin-top: 0.5rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    margin-top: 0.75rem;
 }
 
 .product-info-name {
-    font-weight: 600;
-    color: #0c5aa0;
+    font-weight: 700;
+    color: #1d4ed8;
 }
 
 .product-info-details {
-    font-size: 0.875rem;
-    color: #656565;
+    font-size: 0.9rem;
+    color: #475569;
     margin-top: 0.25rem;
 }
 </style>
@@ -128,12 +187,12 @@ Uso simple:
             displayResults(productos);
         },
         onError: (message) => {
-            resultsDiv.innerHTML = '<div class="product-search-item text-muted">' + (message || 'Error en búsqueda') + '</div>';
+            resultsDiv.innerHTML = '<div class="product-search-item state-item">' + (message || 'Error en la búsqueda') + '</div>';
             resultsDiv.style.display = 'block';
         },
         onLoading: (isLoading) => {
             if (isLoading) {
-                resultsDiv.innerHTML = '<div class="product-search-item text-center"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>';
+                resultsDiv.innerHTML = '<div class="product-search-item state-item">⏳ Buscando productos...</div>';
                 resultsDiv.style.display = 'block';
             }
         }
@@ -184,7 +243,7 @@ Uso simple:
         resultsDiv.innerHTML = '';
 
         if (!productos || productos.length === 0) {
-            resultsDiv.innerHTML = '<div class="product-search-item text-muted">No encontrado</div>';
+            resultsDiv.innerHTML = '<div class="product-search-item state-item">No se encontraron productos</div>';
             resultsDiv.style.display = 'block';
             return;
         }
@@ -193,12 +252,10 @@ Uso simple:
             const item = document.createElement('div');
             item.className = 'product-search-item';
             item.innerHTML = `
-                <div class="fw-bold">${producto.nombre}</div>
-                <small class="text-muted">
-                    ${producto.marca || 'S/M'} • 
-                    Código: ${producto.codigo || 'N/A'} • 
-                    $${(producto.precioMinorista || 0).toFixed(2)}
-                </small>
+                <div class="product-search-name">${producto.nombre}</div>
+                <div class="product-search-meta">
+                    ${producto.marca || 'Sin marca'} • Código: ${producto.codigo || 'N/A'} • $${(producto.precioMinorista || 0).toFixed(2)}
+                </div>
             `;
             
             item.addEventListener('click', () => selectProduct(producto));

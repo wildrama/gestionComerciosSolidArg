@@ -14,124 +14,146 @@
         <!-- Page Header -->
         <div class="form-header">
             <h1 class="form-title">📦 Actualizar Stock</h1>
-            <p class="form-subtitle">Busca un producto y actualiza su cantidad disponible</p>
+            <p class="form-subtitle">Busca un producto y ajusta su cantidad disponible con una vista clara y rápida.</p>
+        </div>
+
+        <div class="stock-page-actions">
+            <a href="/administrador" class="stock-action-btn secondary">← Volver al panel</a>
+            <a href="/administrador/productos" class="stock-action-btn primary">📦 Ver stock</a>
         </div>
 
         <!-- Main Form -->
         <form id="updateStockForm" class="stock-update-form">
-            <!-- Product Search Section -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Paso 1: Buscar Producto</h5>
+            <div class="stock-overview">
+                <article class="stock-overview-card accent">
+                    <span class="overview-label">Ajuste rápido</span>
+                    <strong>Actualizá el inventario en pocos pasos</strong>
+                    <p>Reponé, corregí o descontá unidades sin salir del flujo administrativo.</p>
+                </article>
+                <article class="stock-overview-card">
+                    <span class="overview-label">Consejo</span>
+                    <strong>Buscá por nombre, marca o código</strong>
+                    <p>Seleccioná el producto y luego elegí el tipo de movimiento que necesitás registrar.</p>
+                </article>
+            </div>
+
+            <section class="stock-panel">
+                <div class="stock-panel-header">
+                    <div>
+                        <span class="stock-step-pill">Paso 1</span>
+                        <h2>Seleccionar producto</h2>
+                        <p>Encontrá el artículo que querés ajustar.</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Product Search Input Component -->
+                <div class="stock-panel-body">
                     <%- include('../partials/productSearchInput', {
                         inputId: 'stockProductSearch',
                         resultsId: 'stockResults',
                         selectedProductId: 'selectedProductId'
                     }) %>
                 </div>
-            </div>
+            </section>
 
-            <!-- Stock Update Section -->
-            <div class="card mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Paso 2: Actualizar Cantidad</h5>
+            <section class="stock-panel">
+                <div class="stock-panel-header info">
+                    <div>
+                        <span class="stock-step-pill info">Paso 2</span>
+                        <h2>Definir el ajuste</h2>
+                        <p>Elegí cómo querés impactar el stock y revisá la vista previa.</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Current Stock Display -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="stock-info-box">
-                                <label class="form-label">Stock Actual</label>
-                                <div class="stock-value" id="currentStock">
-                                    <span class="badge bg-warning text-dark">Selecciona un producto</span>
-                                </div>
+                <div class="stock-panel-body">
+                    <div class="stock-status-grid">
+                        <article class="stock-info-box">
+                            <label class="stock-box-label">Stock actual</label>
+                            <div class="stock-value" id="currentStock">
+                                <span class="info-badge neutral">Seleccioná un producto</span>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="stock-info-box">
-                                <label class="form-label">Precio Unitario</label>
-                                <div class="stock-value" id="unitPrice">
-                                    <span class="badge bg-secondary">$0.00</span>
-                                </div>
+                        </article>
+                        <article class="stock-info-box">
+                            <label class="stock-box-label">Precio unitario</label>
+                            <div class="stock-value" id="unitPrice">
+                                <span class="info-badge neutral">$0.00</span>
                             </div>
-                        </div>
+                        </article>
                     </div>
 
-                    <!-- Update Type Selection -->
-                    <div class="mb-3">
-                        <label class="form-label">Tipo de Actualización</label>
-                        <div class="btn-group w-100" role="group">
+                    <div class="stock-field">
+                        <label class="stock-section-label">Tipo de movimiento</label>
+                        <div class="stock-mode-grid" role="group" aria-label="Tipo de actualización">
                             <input type="radio" class="btn-check" name="updateType" id="setAmount" value="set" checked>
-                            <label class="btn btn-outline-primary" for="setAmount">
-                                Establecer cantidad
+                            <label class="stock-mode-option" for="setAmount">
+                                <span class="mode-icon">🎯</span>
+                                <span>
+                                    <strong>Definir stock</strong>
+                                    <small>Reemplaza la cantidad actual</small>
+                                </span>
                             </label>
 
                             <input type="radio" class="btn-check" name="updateType" id="addAmount" value="add">
-                            <label class="btn btn-outline-primary" for="addAmount">
-                                Agregar cantidad
+                            <label class="stock-mode-option" for="addAmount">
+                                <span class="mode-icon">➕</span>
+                                <span>
+                                    <strong>Agregar</strong>
+                                    <small>Suma unidades al stock</small>
+                                </span>
                             </label>
 
                             <input type="radio" class="btn-check" name="updateType" id="subtractAmount" value="subtract">
-                            <label class="btn btn-outline-danger" for="subtractAmount">
-                                Restar cantidad
+                            <label class="stock-mode-option danger" for="subtractAmount">
+                                <span class="mode-icon">➖</span>
+                                <span>
+                                    <strong>Descontar</strong>
+                                    <small>Resta unidades disponibles</small>
+                                </span>
                             </label>
                         </div>
                     </div>
 
-                    <!-- New/Change Amount Input -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="newQuantity" class="form-label" id="quantityLabel">
-                                    Nueva Cantidad
-                                </label>
-                                <input type="number" 
-                                       id="newQuantity" 
-                                       name="quantity" 
-                                       class="form-control form-control-lg"
-                                       placeholder="0"
-                                       min="0"
-                                       step="1"
-                                       required>
-                                <small class="form-text text-muted" id="quantityHint">
-                                    Ingresa la nueva cantidad total
-                                </small>
-                            </div>
+                    <div class="stock-form-grid">
+                        <div class="stock-field">
+                            <label for="newQuantity" class="form-label stock-section-label" id="quantityLabel">
+                                Nueva cantidad
+                            </label>
+                            <input type="number" 
+                                   id="newQuantity" 
+                                   name="quantity" 
+                                   class="form-control form-control-lg"
+                                   placeholder="0"
+                                   min="0"
+                                   step="1"
+                                   required>
+                            <small class="field-help" id="quantityHint">
+                                Ingresá la nueva cantidad total.
+                            </small>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="notes" class="form-label">Notas (Opcional)</label>
-                                <input type="text" 
-                                       id="notes" 
-                                       name="notes" 
-                                       class="form-control"
-                                       placeholder="ej: Reposición, Devolución, etc.">
-                            </div>
+                        <div class="stock-field">
+                            <label for="notes" class="form-label stock-section-label">Observación</label>
+                            <input type="text" 
+                                   id="notes" 
+                                   name="notes" 
+                                   class="form-control"
+                                   placeholder="Ej: reposición, control manual, devolución...">
+                            <small class="field-help">Opcional, útil para dejar trazabilidad del cambio.</small>
                         </div>
                     </div>
 
-                    <!-- Preview of Change -->
-                    <div id="changePreview" class="alert alert-info" style="display: none;">
-                        <strong>Cambio estimado:</strong>
+                    <div id="changePreview" class="stock-preview-card" style="display: none;">
+                        <span class="preview-kicker">Vista previa del ajuste</span>
                         <div id="changePreviewText"></div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Action Buttons -->
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
-                    ✓ Actualizar Stock
+            <div class="form-actions stock-actions">
+                <button type="submit" class="stock-submit-btn" id="submitBtn" disabled>
+                    💾 Guardar ajuste
                 </button>
-                <a href="/administrador/stock" class="btn btn-secondary btn-lg">
-                    ← Cancelar
+                <a href="/administrador/stock" class="stock-cancel-btn">
+                    ← Volver a stock
                 </a>
             </div>
 
-            <!-- Hidden inputs -->
             <input type="hidden" id="selectedProductId" name="productId">
         </form>
     </div>
@@ -141,27 +163,303 @@
 <style>
 .admin-dashboard {
     padding: 2rem;
-    background-color: #f5f5f5;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
     min-height: 100vh;
+}
+
+.stock-page-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.stock-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.15rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    transition: all 0.2s ease;
+}
+
+.stock-action-btn.primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    color: #ffffff;
+}
+
+.stock-action-btn.secondary {
+    background: #e5e7eb;
+    color: #111827;
+    border: 1px solid #cbd5e1;
+}
+
+.stock-action-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.98);
+}
+
+.stock-update-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.stock-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.stock-overview-card {
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.stock-overview-card.accent {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border-color: #bfdbfe;
+}
+
+.overview-label {
+    display: inline-flex;
+    margin-bottom: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: #2563eb;
+    text-transform: uppercase;
+}
+
+.stock-overview-card strong {
+    display: block;
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+    color: #0f172a;
+}
+
+.stock-overview-card p {
+    margin: 0;
+    color: #475569;
+}
+
+.stock-panel {
+    background: #ffffff;
+    border: 1px solid #dbe3f0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+}
+
+.stock-panel-header {
+    padding: 1rem 1.2rem;
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    color: #ffffff;
+}
+
+.stock-panel-header.info {
+    background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);
+}
+
+.stock-panel-header h2 {
+    margin: 0.25rem 0 0.2rem;
+    font-size: 1.15rem;
+}
+
+.stock-panel-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.stock-step-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+}
+
+.stock-panel-body {
+    padding: 1.2rem;
+}
+
+.stock-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .stock-info-box {
     padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 0.375rem;
-    border-left: 4px solid #0d6efd;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 1px solid #dbe3f0;
+}
+
+.stock-box-label,
+.stock-section-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
 }
 
 .stock-value {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
+    font-size: 1.15rem;
+    font-weight: 700;
 }
+
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.42rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.info-badge.neutral { background: #e5e7eb; color: #374151; }
+.info-badge.success { background: #dcfce7; color: #166534; }
+.info-badge.info { background: #dbeafe; color: #1d4ed8; }
+
+.stock-field {
+    margin-top: 1rem;
+}
+
+.stock-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.btn-check {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stock-mode-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #0f172a;
+}
+
+.stock-mode-option strong {
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.stock-mode-option small {
+    display: block;
+    color: #64748b;
+}
+
+.mode-icon {
+    font-size: 1.1rem;
+    line-height: 1.2;
+}
+
+#setAmount:checked + .stock-mode-option,
+#addAmount:checked + .stock-mode-option {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 10px 18px rgba(37, 99, 235, 0.14);
+}
+
+#subtractAmount:checked + .stock-mode-option {
+    border-color: #dc2626;
+    background: #fef2f2;
+    box-shadow: 0 10px 18px rgba(220, 38, 38, 0.12);
+}
+
+.stock-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.form-control,
+.form-control-lg {
+    width: 100%;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    box-shadow: none;
+}
+
+.form-control::placeholder,
+.form-control-lg::placeholder {
+    color: #94a3b8;
+}
+
+.form-control:focus,
+.form-control-lg:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+    outline: none;
+}
+
+.field-help {
+    display: block;
+    margin-top: 0.4rem;
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.stock-preview-card {
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border: 1px solid #bfdbfe;
+}
+
+.preview-kicker {
+    display: inline-flex;
+    margin-bottom: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #2563eb;
+}
+
+#changePreviewText {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.delta-positive { color: #15803d; }
+.delta-negative { color: #b91c1c; }
+.delta-neutral { color: #475569; }
 
 .form-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 0.25rem;
+    flex-wrap: wrap;
 }
 
 .form-actions button,
@@ -169,19 +467,55 @@
     flex: 1;
 }
 
-.card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+.stock-submit-btn,
+.stock-cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 52px;
+    padding: 0.95rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration: none;
     border: none;
-    margin-bottom: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    transition: all 0.2s ease;
 }
 
-.card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-    padding: 1rem 1.25rem;
+.stock-submit-btn {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff;
 }
 
-.card-body {
-    padding: 1.5rem;
+.stock-submit-btn:disabled {
+    background: #94a3b8;
+    color: #f8fafc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.stock-cancel-btn {
+    background: #e5e7eb;
+    color: #111827;
+    border: 1px solid #cbd5e1;
+}
+
+.stock-submit-btn:hover:not(:disabled),
+.stock-cancel-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.98);
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 1rem;
+    }
+
+    .stock-mode-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 
@@ -211,10 +545,10 @@
         if (e.detail.selectedProductId === 'selectedProductId') {
             selectedProduct = e.detail.producto;
             currentStockDiv.innerHTML = `
-                <span class="badge bg-success">${selectedProduct.cantidad || 0} unidades</span>
+                <span class="info-badge success">${selectedProduct.cantidad || 0} unidades</span>
             `;
             unitPriceDiv.innerHTML = `
-                <span class="badge bg-info">$${(selectedProduct.precioMinorista || 0).toFixed(2)}</span>
+                <span class="info-badge info">$${(selectedProduct.precioMinorista || 0).toFixed(2)}</span>
             `;
             submitBtn.disabled = false;
             newQuantityInput.value = '';
@@ -265,7 +599,7 @@
                 change = inputQty - currentQty;
                 changePreviewText.innerHTML = `
                     ${currentQty} → ${newQty} unidades
-                    <span class="${change > 0 ? 'text-success' : change < 0 ? 'text-danger' : 'text-muted'}">
+                    <span class="${change > 0 ? 'delta-positive' : change < 0 ? 'delta-negative' : 'delta-neutral'}">
                         (${change > 0 ? '+' : ''}${change})
                     </span>
                 `;
@@ -274,14 +608,14 @@
                 newQty = currentQty + inputQty;
                 changePreviewText.innerHTML = `
                     ${currentQty} + ${inputQty} = ${newQty} unidades
-                    <span class="text-success">(+${inputQty})</span>
+                    <span class="delta-positive">(+${inputQty})</span>
                 `;
                 break;
             case 'subtract':
                 newQty = Math.max(0, currentQty - inputQty);
                 changePreviewText.innerHTML = `
                     ${currentQty} - ${inputQty} = ${newQty} unidades
-                    <span class="text-danger">(-${inputQty})</span>
+                    <span class="delta-negative">(-${inputQty})</span>
                 `;
                 break;
         }
@@ -317,7 +651,7 @@
 
         try {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Guardando...';
+            submitBtn.innerHTML = '⏳ Guardando ajuste...';
 
             // Enviar datos al servidor
             const response = await axios.post('/administrador/stock/update', {
@@ -336,13 +670,13 @@
             } else {
                 alert('Error: ' + response.data.message);
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '✓ Actualizar Stock';
+                submitBtn.innerHTML = '💾 Guardar ajuste';
             }
         } catch (error) {
             console.error('Error:', error);
             alert('Error al actualizar stock: ' + (error.response?.data?.message || error.message));
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '✓ Actualizar Stock';
+            submitBtn.innerHTML = '💾 Guardar ajuste';
         }
     });
 })();

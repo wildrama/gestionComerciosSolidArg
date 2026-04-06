@@ -1,6 +1,6 @@
 <%- include('../partials/headerAdm.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard stock-form-page">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -13,8 +13,39 @@
 
         <!-- Form Header -->
         <div class="form-header">
-            <h1 class="form-title">➕ Agregar Producto al Stock</h1>
-            <p class="form-subtitle">Completa todos los campos requeridos para registrar el producto</p>
+            <h1 class="form-title">➕ Alta de Producto</h1>
+            <p class="form-subtitle">Flujo pensado para lector de código de barras: primero escaneá o generá el código y después completá el resto con teclado.</p>
+        </div>
+
+        <div class="scanner-guide">
+            <div class="scanner-guide-copy">
+                <span class="scanner-badge">Alta rápida</span>
+                <h3>📷 Primero el código, después el teclado</h3>
+                <ol class="scanner-steps">
+                    <li><strong>Paso 1:</strong> escaneá el código del producto en el primer campo.</li>
+                    <li><strong>Si no tiene código:</strong> usá el botón <em>Generar código</em>.</li>
+                    <li><strong>Paso 2:</strong> completá nombre, marca, stock y precios.</li>
+                </ol>
+            </div>
+            <div class="scanner-guide-actions">
+                <button type="button" class="btn-secondary-modern" onclick="enfocarCodigo()">🎯 Escanear ahora</button>
+                <button type="button" id="switchCodigo" class="btn-primary-modern">🔄 Generar código</button>
+            </div>
+        </div>
+
+        <div class="stock-help-grid">
+            <div class="stock-help-card">
+                <strong>1. Escaneá</strong>
+                <p>El cursor queda listo en el código para usar el lector apenas abre la pantalla.</p>
+            </div>
+            <div class="stock-help-card">
+                <strong>2. Generá si falta</strong>
+                <p>Si el artículo no trae código, el sistema propone uno nuevo y lo muestra en vista previa.</p>
+            </div>
+            <div class="stock-help-card">
+                <strong>3. Completá y guardá</strong>
+                <p>Terminá nombre, stock y precios con teclado y guardá el producto en stock.</p>
+            </div>
         </div>
 
         <!-- Form -->
@@ -34,16 +65,19 @@
                                    id="codigo" 
                                    name="codigo" 
                                    class="form-control-modern with-icon codigoProducto" 
-                                   placeholder="Ingresa el código de barra"
+                                   placeholder="Escaneá o escribí el código"
                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                   inputmode="numeric"
                                    tabindex="1"
+                                   autofocus
                                    required>
                         </div>
-                        <div class="form-actions-inline">
-                            <small class="form-help">Solo números</small>
-                            <button type="button" id="switchCodigo" class="btn-generate-code" onclick="generarCodigo()">
-                                🔄 Generar código
-                            </button>
+                        <div class="form-actions-inline barcode-actions-inline">
+                            <small id="barcodeStatus" class="form-help barcode-status is-info">El cursor queda listo acá para trabajar con el lector.</small>
+                        </div>
+                        <div class="barcode-preview-card">
+                            <svg id="barcodePreview" class="barcode-preview-svg"></svg>
+                            <p class="barcode-preview-caption">Vista previa del código para este producto</p>
                         </div>
                     </div>
 
@@ -71,7 +105,7 @@
                                        name="marca" 
                                        class="form-control-modern with-icon" 
                                        placeholder="Ej: Coca Cola"
-                                       tabindex="4"
+                                       tabindex="3"
                                        required>
                             </div>
                         </div>
@@ -86,7 +120,7 @@
                                        class="form-control-modern with-icon" 
                                        placeholder="0"
                                        min="0"
-                                       tabindex="3"
+                                       tabindex="4"
                                        required>
                             </div>
                         </div>
@@ -244,18 +278,17 @@
                 <a href="/administrador/productos" class="btn-secondary-modern">
                     Cancelar
                 </a>
-                <button type="submit" id="btnCargaStock" class="btn-primary-modern">
-                    <span class="btn-icon">💾</span>
-                    Cargar Producto
+                <button type="submit" id="btnCargaStock" class="btn-primary-modern btn-save-emphasis">
+                    <span class="btn-icon">📦</span>
+                    Cargar producto
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="../../cargaStock.js"></script>    
-<script src="../../jsBarcode.min.js"></script>    
+<script src="../../cargaStock.js"></script>
+<script src="../../jsBarcode.min.js"></script>
 <script src="../../ktCode.js"></script>
 
 <script>
