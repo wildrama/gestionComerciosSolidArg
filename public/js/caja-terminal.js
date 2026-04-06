@@ -560,87 +560,87 @@ function buildTicketHtml(ticketData) {
       <title>Ticket ${escapeHtml(ticketData.ventaId || '')}</title>
       <style>
         @page {
-          size: 80mm auto;
-          margin: 3mm;
+          size: 58mm auto;
+          margin: 2mm;
         }
         html, body {
-          width: 80mm;
+          width: 58mm;
           margin: 0;
           padding: 0;
           background: #ffffff;
           color: #111827;
           font-family: 'Courier New', Courier, monospace;
-          font-size: 11px;
-          line-height: 1.25;
+          font-size: 10px;
+          line-height: 1.2;
         }
         body {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
         .ticket {
-          width: 72mm;
+          width: 54mm;
           margin: 0 auto;
           padding: 1mm 0;
         }
         .ticket h1, .ticket h2, .ticket p { margin: 0; }
         .ticket-header {
           text-align: center;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
         .ticket-header h1 {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 700;
           margin-bottom: 2px;
         }
         .ticket-header .business-sub,
         .ticket-header .date-line {
-          font-size: 11px;
+          font-size: 10px;
           margin-top: 2px;
         }
         .divider {
           border-top: 1px dashed #475569;
-          margin: 8px 0;
+          margin: 6px 0;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 11px;
+          font-size: 10px;
         }
         th, td {
-          padding: 3px 0;
+          padding: 2px 0;
           text-align: left;
           vertical-align: top;
         }
         th:nth-child(2), td:nth-child(2) {
           text-align: center;
-          width: 12mm;
+          width: 9mm;
         }
         th:last-child, td:last-child {
           text-align: right;
-          width: 18mm;
+          width: 16mm;
         }
         .line-note {
-          font-size: 10px;
+          font-size: 9px;
           color: #475569;
           margin-top: 1px;
         }
         .meta p {
-          font-size: 11px;
-          margin-bottom: 3px;
+          font-size: 10px;
+          margin-bottom: 2px;
         }
         .total-row {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
         }
         .footer {
           text-align: center;
-          font-size: 10.5px;
-          margin-top: 8px;
+          font-size: 9.5px;
+          margin-top: 6px;
         }
         .footer strong {
           display: block;
-          margin-top: 6px;
-          font-size: 10px;
+          margin-top: 4px;
+          font-size: 9px;
         }
       </style>
     </head>

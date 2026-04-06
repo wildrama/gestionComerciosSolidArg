@@ -6,21 +6,25 @@
     <title>Ticket <%= venta.codigoVenta %></title>
     <style>
         @page {
-            size: 80mm auto;
-            margin: 4mm;
+            size: 58mm auto;
+            margin: 2mm;
         }
 
+        html,
         body {
+            width: 58mm;
             margin: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #ffffff;
             color: #111;
+            font-size: 10px;
+            line-height: 1.2;
         }
 
         .ticket {
-            width: 72mm;
+            width: 54mm;
             margin: 0 auto;
-            padding: 4mm 3mm 6mm;
+            padding: 2mm 1mm 4mm;
         }
 
         .center {
@@ -28,29 +32,29 @@
         }
 
         .business-name {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             margin-bottom: 4px;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.3px;
         }
 
         .muted {
-            font-size: 11px;
+            font-size: 10px;
             color: #444;
         }
 
         .separator {
             border-top: 1px dashed #222;
-            margin: 8px 0;
+            margin: 6px 0;
         }
 
         .meta-row,
         .total-row {
             display: flex;
             justify-content: space-between;
-            gap: 8px;
-            font-size: 12px;
-            margin: 4px 0;
+            gap: 6px;
+            font-size: 11px;
+            margin: 3px 0;
         }
 
         .items-table {
@@ -61,8 +65,8 @@
 
         .items-table th,
         .items-table td {
-            font-size: 11px;
-            padding: 4px 0;
+            font-size: 10px;
+            padding: 3px 0;
             vertical-align: top;
         }
 
@@ -74,22 +78,23 @@
         .items-table td:last-child,
         .items-table th:last-child {
             text-align: right;
+            width: 16mm;
         }
 
         .total-row {
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .footer-note {
-            margin-top: 8px;
-            font-size: 10px;
+            margin-top: 6px;
+            font-size: 9px;
             text-align: center;
         }
 
         @media print {
             html, body {
-                width: 80mm;
+                width: 58mm;
             }
         }
     </style>
