@@ -1,6 +1,6 @@
 <%- include('../partials/headerAdm.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard" id="admin-main-content">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -19,21 +19,27 @@
 
         <!-- Search Container -->
         <div class="search-container">
-            <form id="searchForm" class="search-form-modern">
+            <form id="searchForm" class="search-form-modern" role="search" aria-label="Buscador inteligente de productos">
                 <!-- Search Input -->
                 <div class="search-input-wrapper">
                     <div class="search-box-large">
-                        <span class="search-icon-large">🔍</span>
+                        <label for="searchInput" class="sr-only">Buscar productos por nombre, marca o código</label>
+                        <span class="search-icon-large" aria-hidden="true">🔍</span>
                         <input type="text" 
                                id="searchInput" 
                                class="search-input-large" 
                                placeholder="Busca por nombre, marca o código..."
-                               autocomplete="off">
+                               aria-label="Buscar productos por nombre, marca o código"
+                               aria-describedby="searchModeHint"
+                               aria-controls="searchResults"
+                               autocomplete="off"
+                               inputmode="search"
+                               enterkeyhint="search">
                     </div>
 
                     <!-- Search Type Toggle -->
                     <div class="search-type-wrapper">
-                        <label class="toggle-switch-label">
+                        <label class="toggle-switch-label" id="searchModeHint">
                             <span class="toggle-label-text">Buscar por:</span>
                             <div class="toggle-switch-container">
                                 <input type="checkbox" id="searchByBarcode" class="toggle-input">
@@ -48,9 +54,9 @@
 
                 <!-- Filters Row -->
                 <div class="search-filters-row">
-                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                    <div class="filter-group">
                         <label for="sortFilter" class="filter-label">Ordenar por:</label>
-                        <select id="sortFilter" class="filter-select-modern">
+                        <select id="sortFilter" class="filter-select-modern" aria-label="Ordenar resultados de búsqueda">
                             <option value="relevancia">⭐ Relevancia</option>
                             <option value="nombre">🔤 Nombre A-Z</option>
                             <option value="precio">💰 Menor precio</option>
@@ -58,20 +64,20 @@
                         </select>
                     </div>
 
-                    <button type="reset" id="clearSearchBtn" class="btn-clear-search" style="align-self: flex-end;">
+                    <button type="reset" id="clearSearchBtn" class="btn-clear-search" aria-label="Limpiar búsqueda actual">
                         🔄 Limpiar
                     </button>
                 </div>
 
                 <!-- Alert Message -->
-                <div id="alertMessage" class="search-alert" style="display: none;">
+                <div id="alertMessage" class="search-alert search-status-live" style="display: none;" aria-live="polite">
                     <span class="alert-icon">ℹ️</span>
                     <span id="alertText">Ingresa un término de búsqueda válido</span>
                 </div>
             </form>
 
             <!-- Search Stats -->
-            <div id="searchStats" class="search-stats" style="display: none;">
+            <div id="searchStats" class="search-stats" style="display: none;" aria-live="polite">
                 <span class="stat-badge">
                     📊 <strong id="resultCount">0</strong> productos encontrados
                 </span>
@@ -80,10 +86,10 @@
 
         <!-- Search Results Grid -->
         <div class="search-results-wrapper">
-            <div id="searchResults" class="search-results-grid"></div>
+            <div id="searchResults" class="search-results-grid" aria-live="polite"></div>
 
             <!-- Empty State -->
-            <div id="noResults" class="empty-state-search" style="display: none;">
+            <div id="noResults" class="empty-state-search" style="display: none;" aria-live="polite">
                 <div class="empty-icon-large">🔍</div>
                 <h3>No se encontraron productos</h3>
                 <p>Intenta con otros términos de búsqueda o utiliza diferentes palabras clave</p>

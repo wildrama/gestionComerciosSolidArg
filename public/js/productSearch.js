@@ -61,6 +61,11 @@ class ProductSearch {
         e.preventDefault();
         this.performSearch();
       }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.clear();
+      }
     });
 
     // Toggle búsqueda por código/texto
@@ -106,6 +111,9 @@ class ProductSearch {
    */
   async performSearch() {
     const searchTerm = this.searchInput.value.trim();
+    const searchMode = this.searchByBarcode?.checked ? 'barcode' : 'text';
+    const sortBy = this.sortFilter?.value || 'relevancia';
+    const searchKey = `${searchTerm}|${searchMode}|${sortBy}`;
 
     // Validación
     if (searchTerm.length < this.minChars) {
@@ -113,9 +121,9 @@ class ProductSearch {
       return;
     }
 
-    // Evitar búsquedas duplicadas
-    if (searchTerm === this.lastSearch) return;
-    this.lastSearch = searchTerm;
+    // Evitar búsquedas duplicadas reales
+    if (searchKey === this.lastSearch) return;
+    this.lastSearch = searchKey;
 
     // Mostrar loading
     this.showLoading();
@@ -173,16 +181,32 @@ class ProductSearch {
       return;
     }
 
+    const sortBy = this.sortFilter?.value || 'relevancia';
+    const safeResults = Array.isArray(productos) ? [...productos] : [];
+
+    if (sortBy === 'nombre') {
+      safeResults.sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'));
+    } else if (sortBy === 'precio') {
+      safeResults.sort((a, b) => Number(a.precioMinorista || a.valor || 0) - Number(b.precioMinorista || b.valor || 0));
+    } else if (sortBy === 'stock') {
+      safeResults.sort((a, b) => Number(b.cantidad || 0) - Number(a.cantidad || 0));
+    }
+
+    const limitedResults = safeResults.slice(0, this.maxResults);
+    const fragment = document.createDocumentFragment();
+
     this.searchResults.innerHTML = '';
     this.hideInitialState();
     this.hideNoResults();
     this.hideAlert();
-    this.showSearchStats(productos.length);
+    this.showSearchStats(limitedResults.length);
 
-    productos.forEach((producto) => {
+    limitedResults.forEach((producto) => {
       const card = this.createProductCard(producto);
-      this.searchResults.appendChild(card);
+      fragment.appendChild(card);
     });
+
+    this.searchResults.appendChild(fragment);
   }
 
   /**
@@ -212,6 +236,8 @@ class ProductSearch {
 
     if (editBtn) {
       editBtn.href = `/administrador/productos/${producto._id}`;
+      editBtn.setAttribute('aria-label', `Ver detalle de ${producto.nombre || 'producto'}`);
+      editBtn.setAttribute('title', `Ver detalle de ${producto.nombre || 'producto'}`);
       editBtn.addEventListener('click', (e) => {
         if (this.onResultClick) {
           e.preventDefault();
@@ -222,6 +248,8 @@ class ProductSearch {
 
     if (stockBtn) {
       stockBtn.href = `/administrador/productos/${producto._id}/upstock`;
+      stockBtn.setAttribute('aria-label', `Actualizar stock de ${producto.nombre || 'producto'}`);
+      stockBtn.setAttribute('title', `Actualizar stock de ${producto.nombre || 'producto'}`);
       stockBtn.addEventListener('click', (e) => {
         if (this.onResultClick) {
           e.preventDefault();
@@ -240,11 +268,12 @@ class ProductSearch {
     if (!this.searchByBarcode) return;
 
     const isBarcode = this.searchByBarcode.checked;
+    this.lastSearch = '';
     this.searchInput.placeholder = isBarcode
       ? 'Escanea o ingresa código de barra...'
       : 'Busca por nombre, marca o código...';
 
-    // Limpiar resultados previos
+    // Re-ejecutar búsqueda al cambiar el modo
     if (this.searchInput.value.trim()) {
       this.performSearch();
     }
@@ -256,6 +285,7 @@ class ProductSearch {
   onClear(e) {
     e?.preventDefault();
 
+    this.lastSearch = '';
     this.searchInput.value = '';
     if (this.searchByBarcode) this.searchByBarcode.checked = false;
     if (this.sortFilter) this.sortFilter.value = 'relevancia';
@@ -286,7 +316,7 @@ class ProductSearch {
 
   showLoading() {
     if (this.searchResults) {
-      this.searchResults.innerHTML = '<div class="search-loading">Buscando...</div>';
+      this.searchResults.innerHTML = '<div class="search-loading" role="status" aria-live="polite">Buscando productos...</div>';
     }
   }
 

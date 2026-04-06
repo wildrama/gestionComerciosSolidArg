@@ -1,1 +1,8 @@
 node_modules
+.env
+.env.*
+!.env.example
+!.env.production.example
+npm-debug.log*
+logs/
+*.log

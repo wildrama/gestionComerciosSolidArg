@@ -7,14 +7,24 @@
     <link rel="stylesheet" href="/styles/app-unified.css">
 </head>
 <body class="admin-page">
+    <a class="skip-link" href="#admin-main-content">Saltar al contenido principal</a>
+
     <!-- Navbar Principal -->
-    <nav class="navbar-admin">
+    <nav class="navbar-admin" aria-label="Navegación principal del administrador">
         <div class="navbar-content">
-            <a href="/administrador" class="navbar-brand">
+            <a href="/administrador" class="navbar-brand" aria-label="Volver al inicio del panel administrador">
                 <span class="brand-icon">🏪</span>
                 <span class="brand-text">SOLIDARG-COMERCIOS</span>
             </a>
-            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+            <button
+                id="navbarToggle"
+                class="navbar-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="navbarMenu"
+                aria-label="Abrir menú principal">
+                <span aria-hidden="true">☰</span>
+            </button>
             <div class="navbar-menu" id="navbarMenu">
                 <a href="/administrador" class="nav-link">
                     <span class="nav-icon">🏠</span>
@@ -34,7 +44,7 @@
                 </a>
                 <a href="/administrador/estacionesdecobro" class="nav-link">
                     <span class="nav-icon">💰</span>
-                    <span>Caja</span>
+                    <span>Estaciones</span>
                 </a>
                 <a href="/administrador/cierres-caja" class="nav-link">
                     <span class="nav-icon">🧾</span>
@@ -49,9 +59,9 @@
     </nav>
 
     <!-- Submenú de Acceso Rápido -->
-    <div class="submenu-container">
+    <div class="submenu-container" role="navigation" aria-label="Accesos frecuentes del administrador">
         <div class="submenu-quick-access">
-            <h3 class="submenu-title">⚡ Acceso Rápido</h3>
+            <p class="submenu-title">⚡ Accesos frecuentes</p>
             <ul class="submenu-links">
                 <li>
                     <a href="/administrador/productos" class="submenu-link">
@@ -62,31 +72,31 @@
                 <li>
                     <a href="/administrador/productos/nuevo#codigo" class="submenu-link">
                         <span class="submenu-link-icon">➕</span>
-                        Agregar producto
+                        Nuevo producto
                     </a>
                 </li>
                 <li>
                     <a href="/administrador/buscar" class="submenu-link">
                         <span class="submenu-link-icon">🔍</span>
-                        Buscar producto
+                        Buscar
                     </a>
                 </li>
                 <li>
                     <a href="/administrador/ofertas" class="submenu-link">
                         <span class="submenu-link-icon">🎁</span>
-                        Ir a ofertas
+                        Ofertas
                     </a>
                 </li>
                 <li>
                     <a href="/administrador/estacionesdecobro" class="submenu-link">
                         <span class="submenu-link-icon">💰</span>
-                        Caja principal
+                        Estaciones
                     </a>
                 </li>
                 <li>
                     <a href="/administrador/cierres-caja" class="submenu-link">
                         <span class="submenu-link-icon">🧾</span>
-                        Ver cierres
+                        Cierres
                     </a>
                 </li>
             </ul>
@@ -95,22 +105,6 @@
 
     <!-- Flash Messages -->
     <%- include('../partials/flash.ejs'); %>
-
-    <script>
-        function toggleMenu() {
-            const menu = document.getElementById('navbarMenu');
-            if (menu) menu.classList.toggle('active');
-        }
-        
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('navbarMenu');
-            const toggle = document.querySelector('.navbar-toggle');
-            if (menu && menu.classList.contains('active') && 
-                !menu.contains(e.target) && 
-                toggle && !toggle.contains(e.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
+    <script src="/js/admin-ui.js" defer></script>
 
 

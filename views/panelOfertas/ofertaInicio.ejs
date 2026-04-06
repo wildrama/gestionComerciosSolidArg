@@ -1,6 +1,6 @@
 <%- include('../partials/headerAdm.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard" id="admin-main-content">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -16,16 +16,16 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="ofertas-actions" style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-            <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-oferta-action btn-individual" style="flex: 1; min-width: 220px; text-align: center;">
+        <div class="ofertas-actions">
+            <a href="/administrador/ofertas/agregar-oferta-individual" class="btn-oferta-action btn-individual">
                 <span class="btn-icon">📦</span>
                 <span>Agregar Oferta Individual</span>
             </a>
-            <a href="/administrador/ofertas/agregar-oferta-conjunto" class="btn-oferta-action btn-conjunto" style="flex: 1; min-width: 220px; text-align: center;">
+            <a href="/administrador/ofertas/agregar-oferta-conjunto" class="btn-oferta-action btn-conjunto">
                 <span class="btn-icon">🎯</span>
                 <span>Agregar Oferta Conjunto</span>
             </a>
-            <a href="/administrador/ofertas/imprimir-codigos" class="btn-oferta-action btn-individual" style="flex: 1; min-width: 220px; text-align: center;" target="_blank" rel="noopener">
+            <a href="/administrador/ofertas/imprimir-codigos" class="btn-oferta-action btn-individual" target="_blank" rel="noopener">
                 <span class="btn-icon">🖨️</span>
                 <span>Imprimir códigos de combos</span>
             </a>
@@ -37,7 +37,7 @@
             
             <% if (ofertasIndividuales && ofertasIndividuales.length > 0) { %>
             <div class="ofertas-table-wrapper">
-                <table class="ofertas-table">
+                <table class="ofertas-table" aria-label="Listado de ofertas individuales">
                     <thead>
                         <tr>
                             <th>Producto</th>
@@ -74,28 +74,28 @@
                                 </span>
                             </td>
                             <td data-label="Estado:" style="text-align: center;">
-                                <span class="quantity-badge" style="background:<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '#fee2e2' : '#dcfce7' %>; color:<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '#991b1b' : '#166534' %>">
+                                <span class="status-pill <%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'is-paused' : 'is-active' %>">
                                     <%= oferta.estado || 'ACTIVA' %>
                                 </span>
                             </td>
                             <td data-label="Acciones:" style="text-align: center;">
                                 <div class="oferta-actions">
-                                    <a href="/administrador/ofertas/oferta-individual/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles">
+                                    <a href="/administrador/ofertas/oferta-individual/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles" aria-label="Ver detalle de la oferta <%= oferta.productoEnOferta.nombre %>">
                                         👁️
                                     </a>
                                     <form action="/administrador/ofertas/oferta-individual/<%= oferta._id %>/estado" 
                                           method="POST" 
-                                          style="display: inline;">
+                                          class="inline-action-form">
                                         <input type="hidden" name="estado" value="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'ACTIVA' : 'PAUSADA' %>">
-                                        <button type="submit" class="btn-oferta-view" title="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %>">
+                                        <button type="submit" class="btn-oferta-view" title="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %>" aria-label="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %> oferta <%= oferta.productoEnOferta.nombre %>">
                                             <%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '▶️' : '⏸️' %>
                                         </button>
                                     </form>
                                     <form action="/administrador/ofertas/oferta-individual/<%= oferta._id %>?_method=DELETE" 
                                           method="POST" 
-                                          style="display: inline;"
+                                          class="inline-action-form"
                                           onsubmit="return confirm('¿Eliminar esta oferta?')">
-                                        <button type="submit" class="btn-oferta-delete" title="Eliminar">
+                                        <button type="submit" class="btn-oferta-delete" title="Eliminar" aria-label="Eliminar oferta <%= oferta.productoEnOferta.nombre %>">
                                             🗑️
                                         </button>
                                     </form>
@@ -123,7 +123,7 @@
             
             <% if (ofertasConjunto && ofertasConjunto.length > 0) { %>
             <div class="ofertas-table-wrapper">
-                <table class="ofertas-table">
+                <table class="ofertas-table" aria-label="Listado de ofertas conjunto">
                     <thead>
                         <tr>
                             <th>Nombre de Oferta</th>
@@ -162,28 +162,28 @@
                                 </span>
                             </td>
                             <td data-label="Estado:" style="text-align: center;">
-                                <span class="quantity-badge" style="background:<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '#fee2e2' : '#dcfce7' %>; color:<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '#991b1b' : '#166534' %>">
+                                <span class="status-pill <%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'is-paused' : 'is-active' %>">
                                     <%= oferta.estado || 'ACTIVA' %>
                                 </span>
                             </td>
                             <td data-label="Acciones:" style="text-align: center;">
                                 <div class="oferta-actions">
-                                    <a href="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles">
+                                    <a href="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>" class="btn-oferta-view" title="Ver detalles" aria-label="Ver detalle de la oferta <%= oferta.nombreOferta %>">
                                         👁️
                                     </a>
                                     <form action="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>/estado" 
                                           method="POST" 
-                                          style="display: inline;">
+                                          class="inline-action-form">
                                         <input type="hidden" name="estado" value="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'ACTIVA' : 'PAUSADA' %>">
-                                        <button type="submit" class="btn-oferta-view" title="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %>">
+                                        <button type="submit" class="btn-oferta-view" title="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %>" aria-label="<%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? 'Reactivar' : 'Pausar' %> oferta <%= oferta.nombreOferta %>">
                                             <%= (oferta.estado || 'ACTIVA') === 'PAUSADA' ? '▶️' : '⏸️' %>
                                         </button>
                                     </form>
                                     <form action="/administrador/ofertas/oferta-conjunto/<%= oferta._id %>?_method=DELETE" 
                                           method="POST" 
-                                          style="display: inline;"
+                                          class="inline-action-form"
                                           onsubmit="return confirm('¿Eliminar esta oferta?')">
-                                        <button type="submit" class="btn-oferta-delete" title="Eliminar">
+                                        <button type="submit" class="btn-oferta-delete" title="Eliminar" aria-label="Eliminar oferta <%= oferta.nombreOferta %>">
                                             🗑️
                                         </button>
                                     </form>

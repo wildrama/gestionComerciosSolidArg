@@ -1,6 +1,6 @@
 <%- include('../partials/headerAdm.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard" id="admin-main-content">
     <!-- Header -->
     <div class="page-header">
         <div class="page-header-content">
@@ -24,21 +24,21 @@
     <!-- Stats Mini -->
     <div class="stock-stats-mini">
         <div class="stock-stat-card">
-            <div class="stock-stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">📦</div>
+            <div class="stock-stat-icon stat-theme-primary">📦</div>
             <div class="stock-stat-content">
                 <h3><%= cantidadTotalDeProductos %></h3>
                 <p>Total Productos</p>
             </div>
         </div>
         <div class="stock-stat-card">
-            <div class="stock-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+            <div class="stock-stat-icon stat-theme-success">✓</div>
             <div class="stock-stat-content">
                 <h3><%= stockTotalGeneral %></h3>
                 <p>Stock Total</p>
             </div>
         </div>
         <div class="stock-stat-card">
-            <div class="stock-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚠️</div>
+            <div class="stock-stat-icon stat-theme-warning">⚠️</div>
             <div class="stock-stat-content">
                 <h3><%= stockBajoCount %></h3>
                 <p>Stock Bajo</p>
@@ -64,27 +64,38 @@
     <div class="stock-filters-card">
         <div class="filters-row-stock">
             <div class="search-box">
-                <span class="search-icon">🔍</span>
+                <label for="searchStock" class="sr-only">Buscar productos por nombre, marca o categoría</label>
+                <span class="search-icon" aria-hidden="true">🔍</span>
                 <input type="text" 
                        id="searchStock" 
                        placeholder="Buscar por nombre, marca o categoría..." 
                        class="search-input"
-                       onkeyup="filtrarStock()">
+                       aria-label="Buscar productos por nombre, marca o categoría"
+                       autocomplete="off"
+                       inputmode="search"
+                       enterkeyhint="search"
+                       oninput="filtrarStock()">
             </div>
             <div class="filter-group-stock">
-                <select id="filterCategoria" class="filter-select" onchange="filtrarStock()">
-                    <option value="">Todas las categorías</option>
-                    <% (categorias || []).forEach(cat => { %>
-                        <option value="<%= cat %>"><%= cat %></option>
-                    <% }); %>
-                </select>
-                <select id="filterStock" class="filter-select" onchange="filtrarStock()">
-                    <option value="">Todo el stock</option>
-                    <option value="bajo">Stock bajo (&lt;10)</option>
-                    <option value="medio">Stock medio (10-50)</option>
-                    <option value="alto">Stock alto (&gt;50)</option>
-                </select>
-                <button onclick="limpiarFiltros()" class="btn-filter-clear">🔄 Limpiar</button>
+                <div class="filter-group">
+                    <label for="filterCategoria" class="sr-only">Filtrar productos por categoría</label>
+                    <select id="filterCategoria" class="filter-select" aria-label="Filtrar productos por categoría" onchange="filtrarStock()">
+                        <option value="">Todas las categorías</option>
+                        <% (categorias || []).forEach(cat => { %>
+                            <option value="<%= cat %>"><%= cat %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStock" class="sr-only">Filtrar productos por nivel de stock</label>
+                    <select id="filterStock" class="filter-select" aria-label="Filtrar productos por nivel de stock" onchange="filtrarStock()">
+                        <option value="">Todo el stock</option>
+                        <option value="bajo">Stock bajo (&lt;10)</option>
+                        <option value="medio">Stock medio (10-50)</option>
+                        <option value="alto">Stock alto (&gt;50)</option>
+                    </select>
+                </div>
+                <button type="button" onclick="limpiarFiltros()" class="btn-filter-clear" aria-label="Limpiar búsqueda y filtros">🔄 Limpiar</button>
             </div>
         </div>
     </div>
@@ -92,7 +103,7 @@
     <!-- Vista Desktop: Tabla -->
     <div class="stock-table-desktop">
         <div class="stock-table-wrapper">
-            <table class="stock-table">
+            <table class="stock-table" aria-label="Listado general de stock">
                 <thead>
                     <tr>
                         <th>Producto</th>
@@ -197,11 +208,14 @@
                 <% } %>
             </div>
             <div class="stock-card-footer-mobile">
-                <a href="/administrador/productos/<%= producto._id %>/upstock" class="btn-mobile-action primary">
+                <a href="/administrador/productos/<%= producto._id %>/upstock" class="btn-mobile-action primary" aria-label="Actualizar stock de <%= producto.nombre %>">
                     📦 Actualizar Stock
                 </a>
-                <a href="/administrador/productos/<%= producto._id %>" class="btn-mobile-action secondary">
+                <a href="/administrador/productos/<%= producto._id %>" class="btn-mobile-action secondary" aria-label="Ver detalle de <%= producto.nombre %>">
                     👁️ Ver Detalles
+                </a>
+                <a href="/administrador/productos/imprimir-codigos?ids=<%= producto._id %>" class="btn-mobile-action tertiary" target="_blank" rel="noopener" aria-label="Imprimir código del producto <%= producto.nombre %>">
+                    🖨️ Código
                 </a>
             </div>
         </div>
@@ -209,7 +223,7 @@
     </div>
 
     <!-- No Results -->
-    <div id="noResults" class="empty-state" style="display: none;">
+    <div id="noResults" class="empty-state" style="display: none;" aria-live="polite">
         <div class="empty-icon">🔍</div>
         <h3>No se encontraron productos</h3>
         <p>Intenta con otros términos de búsqueda</p>

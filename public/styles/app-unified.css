@@ -8,6 +8,7 @@
 
 /* Base administrativa nueva */
 @import url('/styles/admin.css');
+@import url('/styles/admin-mobile-first.css');
 
 /* Formularios/login compartidos (repartidor/admin/user forms) */
 @import url('/styles/login.css');

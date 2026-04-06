@@ -1,0 +1,605 @@
+/* ============================================
+   ADMIN MOBILE FIRST OVERRIDES
+   Pulido UI/UX del módulo ADMINISTRADOR
+   Sin tocar estilos de CAJA
+   ============================================ */
+
+:root {
+    --background-light: var(--bg-light);
+    --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.22);
+    --touch-target: 44px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.skip-link {
+    position: fixed;
+    top: -48px;
+    left: 0.75rem;
+    z-index: 1200;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: #111827;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: var(--shadow-md);
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 0.75rem;
+    color: #ffffff;
+}
+
+body.admin-page {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.submenu-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.navbar-admin {
+    backdrop-filter: blur(12px);
+}
+
+.navbar-content {
+    gap: 0.75rem;
+}
+
+.navbar-brand {
+    min-height: var(--touch-target);
+}
+
+.navbar-toggle {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-white);
+}
+
+.nav-link,
+.submenu-link,
+.btn-primary-modern,
+.btn-secondary-modern,
+.btn-quick-action,
+.btn-stock-action,
+.btn-mobile-action,
+.btn-oferta-action,
+.btn-edit,
+.btn-delete,
+.btn-edit-full,
+.btn-delete-full,
+.btn-result-edit,
+.btn-result-stock,
+.password-toggle {
+    min-height: var(--touch-target);
+    touch-action: manipulation;
+}
+
+.nav-link.is-current,
+.submenu-link.is-current {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary-color);
+    border-color: rgba(99, 102, 241, 0.18);
+}
+
+.nav-link:focus-visible,
+.submenu-link:focus-visible,
+.btn-primary-modern:focus-visible,
+.btn-secondary-modern:focus-visible,
+.btn-quick-action:focus-visible,
+.btn-stock-action:focus-visible,
+.btn-mobile-action:focus-visible,
+.btn-oferta-action:focus-visible,
+.btn-edit:focus-visible,
+.btn-delete:focus-visible,
+.btn-edit-full:focus-visible,
+.btn-delete-full:focus-visible,
+.btn-result-edit:focus-visible,
+.btn-result-stock:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.submenu-quick-access {
+    margin: 0.75rem 0 1.25rem;
+}
+
+.submenu-title {
+    margin-bottom: 0.5rem;
+}
+
+.submenu-links {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+}
+
+.submenu-links li {
+    flex: 0 0 auto;
+}
+
+.admin-dashboard {
+    padding: 1rem;
+}
+
+.form-container {
+    width: 100%;
+}
+
+.dashboard-hero,
+.form-header,
+.modern-form,
+.page-header,
+.ofertas-section,
+.stock-filters-card,
+.product-detail-container {
+    border-radius: 18px;
+}
+
+.hero-title,
+.page-title,
+.form-title {
+    font-size: clamp(1.35rem, 4vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle,
+.page-subtitle,
+.form-subtitle {
+    max-width: 65ch;
+    line-height: 1.5;
+}
+
+.hero-actions,
+.page-actions,
+.stock-page-actions,
+.form-actions,
+.filters-row,
+.filter-group-stock,
+.search-filters-row,
+.actions-group,
+.product-actions,
+.result-card-footer,
+.stock-card-footer-mobile {
+    align-items: stretch;
+}
+
+.btn-primary-modern,
+.btn-secondary-modern,
+.btn-quick-action,
+.btn-mobile-action,
+.btn-result-edit,
+.btn-result-stock {
+    justify-content: center;
+}
+
+.form-help {
+    line-height: 1.45;
+}
+
+.search-input,
+.search-input-large,
+.filter-select,
+.filter-select-modern,
+.form-control-modern,
+.password-toggle {
+    font-size: 16px;
+}
+
+.search-status-live {
+    min-height: 1.25rem;
+}
+
+.search-loading {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.form-quick-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.product-price-info {
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-theme-primary {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #6366f1 !important;
+}
+
+.stat-theme-success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+}
+
+.stat-theme-warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: #f59e0b !important;
+}
+
+.product-meta-icon {
+    color: #6b7280;
+}
+
+.barcode-center {
+    text-align: center;
+}
+
+.section-spaced {
+    margin-top: 2rem;
+}
+
+.product-action-emphasis,
+.price-action-emphasis {
+    color: #ffffff;
+}
+
+.product-action-emphasis {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.price-action-emphasis {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.product-action-emphasis:hover,
+.price-action-emphasis:hover {
+    color: #ffffff;
+    filter: brightness(0.98);
+}
+
+.btn-mobile-action.tertiary {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info-color);
+}
+
+.btn-mobile-action.tertiary:hover {
+    background: var(--info-color);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.status-pill.is-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-pill.is-paused {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.password-wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+.password-wrapper .form-control-modern {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.password-toggle {
+    min-width: var(--touch-target);
+    border: 2px solid var(--border-color);
+    border-left: 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.stock-table,
+.ofertas-table {
+    min-width: 760px;
+}
+
+.stock-table-wrapper,
+.ofertas-table-wrapper {
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 1rem;
+}
+
+.stock-card-footer-mobile,
+.result-card-footer {
+    gap: 0.6rem;
+}
+
+@media (max-width: 1024px) {
+    .navbar-menu {
+        gap: 0.25rem;
+    }
+
+    .submenu-links {
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 0.875rem;
+    }
+
+    .navbar-content {
+        padding: 0.625rem 0.875rem;
+    }
+
+    .navbar-menu {
+        padding: 0.35rem 0;
+    }
+
+    .nav-link {
+        min-height: var(--touch-target);
+        font-size: 0.95rem;
+    }
+
+    .submenu-container {
+        padding: 0 0.875rem;
+    }
+
+    .submenu-quick-access {
+        padding: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .submenu-link {
+        padding: 0.7rem 0.9rem;
+    }
+
+    .dashboard-hero,
+    .form-header,
+    .modern-form,
+    .page-header,
+    .ofertas-section,
+    .stock-filters-card,
+    .product-detail-body,
+    .product-barcode-section,
+    .product-detail-actions {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .hero-actions,
+    .page-actions,
+    .stock-page-actions,
+    .form-actions,
+    .filters-row,
+    .filter-group-stock,
+    .search-filters-row,
+    .actions-group,
+    .product-actions,
+    .stock-card-footer-mobile,
+    .result-card-footer {
+        flex-direction: column;
+    }
+
+    .btn-primary-modern,
+    .btn-secondary-modern,
+    .btn-tertiary,
+    .btn-quick-action,
+    .btn-mobile-action,
+    .btn-result-edit,
+    .btn-result-stock,
+    .btn-oferta-action,
+    .btn-edit,
+    .btn-delete,
+    .btn-edit-full,
+    .btn-delete-full {
+        width: 100%;
+    }
+
+    .filter-group-stock,
+    .search-filters-row .filter-group {
+        width: 100%;
+    }
+
+    .filter-select,
+    .filter-select-modern,
+    .search-input,
+    .search-input-large {
+        width: 100%;
+    }
+
+    .toggle-switch-label {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .stock-card-row,
+    .result-detail-row,
+    .ofertas-table td {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+
+    .stock-card-row .value,
+    .result-detail-value {
+        width: 100%;
+    }
+
+    .detail-box-large {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .detail-box-large .detail-box-value {
+        font-size: 1rem;
+    }
+
+    .product-price-info {
+        padding: 1rem !important;
+        gap: 0.75rem !important;
+        align-items: flex-start !important;
+    }
+
+    .prices-edit-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .price-edit-card {
+        padding: 1rem !important;
+    }
+
+    .product-detail-icon {
+        width: 4.5rem;
+        height: 4.5rem;
+        font-size: 2.25rem;
+    }
+
+    #codigoBarra {
+        max-height: 72px;
+    }
+
+    .stock-table {
+        min-width: 680px;
+    }
+
+    /* Fix crítico: la tabla de ofertas no debe desaparecer en mobile */
+    .ofertas-table-wrapper {
+        display: block !important;
+        overflow: visible;
+        border: none;
+        background: transparent;
+    }
+
+    .ofertas-table {
+        min-width: 100%;
+        display: block;
+        border: none;
+        background: transparent;
+    }
+
+    .ofertas-table thead {
+        display: none;
+    }
+
+    .ofertas-table tbody {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .oferta-row {
+        display: block;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        background: #ffffff;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .ofertas-table td {
+        padding: 0.45rem 0;
+        border: none;
+        text-align: left !important;
+    }
+
+    .ofertas-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .oferta-product-cell {
+        align-items: flex-start;
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .oferta-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard {
+        padding: 0.75rem;
+    }
+
+    .submenu-container,
+    .navbar-content {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .submenu-link,
+    .nav-link {
+        font-size: 0.9rem;
+    }
+
+    .hero-title,
+    .page-title,
+    .form-title {
+        font-size: 1.25rem;
+    }
+
+    .stock-card-mobile,
+    .search-result-card,
+    .oferta-row,
+    .detail-box-large {
+        border-radius: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .action-card:hover,
+    .product-card-modern:hover,
+    .detail-box-large:hover,
+    .search-result-card:hover,
+    .btn-primary-modern:hover {
+        transform: none !important;
+    }
+}

@@ -1,6 +1,6 @@
 <%- include('../partials/headerAdm.ejs'); %>
 
-<div class="admin-dashboard">
+<div class="admin-dashboard" id="admin-main-content">
     <div class="form-container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
@@ -19,7 +19,7 @@
                     <h1 class="product-detail-name"><%= producto.nombre %></h1>
                     <p class="product-detail-brand"><%= producto.marca || 'Sin marca' %></p>
                     <p class="product-detail-category">
-                        <span style="color: #6b7280;">📁</span> 
+                        <span class="product-meta-icon">📁</span>
                         <%= producto.categoriaInterna || 'Sin categoría' %>
                     </p>
                 </div>
@@ -27,7 +27,7 @@
 
             <!-- Barcode -->
             <div class="product-barcode-section">
-                <div style="text-align: center;">
+                <div class="barcode-center">
                     <svg id="codigoBarra"></svg>
                     <p class="barcode-label">Código: <%= producto.codigo %></p>
                 </div>
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                <h3 class="section-title-form" style="margin-top: 2rem;">💰 Información de Precios</h3>
+                <h3 class="section-title-form section-spaced">💰 Información de Precios</h3>
                 
                 <div class="detail-grid-large">
                     <div class="detail-box-large">
@@ -129,20 +129,20 @@
                     </a>
                 </div>
                 <div class="actions-group">
-                    <a href="/administrador/productos/imprimir-codigos?ids=<%= producto._id %>" class="btn-primary-modern btn-save-emphasis" target="_blank" rel="noopener">
+                    <a href="/administrador/productos/imprimir-codigos?ids=<%= producto._id %>" class="btn-primary-modern btn-save-emphasis" target="_blank" rel="noopener" aria-label="Imprimir código del producto <%= producto.nombre %>">
                         🖨️ Imprimir código
                     </a>
-                    <a href="/administrador/productos/<%= producto._id %>/edit" class="btn-edit-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <a href="/administrador/productos/<%= producto._id %>/edit" class="btn-edit-full product-action-emphasis" aria-label="Editar producto <%= producto.nombre %>">
                         ✏️ Editar Producto
                     </a>
-                    <a href="/administrador/productos/<%= producto._id %>/upstockprecio" class="btn-edit-full" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <a href="/administrador/productos/<%= producto._id %>/upstockprecio" class="btn-edit-full price-action-emphasis" aria-label="Editar precios de <%= producto.nombre %>">
                         💰 Editar Precios
                     </a>
                     <form action="/administrador/productos/<%= producto._id %>?_method=DELETE" 
                           method="POST" 
-                          style="display: inline;"
+                          class="inline-action-form"
                           onsubmit="return confirm('¿Estás seguro de eliminar este producto?\\n\\nEsta acción eliminará permanentemente: <%= producto.nombre %>')">
-                        <button type="submit" class="btn-delete-full">
+                        <button type="submit" class="btn-delete-full" aria-label="Eliminar producto <%= producto.nombre %>">
                             🗑️ Eliminar
                         </button>
                     </form>
