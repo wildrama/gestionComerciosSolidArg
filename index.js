@@ -1,10 +1,16 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
-const port = 3037;
+const port = Number(process.env.PORT) || 3037;
 const path = require('path');
 
+app.disable('x-powered-by');
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 
 const methodOverride = require('method-override');
