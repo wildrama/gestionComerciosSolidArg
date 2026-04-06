@@ -1,11 +1,11 @@
 <%- include('../partials/headerAdm.ejs'); %>
-<%- include('../partials/flash.ejs'); %>
 <%
     const currentFilters = (typeof filters !== 'undefined' && filters) ? filters : { desde: '', hasta: '', q: '' };
     const currentSummary = (typeof summary !== 'undefined' && summary) ? summary : {
         totalCount: (cierresDeCaja || []).length,
         totalVentas: (cierresDeCaja || []).reduce((acc, cierre) => acc + Number((cierre.ventasEnEfectivo?.montoTotal || 0) + (cierre.ventasEnOtro?.montoTotal || 0)), 0),
         totalEnCaja: (cierresDeCaja || []).reduce((acc, cierre) => acc + Number(cierre.dineroReal || cierre.dineroEnCaja || 0), 0),
+        totalRetiros: (cierresDeCaja || []).reduce((acc, cierre) => acc + Number(cierre.egresosManualDinero?.montoTotal || 0), 0),
         lastClose: (cierresDeCaja && cierresDeCaja[0]) ? cierresDeCaja[0].fechaDeCierre : null
     };
 %>
@@ -37,25 +37,29 @@
                 <input type="text" id="q" name="q" class="form-control-modern" placeholder="Caja, usuario, período..." value="<%= currentFilters.q || '' %>">
             </div>
             <div class="filter-actions">
-                <button type="submit" class="btn-primary-modern">🔎 Filtrar</button>
-                <a href="/administrador/cierres-caja" class="btn-secondary-modern">Limpiar</a>
+                <button type="submit" class="btn-primary-modern cierres-filter-submit">🔎 Filtrar</button>
+                <a href="/administrador/cierres-caja" class="btn-secondary-modern cierres-filter-reset">Limpiar</a>
             </div>
         </form>
 
         <div class="cierres-summary-grid">
-            <article class="cierres-summary-card">
+            <article class="cierres-summary-card neutral">
                 <span>Total de cierres</span>
                 <strong><%= currentSummary.totalCount || 0 %></strong>
             </article>
-            <article class="cierres-summary-card">
-                <span>Ventas registradas</span>
+            <article class="cierres-summary-card sales-highlight">
+                <span>Total ventas del período</span>
                 <strong>$<%= Number(currentSummary.totalVentas || 0).toFixed(2) %></strong>
             </article>
-            <article class="cierres-summary-card">
+            <article class="cierres-summary-card withdrawals-highlight">
+                <span>Retiros de caja</span>
+                <strong>$<%= Number(currentSummary.totalRetiros || 0).toFixed(2) %></strong>
+            </article>
+            <article class="cierres-summary-card cash-highlight">
                 <span>Dinero contado</span>
                 <strong>$<%= Number(currentSummary.totalEnCaja || 0).toFixed(2) %></strong>
             </article>
-            <article class="cierres-summary-card">
+            <article class="cierres-summary-card neutral">
                 <span>Último cierre</span>
                 <strong><%= currentSummary.lastClose ? new Date(currentSummary.lastClose).toLocaleDateString('es-AR') : '—' %></strong>
             </article>
@@ -71,6 +75,7 @@
                             <th>Usuario</th>
                             <th>Período</th>
                             <th>Ventas</th>
+                            <th>Retiros</th>
                             <th>Esperado</th>
                             <th>Real</th>
                             <th>Diferencia</th>
@@ -79,21 +84,24 @@
                     </thead>
                     <tbody>
                         <% cierresDeCaja.forEach((cierre) => { %>
+                            <% const totalVentasCierre = Number((cierre.ventasEnEfectivo?.montoTotal || 0) + (cierre.ventasEnOtro?.montoTotal || 0)); %>
+                            <% const retirosCierre = Number(cierre.egresosManualDinero?.montoTotal || 0); %>
                             <tr>
                                 <td data-label="Fecha"><%= cierre.fechaDeCierre ? new Date(cierre.fechaDeCierre).toLocaleString('es-AR') : '—' %></td>
                                 <td data-label="Estación"><strong><%= cierre.ubicacionDeEstacion || cierre.estacionDeCobro?.ubicacionDeEstacion || 'Caja' %></strong></td>
                                 <td data-label="Usuario"><%= cierre.nombreDelUsuario || '—' %></td>
                                 <td data-label="Período"><span class="period-badge"><%= cierre.periodo || 'DIARIO' %></span></td>
-                                <td data-label="Ventas">$<%= Number((cierre.ventasEnEfectivo?.montoTotal || 0) + (cierre.ventasEnOtro?.montoTotal || 0)).toFixed(2) %></td>
-                                <td data-label="Esperado">$<%= Number(cierre.dineroEsperado || 0).toFixed(2) %></td>
-                                <td data-label="Real">$<%= Number(cierre.dineroReal || cierre.dineroEnCaja || 0).toFixed(2) %></td>
+                                <td data-label="Ventas"><span class="amount-pill sales">$<%= totalVentasCierre.toFixed(2) %></span></td>
+                                <td data-label="Retiros"><span class="amount-pill withdrawals">$<%= retirosCierre.toFixed(2) %></span></td>
+                                <td data-label="Esperado"><span class="amount-pill expected">$<%= Number(cierre.dineroEsperado || 0).toFixed(2) %></span></td>
+                                <td data-label="Real"><span class="amount-pill cash">$<%= Number(cierre.dineroReal || cierre.dineroEnCaja || 0).toFixed(2) %></span></td>
                                 <td data-label="Diferencia">
                                     <span class="difference-pill <%= Number(cierre.diferencia || 0) > 0 ? 'up' : Number(cierre.diferencia || 0) < 0 ? 'down' : 'even' %>">
                                         <%= Number(cierre.diferencia || 0) > 0 ? '+' : '' %>$<%= Number(cierre.diferencia || 0).toFixed(2) %>
                                     </span>
                                 </td>
                                 <td class="action-cell">
-                                    <a href="/administrador/cierres-caja/<%= cierre._id %>" class="btn-primary-modern btn-small">Ver detalle</a>
+                                    <a href="/administrador/cierres-caja/<%= cierre._id %>" class="btn-primary-modern btn-small cierres-view-btn">👁️ Ver detalle</a>
                                 </td>
                             </tr>
                         <% }); %>
@@ -143,6 +151,19 @@
     flex-wrap: wrap;
 }
 
+.cierres-filter-submit {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(37, 99, 235, 0.35) !important;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+}
+
+.cierres-filter-reset {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
 .cierres-summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -158,6 +179,21 @@
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
+.cierres-summary-card.sales-highlight {
+    background: linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%);
+    border-color: #86efac;
+}
+
+.cierres-summary-card.withdrawals-highlight {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border-color: #fdba74;
+}
+
+.cierres-summary-card.cash-highlight {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #93c5fd;
+}
+
 .cierres-summary-card span {
     display: block;
     margin-bottom: 0.35rem;
@@ -169,6 +205,10 @@
     color: #0f172a;
     font-size: 1.2rem;
 }
+
+.cierres-summary-card.sales-highlight strong { color: #166534; }
+.cierres-summary-card.withdrawals-highlight strong { color: #9a3412; }
+.cierres-summary-card.cash-highlight strong { color: #1d4ed8; }
 
 .cierres-table-shell {
     background: #ffffff;
@@ -212,6 +252,20 @@
     font-size: 0.78rem;
 }
 
+.amount-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.34rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+.amount-pill.sales { background: #dcfce7; color: #166534; }
+.amount-pill.withdrawals { background: #ffedd5; color: #9a3412; }
+.amount-pill.expected { background: #ede9fe; color: #6d28d9; }
+.amount-pill.cash { background: #dbeafe; color: #1d4ed8; }
+
 .difference-pill {
     display: inline-flex;
     padding: 0.32rem 0.55rem;
@@ -231,6 +285,17 @@
 .btn-small {
     padding: 0.55rem 0.8rem;
     font-size: 0.82rem;
+}
+
+.cierres-view-btn {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(37, 99, 235, 0.35) !important;
+    box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+}
+
+.cierres-view-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
 }
 
 .empty-state-cierres {

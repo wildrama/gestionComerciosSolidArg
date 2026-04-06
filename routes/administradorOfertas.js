@@ -161,8 +161,8 @@ router.post('/agregar-oferta-conjunto', catchAsync(async (req, res) => {
 
   await nuevaOferta.save();
   req.flash('success', productosEnOfertaConCodigo.length
-    ? 'Oferta combo creada correctamente con productos vinculados al stock.'
-    : 'Oferta combo creada correctamente sin productos de stock vinculados.');
+    ? `Oferta combo "${nombreOferta}" creada correctamente con ${productosEnOfertaConCodigo.length} producto(s) vinculados al stock.`
+    : `Oferta combo "${nombreOferta}" creada correctamente sin productos vinculados al stock.`);
   res.redirect(`/administrador/ofertas/oferta-conjunto/${nuevaOferta._id}`);
 }));
 
@@ -193,7 +193,7 @@ router.post('/oferta-conjunto/:id/estado', catchAsync(async (req, res) => {
     return res.redirect('/administrador/ofertas');
   }
 
-  req.flash('success', `Oferta combo ${nuevoEstado === 'PAUSADA' ? 'pausada' : 'reactivada'} correctamente.`);
+  req.flash('success', `Oferta combo "${oferta.nombreOferta || 'sin nombre'}" ${nuevoEstado === 'PAUSADA' ? 'pausada' : 'reactivada'} correctamente.`);
   res.redirect(`/administrador/ofertas/oferta-conjunto/${id}`);
 }));
 
@@ -262,7 +262,7 @@ router.post('/agregar-oferta-individual/nueva', catchAsync(async (req, res) => {
   });
 
   await nuevaOfertaSingular.save();
-  req.flash('success', 'Oferta individual creada correctamente.');
+  req.flash('success', `Oferta individual creada correctamente: ${cantidadDeUnidadesNecesarias} unidad(es) por $${precioOferta.toFixed(2)}.`);
   res.redirect(`/administrador/ofertas/oferta-individual/${nuevaOfertaSingular._id}`);
 }));
 
@@ -319,7 +319,7 @@ router.delete('/oferta-conjunto/:id', catchAsync(async (req, res) => {
     return res.redirect('/administrador/ofertas');
   }
 
-  req.flash('success', 'Oferta combo eliminada correctamente.');
+  req.flash('success', `Oferta combo "${ofertaConjuntoParaEliminar.nombreOferta || 'sin nombre'}" eliminada correctamente.`);
   res.redirect('/administrador/ofertas');
 }));
 

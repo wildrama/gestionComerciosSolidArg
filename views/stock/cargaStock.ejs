@@ -14,7 +14,7 @@
         <!-- Form Header -->
         <div class="form-header">
             <h1 class="form-title">➕ Alta de Producto</h1>
-            <p class="form-subtitle">Flujo pensado para lector de código de barras: primero escaneá o generá el código y después completá el resto con teclado.</p>
+            <p class="form-subtitle">Primero escaneá el código de un producto nuevo. Si el artículo no trae código, podés generarlo acá y seguir con la carga normalmente.</p>
         </div>
 
         <div class="scanner-guide">
@@ -22,14 +22,14 @@
                 <span class="scanner-badge">Alta rápida</span>
                 <h3>📷 Primero el código, después el teclado</h3>
                 <ol class="scanner-steps">
-                    <li><strong>Paso 1:</strong> escaneá el código del producto en el primer campo.</li>
-                    <li><strong>Si no tiene código:</strong> usá el botón <em>Generar código</em>.</li>
+                    <li><strong>Paso 1:</strong> escaneá el código de barras del producto nuevo en el primer campo.</li>
+                    <li><strong>Si no trae código:</strong> usá <em>Generar código</em> para crear uno nuevo, ideal para fiambre, pan por peso u otros artículos fraccionados.</li>
                     <li><strong>Paso 2:</strong> completá nombre, marca, stock y precios.</li>
                 </ol>
             </div>
             <div class="scanner-guide-actions">
                 <button type="button" class="btn-secondary-modern" onclick="enfocarCodigo()">🎯 Escanear ahora</button>
-                <button type="button" id="switchCodigo" class="btn-primary-modern">🔄 Generar código</button>
+                <button type="button" id="switchCodigo" class="btn-primary-modern btn-generate-barcode">🔄 Generar código</button>
             </div>
         </div>
 
@@ -40,7 +40,7 @@
             </div>
             <div class="stock-help-card">
                 <strong>2. Generá si falta</strong>
-                <p>Si el artículo no trae código, el sistema propone uno nuevo y lo muestra en vista previa.</p>
+                <p>Si el artículo no trae código, como fiambre o pan por medio kilo, el sistema crea uno nuevo y lo deja listo para seguir.</p>
             </div>
             <div class="stock-help-card">
                 <strong>3. Completá y guardá</strong>
@@ -196,6 +196,43 @@
                         </div>
                     </div>
 
+                    <div class="iva-config-card">
+                        <label class="iva-toggle-row" for="usarCalculoIVA">
+                            <input type="checkbox" id="usarCalculoIVA" name="usarCalculoIVA">
+                            <span>
+                                <strong>Calcular IVA sobre el precio cargado</strong>
+                                <small>Si no activás esta opción, el sistema toma el valor escrito como <strong>precio final</strong>.</small>
+                            </span>
+                        </label>
+
+                        <div id="ivaSelectRow" class="iva-select-row" hidden>
+                            <div class="form-group-modern iva-select-field">
+                                <label for="impuestoAplicado" class="form-label-modern">Porcentaje de IVA</label>
+                                <select id="impuestoAplicado" 
+                                        name="impuestoAplicado" 
+                                        class="form-control-modern"
+                                        tabindex="12">
+                                    <option value="0">No sumar / Ya es precio final</option>
+                                    <option value="8">8%</option>
+                                    <option value="21">21%</option>
+                                    <option value="35">35%</option>
+                                </select>
+                                <small id="ivaStatus" class="form-help">Elegí un porcentaje solo si querés que el sistema sume IVA al precio que estás cargando.</small>
+                            </div>
+                        </div>
+
+                        <div class="iva-preview-grid">
+                            <div class="iva-preview-item">
+                                <span>Minorista final</span>
+                                <strong id="previewMinorista">$0.00</strong>
+                            </div>
+                            <div class="iva-preview-item">
+                                <span>Mayorista final</span>
+                                <strong id="previewMayorista">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group-modern">
                         <label for="precioCosto" class="form-label-modern">Precio Costo</label>
                         <div class="input-with-icon">
@@ -256,19 +293,6 @@
                                    placeholder="Ej: Botella, Caja, Sache"
                                    tabindex="11">
                         </div>
-
-                        <div class="form-group-modern">
-                            <label for="impuestoAplicado" class="form-label-modern">Impuesto Aplicado</label>
-                            <select id="impuestoAplicado" 
-                                    name="impuestoAplicado" 
-                                    class="form-control-modern" 
-                                    tabindex="12">
-                                <option value="0">0%</option>
-                                <option value="8">8%</option>
-                                <option value="21">21%</option>
-                                <option value="35">35%</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -290,14 +314,6 @@
 <script src="../../cargaStock.js"></script>
 <script src="../../jsBarcode.min.js"></script>
 <script src="../../ktCode.js"></script>
-
-<script>
-// Función para generar código de barra aleatorio
-function generarCodigo() {
-    const codigo = Math.floor(Math.random() * 9000000000000) + 1000000000000;
-    document.getElementById('codigo').value = codigo;
-}
-</script>
 
 <%- include('../partials/footer.ejs'); %>
 

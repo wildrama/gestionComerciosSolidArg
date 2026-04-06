@@ -1,5 +1,4 @@
 <%- include('../partials/headerAdm.ejs'); %>
-<%- include('../partials/flash.ejs'); %>
 <%
     const movimientosPeriodo = cierrePreview?.detallesIngresosEgresos || [];
     const ingresosPeriodo = movimientosPeriodo.filter((mov) => mov.tipo === 'INGRESO');

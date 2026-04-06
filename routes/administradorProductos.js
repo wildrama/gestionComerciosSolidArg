@@ -182,7 +182,7 @@ router.post('/',isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
   });
 
   await nuevoProducto.save();
-  req.flash('success', 'Producto cargado correctamente');
+  req.flash('success', `Producto "${nuevoProducto.nombre}" cargado correctamente con código ${codigoNormalizado}.`);
   res.redirect(`/administrador/productos/${nuevoProducto._id}`)
 }))
 

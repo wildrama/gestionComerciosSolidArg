@@ -123,11 +123,13 @@ router.get('/', isLoggedIn, isAdmin(roleADM), catchAsync(async (req, res) => {
         acc.totalCount += 1;
         acc.totalVentas += Number(cierre?.ventasEnEfectivo?.montoTotal || 0) + Number(cierre?.ventasEnOtro?.montoTotal || 0);
         acc.totalEnCaja += Number(cierre?.dineroReal ?? cierre?.dineroEnCaja ?? 0);
+        acc.totalRetiros += Number(cierre?.egresosManualDinero?.montoTotal || 0);
         return acc;
     }, {
         totalCount: 0,
         totalVentas: 0,
         totalEnCaja: 0,
+        totalRetiros: 0,
         lastClose: cierresDeCaja[0]?.fechaDeCierre || null
     });
 
@@ -282,7 +284,7 @@ router.post('/crear', isLoggedIn, hasAnyRole(['ADMINISTRADOR', 'CAJA']), catchAs
     };
     await estacion.save();
     
-    req.flash('success', 'Cierre de caja registrado exitosamente');
+    req.flash('success', `Cierre de caja de "${estacion.ubicacionDeEstacion}" registrado exitosamente.`);
     res.json({
         success: true,
         cierrId: cierre._id,

@@ -325,7 +325,7 @@ router.post('/:id/apertura', isLoggedIn, allowCashAccess, catchAsync(async (req,
 
   const openingState = getCajaOpeningState(estacionDeCobro);
   if (openingState.abiertaHoy) {
-    req.flash('success', 'La caja ya está abierta para hoy.');
+    req.flash('success', `La caja "${estacionDeCobro.ubicacionDeEstacion || 'principal'}" ya está abierta para hoy.`);
     return res.redirect(`/caja/${estacionDeCobroId}/cajaActiva`);
   }
 
@@ -349,7 +349,7 @@ router.post('/:id/apertura', isLoggedIn, allowCashAccess, catchAsync(async (req,
 
   await estacionDeCobro.save();
 
-  req.flash('success', 'Caja abierta correctamente para el día.');
+  req.flash('success', `Caja "${estacionDeCobro.ubicacionDeEstacion || 'principal'}" abierta correctamente para el día.`);
   res.redirect(`/caja/${estacionDeCobroId}/cajaActiva`);
 }));
 

@@ -376,7 +376,7 @@ router.post('/nuevaestacion', catchAsync(async (req, res) => {
   });
   await nuevaEstacion.save();
 
-  req.flash('success', 'Estación de cobro creada');
+  req.flash('success', `Estación de cobro "${nuevaEstacion.ubicacionDeEstacion}" creada correctamente.`);
   res.redirect(`/administrador/estacionesdecobro/${nuevaEstacion._id}`)
 }))
 
@@ -527,7 +527,7 @@ router.delete('/:id', catchAsync(async (req, res) => {
     req.flash('error', 'No se puede eliminar la estación');
     return res.redirect('/administrador/estacionesdecobro');
   }
-  req.flash('sucess', 'Estación eliminada correctamente');
+  req.flash('success', 'Estación eliminada correctamente.');
 
   res.redirect('/administrador/estacionesdecobro');
 }))
@@ -551,7 +551,7 @@ router.post('/:id/ingreso-efectivo-inicio', catchAsync(async (req, res) => {
   const estacionDeCobro = await EstacionDeCobro.findByIdAndUpdate(estacionId, { $set: { dineroDeInicio: cantidad }, $inc: { dineroEnEstacion: cantidad } }).exec();
 
 
-  req.flash('success', `Se ingreso $${cantidad} al inicio de la caja`);
+  req.flash('success', `Se cargó $${cantidad} como inicio para la caja "${estacionDeCobro.ubicacionDeEstacion}".`);
 
   res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`)
 }))
@@ -580,7 +580,7 @@ router.post('/:id/ingreso-efectivo', catchAsync(async (req, res) => {
   const estacionDeCobro = await EstacionDeCobro.findByIdAndUpdate(estacionId, { $push: { ingresosDeEfectivoManual: ingresoEfectivo }, $inc: { dineroEnEstacion: cantidad } }).exec();
 
 
-  req.flash('success', `Se ingreso $ ${cantidad}`);
+  req.flash('success', `Se ingresó $${cantidad} en la caja "${estacionDeCobro.ubicacionDeEstacion}".`);
 
   res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`)
 }))
@@ -608,7 +608,7 @@ router.post('/:id/egreso-efectivo', catchAsync(async (req, res) => {
   const estacionDeCobro = await EstacionDeCobro.findByIdAndUpdate(estacionId, { $push: { egresoDeEfectivoManual: egresoEfectivo }, $inc: { dineroEnEstacion: -cantidad } }).exec();
 
 
-  req.flash('success', `Se realizo un retiro de efectivo de $${cantidad}`);
+  req.flash('success', `Se registró un retiro de efectivo de $${cantidad} en la caja "${estacionDeCobro.ubicacionDeEstacion}".`);
 
   res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`)
 }))
@@ -643,7 +643,7 @@ router.post('/:id/reset', catchAsync(async (req, res) => {
       }
     }).exec();
 
-    req.flash('success', `Se reseteo el dia correctamente`);
+    req.flash('success', `La caja "${estacionDeCobro.ubicacionDeEstacion}" se reinició correctamente para comenzar un nuevo día.`);
 
     res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro._id}`);
   } else {
@@ -667,7 +667,7 @@ router.post('/:id/reset', catchAsync(async (req, res) => {
       }
     }).exec();
 
-    req.flash('success', `Se reseteo el dia correctamente`);
+    req.flash('success', `La caja "${estacionDeCobro1.ubicacionDeEstacion}" se reinició correctamente para comenzar un nuevo día.`);
 
     res.redirect(`/administrador/estacionesdecobro/${estacionDeCobro1._id}`);
   }
@@ -778,7 +778,7 @@ router.post('/:id/cierre-caja/guardar', catchAsync(async (req, res) => {
   };
   await estacionDeCobro.save();
 
-  req.flash('success', 'Cierre realizado correctamente');
+  req.flash('success', `Cierre de "${estacionDeCobro.ubicacionDeEstacion}" realizado correctamente. Dinero final contado: $${snapshot.dineroReal.toFixed(2)}.`);
   res.redirect(`/administrador/cierres-caja/${cierreCajaGuardado._id}`);
 }));
 
@@ -799,7 +799,7 @@ router.delete('/:id/eliminar-caja', catchAsync(async (req, res) => {
     req.flash('error', 'No se puede eliminar la estación');
     return res.redirect('/administrador/estacionesdecobro');
   }
-  req.flash('sucess', 'Estación eliminada correctamente');
+  req.flash('success', 'Estación eliminada correctamente.');
 
   res.redirect('/administrador/estacionesdecobro');
 }))

@@ -135,6 +135,18 @@ function enfocarCodigo() {
   codigoInput.select();
 }
 
+function enfocarSiguienteCampo() {
+  const siguienteInput = nombreInput || document.querySelector('[tabindex="2"]');
+  if (!siguienteInput) return;
+
+  window.setTimeout(() => {
+    siguienteInput.focus();
+    if (typeof siguienteInput.select === "function") {
+      siguienteInput.select();
+    }
+  }, 40);
+}
+
 async function generarCodigo() {
   if (!codigoInput) return "";
 
@@ -149,10 +161,8 @@ async function generarCodigo() {
   codigosReservados.add(nuevoCodigo);
   codigoInput.value = nuevoCodigo;
   validarCodigoActual();
-
-  if (nombreInput) {
-    nombreInput.focus();
-  }
+  setBarcodeStatus("✅ Código generado automáticamente. Continuá con el nombre del producto.", "ok");
+  enfocarSiguienteCampo();
 
   return nuevoCodigo;
 }
