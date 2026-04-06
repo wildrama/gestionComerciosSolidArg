@@ -9,8 +9,10 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="/sass/style.css">
     <link rel="stylesheet" href="/styles/caja-terminal.css">
+    <link rel="stylesheet" href="/styles/caja-desktop.css">
 </head>
 <body>
+<a class="cash-skip-link" href="#cash-main-content">Saltar directo a la venta</a>
 <%- include('../partials/navbarUnificada.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
 
@@ -20,7 +22,7 @@
         <p>Esta interfaz fue pensada para uso con lector de código de barras y operación de mostrador.</p>
     </div>
 
-    <section class="cash-register-page">
+    <section class="cash-register-page" id="cash-main-content">
         <header class="cash-register-header">
             <div>
                 <p class="cash-kicker">Caja de cobro activa</p>
@@ -29,6 +31,12 @@
                     Usuario: <strong><%= cajaData.usuarioNombre %></strong> · Rol: <strong><%= tipoUsuario %></strong> · 
                     <span><%= fechaActual %></span>
                 </p>
+                <div class="cash-key-list" aria-label="Atajos rápidos de teclado">
+                    <span class="cash-key-chip"><kbd>F2</kbd> lector</span>
+                    <span class="cash-key-chip"><kbd>F4</kbd> producto</span>
+                    <span class="cash-key-chip"><kbd>F6</kbd> oferta</span>
+                    <span class="cash-key-chip"><kbd>F9</kbd> cobrar</span>
+                </div>
             </div>
 
             <div class="cash-header-stats">
@@ -70,10 +78,25 @@
                     </div>
                 </div>
 
-                <div id="statusMessage" class="cash-status" hidden></div>
+                <div id="statusMessage" class="cash-status" role="status" aria-live="polite" hidden></div>
+
+                <div class="cash-ops-strip" aria-label="Indicadores operativos de la venta actual">
+                    <div class="cash-ops-pill">
+                        <span>Líneas cargadas</span>
+                        <strong id="cartLineCount">0</strong>
+                    </div>
+                    <div class="cash-ops-pill">
+                        <span>Unidades en venta</span>
+                        <strong id="cartUnitsCount">0</strong>
+                    </div>
+                    <div class="cash-ops-pill is-payment">
+                        <span>Método activo</span>
+                        <strong id="activePaymentBadge">EFECTIVO</strong>
+                    </div>
+                </div>
 
                 <div class="cart-table-wrapper">
-                    <table class="table cash-table align-middle mb-0">
+                    <table class="table cash-table align-middle mb-0" aria-label="Detalle de productos de la venta actual">
                         <thead>
                             <tr>
                                 <th>Producto</th>
@@ -107,15 +130,15 @@
 
                     <div class="summary-line">
                         <span>Subtotal</span>
-                        <strong id="subtotalAmount">$0.00</strong>
+                        <strong id="subtotalAmount" aria-live="polite">$0.00</strong>
                     </div>
                     <div class="summary-line discount-line">
                         <span>Descuentos</span>
-                        <strong id="discountAmount">$0.00</strong>
+                        <strong id="discountAmount" aria-live="polite">$0.00</strong>
                     </div>
                     <div class="summary-line total-line">
                         <span>Total a cobrar</span>
-                        <strong id="totalAmount">$0.00</strong>
+                        <strong id="totalAmount" aria-live="polite">$0.00</strong>
                     </div>
 
                     <div class="payment-methods">
@@ -144,7 +167,7 @@
 
                     <div class="summary-line change-line">
                         <span>Vuelto</span>
-                        <strong id="changeAmount">$0.00</strong>
+                        <strong id="changeAmount" aria-live="polite">$0.00</strong>
                     </div>
 
                     <label class="ticket-check">
@@ -217,8 +240,8 @@
         </div>
     </section>
 
-    <div class="finder-modal" id="finderModal" hidden>
-        <div class="finder-dialog">
+    <div class="finder-modal" id="finderModal" hidden role="dialog" aria-modal="true" aria-labelledby="finderTitle">
+        <div class="finder-dialog" tabindex="-1">
             <div class="finder-header">
                 <div>
                     <h2 id="finderTitle">Mini búsqueda de productos</h2>
@@ -227,7 +250,7 @@
                 <button type="button" id="closeFinderBtn" class="btn btn-outline-secondary btn-sm">Cerrar</button>
             </div>
 
-            <div class="finder-mode-switch" style="display:flex; gap:.5rem; margin-bottom: .75rem;">
+            <div class="finder-mode-switch">
                 <button type="button" id="finderModeProducts" class="btn btn-sm btn-primary">Productos</button>
                 <button type="button" id="finderModeOffers" class="btn btn-sm btn-outline-warning">Ofertas</button>
             </div>
@@ -243,11 +266,11 @@
         </div>
     </div>
 
-    <div class="finder-modal" id="salesHistoryModal" hidden>
-        <div class="finder-dialog finder-dialog-wide">
+    <div class="finder-modal" id="salesHistoryModal" hidden role="dialog" aria-modal="true" aria-labelledby="salesHistoryTitle">
+        <div class="finder-dialog finder-dialog-wide" tabindex="-1">
             <div class="finder-header">
                 <div>
-                    <h2>Ventas de las últimas 24 horas</h2>
+                    <h2 id="salesHistoryTitle">Ventas de las últimas 24 horas</h2>
                     <p>Podés reimprimir cualquier venta del listado</p>
                 </div>
                 <button type="button" id="closeSalesHistoryBtn" class="btn btn-outline-secondary btn-sm">Cerrar</button>

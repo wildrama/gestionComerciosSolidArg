@@ -1,7 +1,7 @@
 <%- include('../partials/headerCompleto.ejs'); %>
 <%- include('../partials/flash.ejs'); %>
 
-<div class="cash-start-shell">
+<div class="cash-start-shell" id="cash-main-content">
   <div class="cash-start-card">
     <div class="cash-start-header">
       <div>
@@ -22,6 +22,10 @@
         <a class="btn btn-success" href="/caja/<%= estacionDeCobro._id %>/cajaActiva">▶ Ir a caja activa</a>
       <% } %>
       <a class="btn btn-outline-danger" href="/cerrar-sesion">🚪 Cerrar sesión</a>
+    </div>
+
+    <div class="cash-desktop-note">
+      <strong>Checklist de escritorio:</strong> verificá lector, impresora y fondo de cambio antes de empezar a cobrar.
     </div>
 
     <div class="cash-info-grid">
@@ -179,6 +183,17 @@
   gap: .75rem;
   flex-wrap: wrap;
   margin-bottom: 1.5rem;
+}
+.cash-desktop-note {
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: #1e3a5f;
+  margin-bottom: 1rem;
+}
+.cash-desktop-note strong {
+  color: #0f172a;
 }
 .cash-info-grid {
   display: grid;

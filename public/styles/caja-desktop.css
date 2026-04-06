@@ -1,0 +1,291 @@
+:root {
+  --cash-ui-bg: #f5f8fc;
+  --cash-ui-border: #d8e2ee;
+  --cash-ui-text: #102235;
+  --cash-ui-muted: #5d7088;
+  --cash-ui-accent: #2563eb;
+  --cash-ui-success: #0f766e;
+  --cash-ui-warning: #b45309;
+  --cash-ui-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cash-skip-link {
+  position: fixed;
+  top: -48px;
+  left: 1rem;
+  z-index: 1200;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: var(--cash-ui-shadow);
+  transition: top 0.2s ease;
+}
+
+.cash-skip-link:focus {
+  top: 1rem;
+  color: #ffffff;
+}
+
+.cash-key-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.cash-key-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--cash-ui-text);
+  font-size: 0.82rem;
+}
+
+.cash-key-chip kbd {
+  border: 1px solid #c8d6ea;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--cash-ui-text);
+  padding: 0.08rem 0.35rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 800;
+}
+
+.cash-register-shell {
+  max-width: 1680px;
+  padding: 1.25rem 1rem 1.75rem;
+}
+
+.cash-register-header,
+.cash-toolbar,
+.summary-card,
+.offers-card,
+.cash-panel,
+.stat-card,
+.finder-dialog {
+  box-shadow: var(--cash-ui-shadow);
+}
+
+.cash-register-header h1,
+.summary-card-head h2,
+.offers-card h2 {
+  letter-spacing: -0.02em;
+}
+
+.cash-toolbar {
+  gap: 0.85rem;
+}
+
+.cash-toolbar-actions {
+  align-items: stretch;
+}
+
+.cash-toolbar-btn,
+.cash-main-search-btn,
+.cash-main-focus-btn,
+.offer-button,
+#checkoutBtn {
+  min-height: 42px;
+}
+
+.cash-ops-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cash-ops-pill {
+  border: 1px solid var(--cash-ui-border);
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 0.7rem 0.85rem;
+}
+
+.cash-ops-pill span {
+  display: block;
+  color: var(--cash-ui-muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+
+.cash-ops-pill strong {
+  color: var(--cash-ui-text);
+  font-size: 1rem;
+}
+
+.cash-ops-pill.is-payment {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fffc 100%);
+  border-color: #a7f3d0;
+}
+
+.cart-table-wrapper {
+  overflow: auto;
+  max-height: 62vh;
+}
+
+.cash-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.cash-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.qty-controls span {
+  min-width: 1.8rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.summary-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.total-line {
+  background: #f8fbff;
+  border-radius: 12px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.payment-methods {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.payment-option:hover {
+  border-color: #93c5fd;
+  background: #f8fbff;
+}
+
+.payment-option input:focus-visible {
+  outline: 2px solid var(--cash-ui-accent);
+  outline-offset: 2px;
+}
+
+.finder-mode-switch {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.finder-result-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--cash-ui-border);
+  border-radius: 14px;
+  background: #fbfdff;
+}
+
+.finder-result-card h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  color: var(--cash-ui-text);
+}
+
+.finder-result-card p,
+.finder-result-card small,
+.finder-empty {
+  margin: 0;
+  color: var(--cash-ui-muted);
+}
+
+.sales-print-btn {
+  white-space: nowrap;
+}
+
+.cash-desktop-note,
+.cash-login-note,
+.cajas-desktop-tip {
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  color: #1e3a5f;
+}
+
+.cash-login-note,
+.cajas-desktop-tip {
+  margin-bottom: 1rem;
+}
+
+.cash-desktop-note strong,
+.cash-login-note strong,
+.cajas-desktop-tip strong {
+  color: #0f172a;
+}
+
+.cash-login-note ul,
+.cajas-desktop-tip ul {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.password-toggle:focus-visible,
+.cash-toolbar-btn:focus-visible,
+.cash-main-search-btn:focus-visible,
+.cash-main-focus-btn:focus-visible,
+.offer-button:focus-visible,
+#checkoutBtn:focus-visible,
+.finder-dialog button:focus-visible,
+.finder-dialog input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+@media (min-width: 992px) {
+  .cash-panel-sidebar {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+  }
+
+  .summary-card,
+  .offers-card {
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  .login-card {
+    max-width: 620px;
+  }
+
+  .cajas-container {
+    max-width: 1220px;
+  }
+}
+
+@media (max-width: 991px) {
+  .cash-ops-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .finder-result-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

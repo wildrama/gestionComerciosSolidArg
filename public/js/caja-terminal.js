@@ -48,7 +48,10 @@ const elements = {
   paymentInputs: Array.from(document.querySelectorAll('input[name="metodoPago"]')),
   offerButtons: Array.from(document.querySelectorAll('.offer-button[data-offer-id]')),
   individualOfferButtons: Array.from(document.querySelectorAll('.individual-offer-button')),
-  ticketToggle: document.getElementById('ticketToggle')
+  ticketToggle: document.getElementById('ticketToggle'),
+  cartLineCount: document.getElementById('cartLineCount'),
+  cartUnitsCount: document.getElementById('cartUnitsCount'),
+  activePaymentBadge: document.getElementById('activePaymentBadge')
 };
 
 const offerMap = new Map((cajaData.ofertasConjunto || []).map((offer) => [String(offer._id), offer]));
@@ -143,6 +146,7 @@ function syncPaymentLabels() {
   }
 
   updateChange();
+  updateOperationalSnapshot();
 }
 
 function getLineCalculation(item) {
@@ -200,6 +204,24 @@ function updateChange() {
   elements.changeAmount.textContent = formatMoney(change);
 }
 
+function updateOperationalSnapshot() {
+  const lineCount = state.items.length;
+  const unitsCount = state.items.reduce((acc, item) => acc + toQuantity(item.quantity), 0);
+  const metodoPago = getMetodoPago();
+
+  if (elements.cartLineCount) {
+    elements.cartLineCount.textContent = String(lineCount);
+  }
+
+  if (elements.cartUnitsCount) {
+    elements.cartUnitsCount.textContent = String(unitsCount);
+  }
+
+  if (elements.activePaymentBadge) {
+    elements.activePaymentBadge.textContent = metodoPago;
+  }
+}
+
 function renderCart() {
   if (!elements.cartTableBody) return;
 
@@ -220,15 +242,15 @@ function renderCart() {
           </td>
           <td class="text-center">
             <div class="qty-controls">
-              <button type="button" data-action="decrease" data-key="${escapeHtml(item.key)}">−</button>
+              <button type="button" data-action="decrease" data-key="${escapeHtml(item.key)}" aria-label="Restar una unidad de ${escapeHtml(item.name)}">−</button>
               <span>${toQuantity(item.quantity)}</span>
-              <button type="button" data-action="increase" data-key="${escapeHtml(item.key)}">+</button>
+              <button type="button" data-action="increase" data-key="${escapeHtml(item.key)}" aria-label="Sumar una unidad de ${escapeHtml(item.name)}">+</button>
             </div>
           </td>
           <td class="text-end">${formatMoney(item.unitPrice)}</td>
           <td class="text-end">${formatMoney(calc.finalSubtotal)}</td>
           <td class="text-center">
-            <button type="button" class="remove-line-btn" data-action="remove" data-key="${escapeHtml(item.key)}">Quitar</button>
+            <button type="button" class="remove-line-btn" data-action="remove" data-key="${escapeHtml(item.key)}" aria-label="Quitar ${escapeHtml(item.name)} de la venta">Quitar</button>
           </td>
         </tr>
       `;
@@ -240,6 +262,7 @@ function renderCart() {
   elements.discountAmount.textContent = `-${formatMoney(summary.discount)}`;
   elements.totalAmount.textContent = formatMoney(summary.total);
   updateChange();
+  updateOperationalSnapshot();
 }
 
 function resetSale(message) {
@@ -417,7 +440,7 @@ function renderFinderResults(results) {
         <p>Cod. ${escapeHtml(producto.codigo)} · ${escapeHtml(producto.marca || 'Sin marca')}</p>
         <small>Stock: ${toNumber(producto.cantidad)} · Precio: ${formatMoney(producto.precioMinorista)}</small>
       </div>
-      <button type="button" class="btn btn-sm btn-success" data-add-product="${escapeHtml(producto._id)}">Agregar</button>
+      <button type="button" class="btn btn-sm btn-success" data-add-product="${escapeHtml(producto._id)}" aria-label="Agregar ${escapeHtml(producto.nombre)} a la venta">Agregar</button>
     </article>
   `).join('');
 }
@@ -440,7 +463,7 @@ function renderOfferResults(results) {
           <p>${escapeHtml(offer.code || 'Sin código')} · ${escapeHtml(offer.kind === 'combo' ? 'Combo' : 'Individual')}</p>
           <small>${escapeHtml(offer.subtitle || 'Oferta vigente')} · ${formatMoney(offer.price)}</small>
         </div>
-        <button type="button" class="btn btn-sm btn-warning" ${actionAttr}>Agregar</button>
+        <button type="button" class="btn btn-sm btn-warning" ${actionAttr} aria-label="Agregar oferta ${escapeHtml(offer.title)}">Agregar</button>
       </article>
     `;
   }).join('');

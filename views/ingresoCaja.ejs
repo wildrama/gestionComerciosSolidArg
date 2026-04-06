@@ -1,13 +1,17 @@
 <%- include('./partials/headerCaja.ejs'); %>
 <%- include('./partials/flash.ejs'); %>
 
-<div class="login-container">
+<div class="login-container" id="cash-main-content">
     <div class="login-card">
         <div class="login-header">
             <div class="login-icon">💳</div>
             <h1 class="login-title">Acceso a Caja</h1>
             <p class="login-subtitle">Estación: <strong><%= nombreEstacion %></strong></p>
-            <p class="security-text" style="margin-top: 0.5rem;">Solo el usuario <strong>CAJA</strong> puede operar aquí</p>
+            <p class="security-text">Solo el usuario <strong>CAJA</strong> puede operar aquí</p>
+        </div>
+
+        <div class="cash-login-note">
+            <strong>Recomendado para escritorio:</strong> operar con monitor horizontal, teclado numérico y lector de código conectado.
         </div>
 
         <form action="/ingreso-caja/<%= estacionDeCobroId %>/login" method="POST" class="login-form" id="cashLoginForm" autocomplete="on">
@@ -19,6 +23,8 @@
                        class="form-control-modern" 
                        placeholder="Ingresa tu usuario"
                        autocomplete="username"
+                       spellcheck="false"
+                       autofocus
                        required>
             </div>
 
@@ -32,7 +38,7 @@
                            placeholder="Ingresa tu contraseña"
                            autocomplete="current-password"
                            required>
-                    <button type="button" class="password-toggle" onclick="togglePasswordCaja()">
+                    <button type="button" class="password-toggle" onclick="togglePasswordCaja()" aria-label="Mostrar u ocultar contraseña" aria-controls="password" aria-pressed="false">
                         <span id="eye-icon-caja">👁️</span>
                     </button>
                 </div>
@@ -59,13 +65,16 @@
 function togglePasswordCaja() {
     const passwordField = document.getElementById('password');
     const eyeIcon = document.getElementById('eye-icon-caja');
+    const toggleButton = document.querySelector('.password-toggle');
     
     if (passwordField.type === 'password') {
         passwordField.type = 'text';
         eyeIcon.textContent = '🙈';
+        toggleButton?.setAttribute('aria-pressed', 'true');
     } else {
         passwordField.type = 'password';
         eyeIcon.textContent = '👁️';
+        toggleButton?.setAttribute('aria-pressed', 'false');
     }
 }
 
